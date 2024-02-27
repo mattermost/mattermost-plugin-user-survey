@@ -1,4 +1,4 @@
-module github.com/mattermost/mattermost-plugin-starter-template
+module github.com/mattermost/mattermost-plugin-user-survey
 
 go 1.21
 
