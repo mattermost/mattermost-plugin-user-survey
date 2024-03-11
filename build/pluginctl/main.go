@@ -1,4 +1,4 @@
-// main handles deployment of the plugin to a development server using the Client4 API.
+// main handles deployment of the plugin to a development server using the Client4 PluginAPI.
 package main
 
 import (
@@ -122,7 +122,7 @@ func getUnixClient(socketPath string) (*model.Client4, bool) {
 	return model.NewAPIv4SocketClient(socketPath), true
 }
 
-// deploy attempts to upload and enable a plugin via the Client4 API.
+// deploy attempts to upload and enable a plugin via the Client4 PluginAPI.
 // It will fail if plugin uploads are disabled.
 func deploy(ctx context.Context, client *model.Client4, pluginID, bundlePath string) error {
 	pluginBundle, err := os.Open(bundlePath)
@@ -131,7 +131,7 @@ func deploy(ctx context.Context, client *model.Client4, pluginID, bundlePath str
 	}
 	defer pluginBundle.Close()
 
-	log.Print("Uploading plugin via API.")
+	log.Print("Uploading plugin via PluginAPI.")
 	_, _, err = client.UploadPluginForced(ctx, pluginBundle)
 	if err != nil {
 		return fmt.Errorf("failed to upload plugin bundle: %s", err.Error())
@@ -146,7 +146,7 @@ func deploy(ctx context.Context, client *model.Client4, pluginID, bundlePath str
 	return nil
 }
 
-// disablePlugin attempts to disable the plugin via the Client4 API.
+// disablePlugin attempts to disable the plugin via the Client4 PluginAPI.
 func disablePlugin(ctx context.Context, client *model.Client4, pluginID string) error {
 	log.Print("Disabling plugin.")
 	_, err := client.DisablePlugin(ctx, pluginID)
@@ -157,7 +157,7 @@ func disablePlugin(ctx context.Context, client *model.Client4, pluginID string) 
 	return nil
 }
 
-// enablePlugin attempts to enable the plugin via the Client4 API.
+// enablePlugin attempts to enable the plugin via the Client4 PluginAPI.
 func enablePlugin(ctx context.Context, client *model.Client4, pluginID string) error {
 	log.Print("Enabling plugin.")
 	_, err := client.EnablePlugin(ctx, pluginID)
@@ -168,7 +168,7 @@ func enablePlugin(ctx context.Context, client *model.Client4, pluginID string) e
 	return nil
 }
 
-// resetPlugin attempts to reset the plugin via the Client4 API.
+// resetPlugin attempts to reset the plugin via the Client4 PluginAPI.
 func resetPlugin(ctx context.Context, client *model.Client4, pluginID string) error {
 	err := disablePlugin(ctx, client, pluginID)
 	if err != nil {

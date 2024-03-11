@@ -29,7 +29,7 @@ func (c *configuration) Clone() *configuration {
 
 // getConfiguration retrieves the active configuration under lock, making it safe to use
 // concurrently. The active configuration may change underneath the client of this method, but
-// the struct returned by this API call is considered immutable.
+// the struct returned by this PluginAPI call is considered immutable.
 func (p *Plugin) getConfiguration() *configuration {
 	p.configurationLock.RLock()
 	defer p.configurationLock.RUnlock()
@@ -44,7 +44,7 @@ func (p *Plugin) getConfiguration() *configuration {
 // setConfiguration replaces the active configuration under lock.
 //
 // Do not call setConfiguration while holding the configurationLock, as sync.Mutex is not
-// reentrant. In particular, avoid using the plugin API entirely, as this may in turn trigger a
+// reentrant. In particular, avoid using the plugin PluginAPI entirely, as this may in turn trigger a
 // hook back into the plugin. If that hook attempts to acquire this lock, a deadlock may occur.
 //
 // This method panics if setConfiguration is called with the existing configuration. This almost
