@@ -19,6 +19,12 @@
         "bundle_path": "webapp/dist/main.js"
     },
     "settings_schema": {
-        "settings": []
+        "settings": [
+            {
+                "key": "SurveyDateTime",
+                "display_name": "Send next survey at:",
+                "type": "custom"
+            }
+        ]
     }
 }

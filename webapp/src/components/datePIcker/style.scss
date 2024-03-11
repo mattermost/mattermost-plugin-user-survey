@@ -1,0 +1,24 @@
+.DatePicker {
+  border: 1px solid hsl(0, 0, 0, 80%);
+  box-shadow: none;
+  border-radius: 4px;
+  padding: 0 8px;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  height: 38px;
+
+  &:hover {
+    border-color: hsl(0, 0%, 70%) !important;
+  }
+
+  input {
+    flex: 1;
+    border: none;
+    font-size: 14px;
+  }
+
+  i.icon-calendar-outline {
+    padding-top: 7px;
+  }
+}

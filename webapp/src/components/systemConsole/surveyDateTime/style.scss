@@ -1,0 +1,9 @@
+.SurveyDateTime {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+
+  .SurveyTimeSelector, .DatePicker {
+    flex: 1;
+  }
+}

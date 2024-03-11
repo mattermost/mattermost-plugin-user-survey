@@ -51,10 +51,16 @@
     "webpack-cli": "5.1.4"
   },
   "dependencies": {
+    "@floating-ui/react": "0.26.9",
+    "@mattermost/compass-icons": "0.1.43",
+    "classnames": "2.5.1",
     "core-js": "3.36.0",
+    "date-fns": "3.3.1",
     "mattermost-redux": "5.33.1",
     "react": "18.2.0",
+    "react-day-picker": "8.10.0",
     "react-redux": "8.0.5",
+    "react-select": "5.8.0",
     "redux": "4.2.1",
     "typescript": "4.9.5"
   },
