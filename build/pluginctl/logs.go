@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	logsPerPage     = 100 // logsPerPage is the number of log entries to fetch per API call
+	logsPerPage     = 100 // logsPerPage is the number of log entries to fetch per PluginAPI call
 	timeStampFormat = "2006-01-02 15:04:05.000 Z07:00"
 )
 
@@ -150,7 +150,7 @@ func filterLogEntries(logs []string, pluginID string, since time.Time) ([]string
 			continue
 		}
 
-		// Log entries returned by the API have a newline a prefix.
+		// Log entries returned by the PluginAPI have a newline a prefix.
 		// Remove that to make printing consistent.
 		e = strings.TrimPrefix(e, "\n")
 
