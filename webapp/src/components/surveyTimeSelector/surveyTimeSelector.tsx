@@ -1,5 +1,5 @@
 import React, {useMemo} from 'react';
-import Dropdown from 'components/dropdown/dropdown';
+import Dropdown from 'components/common/dropdown/dropdown';
 
 import './style.scss';
 
