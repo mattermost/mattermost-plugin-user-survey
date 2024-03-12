@@ -1,6 +1,6 @@
 import React, {useMemo} from 'react';
 import Select from 'react-select';
-import Control from 'components/dropdown/control';
+import Control from 'components/common/dropdown/control';
 
 export type DropdownOption = {
     value: string,
