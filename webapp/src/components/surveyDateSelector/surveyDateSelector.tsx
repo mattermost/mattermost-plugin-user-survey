@@ -6,7 +6,7 @@ export type Props = {
 
 };
 
-const DatePicker = ({}: Props) => {
+const SurveyDateSelector = ({}: Props) => {
     return (
         <div className='DatePicker form-control'>
             <i className='icon-calendar-outline'/>
@@ -17,4 +17,4 @@ const DatePicker = ({}: Props) => {
     );
 };
 
-export default DatePicker;
+export default SurveyDateSelector;
