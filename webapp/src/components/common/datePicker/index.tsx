@@ -14,16 +14,18 @@ import {
 import {DayModifiers, DayPicker} from 'react-day-picker';
 
 export type Props = {
+    value?: Date
     children: React.ReactNode
     onSelect: (date: Date) => void
+    closeOnSelect?: boolean
 };
 
-const DatePicker = ({children, onSelect}: Props) => {
+const DatePicker = ({value, children, onSelect, closeOnSelect}: Props) => {
     const popperRef = useRef<HTMLDivElement>(null);
 
     const [isPopupOpen, setPopupOpen] = useState<boolean>(false);
 
-    const {x, y, strategy, context, refs: {setReference, setFloating}} = useFloating({
+    const {context} = useFloating({
         open: isPopupOpen,
         onOpenChange: (open) => setPopupOpen(open),
         placement: 'bottom-end',
@@ -42,9 +44,15 @@ const DatePicker = ({children, onSelect}: Props) => {
         }),
     ]);
 
-    const onSelectHandler = useCallback((day: Date, modifiers: DayModifiers) => {
+    const onSelectHandler = useCallback((day: Date) => {
         onSelect(day);
-    }, []);
+
+        // Checking it this way to handle null and undefined.
+        // The default behavior is to close on select.
+        if (closeOnSelect !== false) {
+            setPopupOpen(false);
+        }
+    }, [closeOnSelect, onSelect]);
 
     return (
         <div className='DatePicker'>
@@ -65,15 +73,15 @@ const DatePicker = ({children, onSelect}: Props) => {
                     >
                         <div
                             className='rdp_wrapper'
-                            ref={setFloating}
                             {...getFloatingProps()}
                         >
                             <DayPicker
+                                selected={value}
                                 className='DatePicker-day-picker'
                                 disabled={{
                                     before: new Date(),
                                 }}
-                                onDayClick={onSelect}
+                                onDayClick={onSelectHandler}
                             />
                         </div>
                     </FloatingFocusManager>

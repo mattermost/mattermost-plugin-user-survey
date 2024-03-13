@@ -1,20 +1,35 @@
-import React, {useState} from 'react';
+// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
+// See LICENSE.txt for license information.
 
-import './style.scss';
-import DatePicker from 'components/common/datePicker';
+import React, {useCallback, useState} from 'react';
 import {format} from 'date-fns';
 
-export type Props = {};
+import DatePicker from 'components/common/datePicker';
 
-const SurveyDateSelector = ({}: Props) => {
+import './style.scss';
+
+export type Props = {
+    value?: Date
+    onChange?: (value: Date) => void
+};
+
+const SurveyDateSelector = ({value, onChange}: Props) => {
     // default to 30 days later
     const [date, setDate] = useState<Date>(
-        new Date(new Date().setDate((new Date()).getDate() + 30)),
+        value || new Date(new Date().setDate((new Date()).getDate() + 30)),
     );
+
+    const onSelectHandler = useCallback((newValue: Date) => {
+        setDate(newValue);
+        if (onChange) {
+            onChange(newValue);
+        }
+    }, [onChange]);
 
     return (
         <DatePicker
-            onSelect={setDate}
+            onSelect={onSelectHandler}
+            value={value}
         >
             <div className='SurveyDateSelector form-control'>
                 <i className='icon-calendar-outline'/>
