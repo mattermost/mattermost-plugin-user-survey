@@ -1,8 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useMemo} from 'react';
-import Select from 'react-select';
+import React, {useCallback, useMemo} from 'react';
+import Select, {MultiValue, SingleValue} from 'react-select';
 
 import Control from 'components/common/dropdown/control';
 
@@ -24,12 +24,18 @@ const Dropdown = ({options, value, defaultValue, onChange}: Props) => {
         };
     }, []);
 
+    // This handler only serves the purpose of satisfying typescript.
+    // Otherwise it complains abut incorrect type's callback passed to Select's onChange prop.
+    const onChangeHandler = useCallback((newValue: SingleValue<DropdownOption> | MultiValue<DropdownOption>) => {
+        onChange(newValue as DropdownOption);
+    }, [onChange]);
+
     return (
         <Select
             value={value || defaultValue}
             options={options}
             components={customComponents}
-            onChange={onChange}
+            onChange={onChangeHandler}
         />
     );
 };
