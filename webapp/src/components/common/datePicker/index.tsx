@@ -1,4 +1,7 @@
-import React, {useCallback, useMemo, useRef, useState} from 'react';
+// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
+// See LICENSE.txt for license information.
+
+import React, {useCallback, useRef, useState} from 'react';
 
 import './style.scss';
 import {
@@ -11,7 +14,8 @@ import {
     useFloating,
     useInteractions,
 } from '@floating-ui/react';
-import {DayModifiers, DayPicker} from 'react-day-picker';
+
+import {DayPicker} from 'react-day-picker';
 
 export type Props = {
     value?: Date
@@ -21,9 +25,17 @@ export type Props = {
 };
 
 const DatePicker = ({value, children, onSelect, closeOnSelect}: Props) => {
-    const popperRef = useRef<HTMLDivElement>(null);
-
     const [isPopupOpen, setPopupOpen] = useState<boolean>(false);
+
+    const onSelectHandler = useCallback((day: Date) => {
+        onSelect(day);
+
+        // Checking it this way to handle null and undefined.
+        // The default behavior is to close on select.
+        if (closeOnSelect !== false) {
+            setPopupOpen(false);
+        }
+    }, [closeOnSelect, onSelect]);
 
     const {context} = useFloating({
         open: isPopupOpen,
@@ -44,15 +56,7 @@ const DatePicker = ({value, children, onSelect, closeOnSelect}: Props) => {
         }),
     ]);
 
-    const onSelectHandler = useCallback((day: Date) => {
-        onSelect(day);
-
-        // Checking it this way to handle null and undefined.
-        // The default behavior is to close on select.
-        if (closeOnSelect !== false) {
-            setPopupOpen(false);
-        }
-    }, [closeOnSelect, onSelect]);
+    const popperRef = useRef<HTMLDivElement>(null);
 
     return (
         <div className='DatePicker'>
@@ -77,6 +81,7 @@ const DatePicker = ({value, children, onSelect, closeOnSelect}: Props) => {
                         >
                             <DayPicker
                                 selected={value}
+                                defaultMonth={value}
                                 className='DatePicker-day-picker'
                                 disabled={{
                                     before: new Date(),

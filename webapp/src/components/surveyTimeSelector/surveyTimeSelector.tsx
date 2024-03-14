@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useMemo} from 'react';
 
 import Dropdown, {DropdownOption} from 'components/common/dropdown/dropdown';
 
@@ -9,7 +9,7 @@ import './style.scss';
 
 export type Props = {
     value?: string
-    onChange?: (value: string) => void
+    onChange: (value: string) => void
 };
 
 const SurveyTimeSelector = ({value, onChange}: Props) => {
@@ -32,20 +32,14 @@ const SurveyTimeSelector = ({value, onChange}: Props) => {
         return timeStrings;
     }, []);
 
-    const [selectedValue, setSelectedValue] = useState<DropdownOption>(value ? {value, label: value} : options[18]);
-
     const onChangeHandler = useCallback((newValue: DropdownOption) => {
-        setSelectedValue(newValue);
-
-        if (onChange) {
-            onChange(newValue.value);
-        }
+        onChange(newValue.value);
     }, [onChange]);
 
     return (
         <div className='SurveyTimeSelector'>
             <Dropdown
-                value={selectedValue}
+                value={value ? {value, label: value} : options[18]}
                 options={options}
                 onChange={onChangeHandler}
             />

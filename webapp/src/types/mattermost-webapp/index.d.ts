@@ -1,11 +1,30 @@
 import React from 'react';
 
+export type DateTimeConfig = {
+    date: string,
+    time: string,
+}
+
+export type CustomConfigTypes = DateTimeConfig;
+
+export type Config = {
+    PluginSettings?: {
+        Plugins?: {
+            'com.mattermost.user-survey'?: {
+                surveydatetime: DateTimeConfig,
+            },
+        },
+    },
+    [key: string]: unknown,
+}
+
 // refer here for all available values -
 // https://developers.mattermost.com/integrate/plugins/best-practices/#how-can-a-plugin-define-its-own-setting-type
 export type CustomComponentProps = {
     id: string
     setSaveNeeded: () => void
-    onChange: (settingId: string, settings: any) => void
+    onChange: (settingId: string, settings: CustomConfigTypes) => void
+    config: Config
 }
 
 export interface PluginRegistry {
