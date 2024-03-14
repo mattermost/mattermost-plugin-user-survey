@@ -2,10 +2,10 @@ import {Store, Action} from 'redux';
 
 import {GlobalState} from 'mattermost-redux/types/store';
 
-import {PluginRegistry} from './types/mattermost-webapp';
+import {PluginRegistry} from 'types/mattermost-webapp';
+import SurveyDateTime from 'components/systemConsole/surveyDateTime/surveyDateTime';
 
 import manifest from './manifest';
-import SurveyDateTime from 'components/systemConsole/surveyDateTime/surveyDateTime';
 
 export default class Plugin {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function

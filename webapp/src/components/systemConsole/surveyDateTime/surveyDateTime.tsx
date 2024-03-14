@@ -1,47 +1,59 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
+import {format, parse} from 'date-fns';
 
 import SurveyTimeSelector from 'components/surveyTimeSelector/surveyTimeSelector';
 import SurveyDateSelector from 'components/surveyDateSelector/surveyDateSelector';
-
 import {CustomComponentProps} from 'types/mattermost-webapp';
 
 import './style.scss';
-import {format} from 'date-fns';
 
 const defaultSurveyTime = '09:00';
 
 // date 30 days from today
 const defaultSurveyDate = new Date(new Date().setDate((new Date()).getDate() + 30));
 
-function SurveyDateTime({id, setSaveNeeded, onChange}: CustomComponentProps) {
+function SurveyDateTime({id, setSaveNeeded, onChange, config}: CustomComponentProps) {
     const [surveyTime, setSurveyTime] = useState<string>(defaultSurveyTime);
     const [surveyDate, setSurveyDate] = useState<Date>(defaultSurveyDate);
 
-    const getSettingJSON = () => {
-        return {
-            surveyDateTime: {
-                time: surveyTime,
-                date: format(surveyDate, 'dd/MM/yyyy'),
-            },
-        };
-    };
+    useEffect(() => {
+        // sets the date picker and time picker to the values saved in config on load
 
-    const registerSettingChange = useCallback(() => {
+        const dateTimeConfig = config.PluginSettings?.Plugins?.['com.mattermost.user-survey']?.surveydatetime;
+
+        if (dateTimeConfig?.time) {
+            setSurveyTime(dateTimeConfig.time);
+        }
+
+        if (dateTimeConfig?.date) {
+            setSurveyDate(parse(dateTimeConfig.date, 'dd/MM/yyyy', new Date()));
+        }
+    }, [config.PluginSettings, config.PluginSettings?.Plugins]);
+
+    // Tells MM system console that some setting(s) have changed.
+    // This makes the "Save" button active and prompts the user
+    // about unsaved changes when navigating away from the plugin setting page.
+    // It also informs MM webapp about the settings so it can save it when user
+    // clicks the "Save" button.
+    useEffect(() => {
+        const setting = {
+            time: surveyTime,
+            date: format(surveyDate, 'dd/MM/yyyy'),
+        };
+
         setSaveNeeded();
-        onChange(id, getSettingJSON());
-    }, [getSettingJSON, id, onChange]);
+        onChange(id, setting);
+    }, [id, onChange, setSaveNeeded, surveyDate, surveyTime]);
 
     const surveyTimeChangeHandler = useCallback((value: string) => {
         setSurveyTime(value);
-        registerSettingChange();
-    }, [registerSettingChange]);
+    }, []);
 
     const surveyDateChangeHandler = useCallback((value: Date) => {
         setSurveyDate(value);
-        registerSettingChange();
     }, []);
 
     return (
@@ -59,7 +71,7 @@ function SurveyDateTime({id, setSaveNeeded, onChange}: CustomComponentProps) {
 
             <div className='row'>
                 <p>
-                    {'A bot message with the survey will be sent to all users at 09:00 UTC on 01/03/2024. The most recent survey was sent at 09:00 UTC on 01/01/2024.'}
+                    {`A bot message with the survey will be sent to all users at ${surveyTime} UTC on ${format(surveyDate, 'do MMM yyyy')}.`}
                 </p>
             </div>
         </div>
