@@ -2,10 +2,12 @@ package store
 
 import (
 	"database/sql"
-	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
+	"net/url"
+
 	"github.com/mattermost/mattermost/server/public/plugin"
 	"github.com/mattermost/mattermost/server/public/pluginapi/cluster"
-	"net/url"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 )
 
 const (

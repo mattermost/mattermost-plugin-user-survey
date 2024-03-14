@@ -6,7 +6,9 @@ import (
 	"database/sql"
 	"embed"
 	"fmt"
-	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
+	"html/template"
+	"path"
+
 	"github.com/mattermost/mattermost/server/public/shared/mlog"
 	sqlUtils "github.com/mattermost/mattermost/server/public/utils/sql"
 	"github.com/mattermost/morph"
@@ -14,8 +16,8 @@ import (
 	"github.com/mattermost/morph/drivers/mysql"
 	"github.com/mattermost/morph/drivers/postgres"
 	"github.com/mattermost/morph/sources/embedded"
-	"html/template"
-	"path"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 )
 
 const (
@@ -58,17 +60,17 @@ func (s *SQLStore) Migrate() error {
 
 	defer func() {
 		s.pluginAPI.LogDebug("Closing migration connection")
-		err := db.Close()
-		if err != nil {
-			s.pluginAPI.LogError("Failed to close migration connection", "error", err.Error())
+		if dbErr := db.Close(); dbErr != nil {
+			s.pluginAPI.LogError("Failed to close migration connection", "error", dbErr.Error())
 		}
 	}()
 
-	if s.dbType == model.DBTypePostgres {
+	switch s.dbType {
+	case model.DBTypePostgres:
 		driver, err = postgres.WithInstance(db)
-	} else if s.dbType == model.DBTypeMySQL {
+	case model.DBTypeMySQL:
 		driver, err = mysql.WithInstance(db)
-	} else {
+	default:
 		err = fmt.Errorf("unknown DB type encountered, dbtype: %s", s.dbType)
 		s.pluginAPI.LogError("Unknown DB type encountered", "error", err.Error())
 		return err
@@ -119,7 +121,7 @@ func (s *SQLStore) getMigrationConnection() (*sql.DB, error) {
 
 	if s.dbType == model.DBTypeMySQL {
 		var err error
-		connectionString, err := sqlUtils.ResetReadTimeout(connectionString)
+		connectionString, err = sqlUtils.ResetReadTimeout(connectionString)
 		if err != nil {
 			s.pluginAPI.LogError("failed to reset read timeout on MySQL connection string", "error", err.Error())
 			return nil, err
@@ -139,9 +141,8 @@ func (s *SQLStore) getMigrationConnection() (*sql.DB, error) {
 		s.pluginAPI.LogError("failed to crete new mLog logger instance", "error", err.Error())
 		return nil, err
 	}
-	db, err := sqlUtils.SetupConnection(logger, "master", connectionString, &sqlSettings, migrationDBPPingRetries)
 
-	return db, nil
+	return sqlUtils.SetupConnection(logger, "master", connectionString, &sqlSettings, migrationDBPPingRetries)
 }
 
 func (s *SQLStore) generateMigrationAssets() (*embedded.AssetSource, error) {

@@ -3,11 +3,13 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/mattermost/mattermost-plugin-user-survey/server/app"
-	"github.com/mattermost/mattermost-plugin-user-survey/server/store"
-	"github.com/mattermost/mattermost/server/public/pluginapi"
 	"net/http"
 	"sync"
+
+	"github.com/mattermost/mattermost/server/public/pluginapi"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/app"
+	"github.com/mattermost/mattermost-plugin-user-survey/server/store"
 
 	"github.com/mattermost/mattermost/server/public/plugin"
 )
