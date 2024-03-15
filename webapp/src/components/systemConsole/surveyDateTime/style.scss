@@ -1,3 +1,5 @@
+@import "style/global";
+
 .SurveyDateTime {
   display: flex;
   flex-direction: column;
@@ -6,16 +8,5 @@
   .SurveyTimeSelector, .DatePicker {
     flex: 1;
     cursor: pointer;
-  }
-
-  .row {
-    display: flex;
-    flex-direction: row;
-    gap: 12px;
-    justify-content: space-between;
-
-    &:before, &:after  {
-      content: none;
-    }
   }
 }

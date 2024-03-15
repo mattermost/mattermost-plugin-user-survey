@@ -24,6 +24,11 @@
                 "key": "SurveyDateTime",
                 "display_name": "Send next survey at:",
                 "type": "custom"
+            },
+            {
+                "key": "SurveyExpiry",
+                "display_name": "Survey expiry (days):",
+                "type": "custom"
             }
         ]
     }
