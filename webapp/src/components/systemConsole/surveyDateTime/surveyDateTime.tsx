@@ -6,7 +6,7 @@ import {format, parse} from 'date-fns';
 
 import SurveyTimeSelector from 'components/surveyTimeSelector/surveyTimeSelector';
 import SurveyDateSelector from 'components/surveyDateSelector/surveyDateSelector';
-import {CustomComponentProps} from 'types/mattermost-webapp';
+import {CustomComponentProps, DateTimeConfig} from 'types/mattermost-webapp';
 
 import './style.scss';
 
@@ -38,23 +38,20 @@ function SurveyDateTime({id, setSaveNeeded, onChange, config}: CustomComponentPr
     // about unsaved changes when navigating away from the plugin setting page.
     // It also informs MM webapp about the settings so it can save it when user
     // clicks the "Save" button.
-    useEffect(() => {
-        const setting = {
-            time: surveyTime,
-            date: format(surveyDate, 'dd/MM/yyyy'),
-        };
-
+    const saveSettings = useCallback((setting: DateTimeConfig) => {
         setSaveNeeded();
         onChange(id, setting);
-    }, [id, onChange, setSaveNeeded, surveyDate, surveyTime]);
+    }, [id, onChange, setSaveNeeded]);
 
     const surveyTimeChangeHandler = useCallback((value: string) => {
         setSurveyTime(value);
-    }, []);
+        saveSettings({date: format(surveyDate, 'dd/MM/yyyy'), time: value});
+    }, [saveSettings, surveyDate]);
 
     const surveyDateChangeHandler = useCallback((value: Date) => {
         setSurveyDate(value);
-    }, []);
+        saveSettings({date: format(value, 'dd/MM/yyyy'), time: surveyTime});
+    }, [saveSettings, surveyTime]);
 
     return (
         <div className='SurveyDateTime'>
