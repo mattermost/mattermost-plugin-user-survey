@@ -11,3 +11,6 @@ server/manifest.go
 
 # VS Code
 .vscode
+
+go.work
+go.work.sum
