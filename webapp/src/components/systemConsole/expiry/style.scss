@@ -1,2 +1,7 @@
-@import "style/global";
+.Expiry {
+  @import "style/global";
 
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
