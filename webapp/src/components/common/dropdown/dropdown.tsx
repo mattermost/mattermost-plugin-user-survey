@@ -18,11 +18,7 @@ export type Props = {
     onChange: (newValue: DropdownOption) => void
 }
 const Dropdown = ({options, value, defaultValue, onChange}: Props) => {
-    const customComponents = useMemo(() => {
-        return {
-            Control,
-        };
-    }, []);
+    const customComponents = useMemo(() => ({Control}), []);
 
     // This handler only serves the purpose of satisfying typescript.
     // Otherwise it complains abut incorrect type's callback passed to Select's onChange prop.

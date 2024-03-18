@@ -32,7 +32,7 @@ const DatePicker = ({value, children, onSelect, closeOnSelect}: Props) => {
 
         // Checking it this way to handle null and undefined.
         // The default behavior is to close on select.
-        if (closeOnSelect !== false) {
+        if (closeOnSelect || typeof closeOnSelect === 'undefined') {
             setPopupOpen(false);
         }
     }, [closeOnSelect, onSelect]);
