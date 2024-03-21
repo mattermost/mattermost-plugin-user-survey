@@ -1,12 +1,13 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {Store, Action} from 'redux';
+import type {Store, Action} from 'redux';
 
-import {GlobalState} from 'mattermost-redux/types/store';
+import type {GlobalState} from 'mattermost-redux/types/store';
 
-import {PluginRegistry} from 'types/mattermost-webapp';
 import SurveyDateTime from 'components/systemConsole/surveyDateTime/surveyDateTime';
+
+import type {PluginRegistry} from 'types/mattermost-webapp';
 
 import manifest from './manifest';
 
@@ -19,7 +20,7 @@ export default class Plugin {
 
 declare global {
     interface Window {
-        registerPlugin(pluginId: string, plugin: Plugin): void
+        registerPlugin(pluginId: string, plugin: Plugin): void;
     }
 }
 

@@ -1,23 +1,21 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useEffect, useState} from 'react';
 import {format, parse} from 'date-fns';
+import React, {useEffect, useState} from 'react';
 
-import SurveyTimeSelector from 'components/surveyTimeSelector/surveyTimeSelector';
 import SurveyDateSelector from 'components/surveyDateSelector/surveyDateSelector';
-import {CustomComponentProps} from 'types/mattermost-webapp';
+import SurveyTimeSelector from 'components/surveyTimeSelector/surveyTimeSelector';
+
+import type {CustomComponentProps} from 'types/mattermost-webapp';
 
 import './style.scss';
 
 const defaultSurveyTime = '09:00';
 
-// date 30 days from today
-const defaultSurveyDate = new Date(new Date().setDate((new Date()).getDate() + 30));
-
 function SurveyDateTime({id, setSaveNeeded, onChange, config}: CustomComponentProps) {
     const [surveyTime, setSurveyTime] = useState<string>(defaultSurveyTime);
-    const [surveyDate, setSurveyDate] = useState<Date>(defaultSurveyDate);
+    const [surveyDate, setSurveyDate] = useState<Date>(new Date());
 
     useEffect(() => {
         // sets the date picker and time picker to the values saved in config on load
@@ -30,8 +28,12 @@ function SurveyDateTime({id, setSaveNeeded, onChange, config}: CustomComponentPr
 
         if (dateTimeConfig?.date) {
             setSurveyDate(parse(dateTimeConfig.date, 'dd/MM/yyyy', new Date()));
+        } else {
+            const monthFromNow = new Date();
+            monthFromNow.setDate(monthFromNow.getDate() + 30);
+            setSurveyDate(monthFromNow);
         }
-    }, [config.PluginSettings, config.PluginSettings?.Plugins]);
+    }, [config.PluginSettings?.Plugins]);
 
     // Tells MM system console that some setting(s) have changed.
     // This makes the "Save" button active and prompts the user
@@ -48,28 +50,20 @@ function SurveyDateTime({id, setSaveNeeded, onChange, config}: CustomComponentPr
         onChange(id, setting);
     }, [id, onChange, setSaveNeeded, surveyDate, surveyTime]);
 
-    const surveyTimeChangeHandler = useCallback((value: string) => {
-        setSurveyTime(value);
-    }, []);
-
-    const surveyDateChangeHandler = useCallback((value: Date) => {
-        setSurveyDate(value);
-    }, []);
-
     return (
         <div className='SurveyDateTime'>
-            <div className='row'>
+            <div className='horizontal'>
                 <SurveyTimeSelector
-                    onChange={surveyTimeChangeHandler}
+                    onChange={setSurveyTime}
                     value={surveyTime}
                 />
                 <SurveyDateSelector
                     value={surveyDate}
-                    onChange={surveyDateChangeHandler}
+                    onChange={setSurveyDate}
                 />
             </div>
 
-            <div className='row'>
+            <div className='horizontal'>
                 <p>
                     {`A bot message with the survey will be sent to all users at ${surveyTime} UTC on ${format(surveyDate, 'do MMM yyyy')}.`}
                 </p>

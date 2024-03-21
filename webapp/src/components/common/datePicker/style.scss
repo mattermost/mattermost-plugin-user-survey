@@ -1,60 +1,60 @@
 .rdp_wrapper {
-  position: absolute;
-  top: 44px;
-  left: 0;
-  width: auto;
-  z-index: 999;
+    position: absolute;
+    z-index: 999;
+    top: 44px;
+    left: 0;
+    width: auto;
 
-  .rdp {
-    padding: 12px;
-    border: 1px solid rgba(63, 67, 80, 0.08);
-    margin: 0;
-    background: white;
-    border-radius: 4px;
-    box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.12);
-  }
+    .rdp {
+        padding: 12px;
+        border: 1px solid rgba(63, 67, 80, 0.08);
+        border-radius: 4px;
+        margin: 0;
+        background: white;
+        box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.12);
+    }
 }
 
 .DatePicker {
-  position: relative;
+    position: relative;
 }
 
 .rdp-day {
-  color: var(--center-channel-color);
-  cursor: pointer;
-
-  &_selected {
-    color: var(--button-color);
-
-    &:focus-visible {
-      &:not([disabled]) {
-        background-color: var(--rdp-accent-color);
-      }
-    }
-
-    &:hover {
-      background-color: var(--rdp-accent-color);
-      color: var(--button-color);
-    }
-  }
-
-  &:hover {
-    background-color: rgba(var(--center-channel-color-rgb), 0.08);
     color: var(--center-channel-color);
-  }
+    cursor: pointer;
 
-  &:active {
-    background-color: rgba(var(--button-bg-rgb), 0.12);
-    color: var(--button-bg);
-  }
+    &_selected {
+        color: var(--button-color);
 
-  &.rdp-day_disabled {
-    color: rgba(var(--center-channel-color-rgb), 0.32);
-    opacity: unset;
-    cursor: default;
+        &:focus-visible {
+            &:not([disabled]) {
+                background-color: var(--rdp-accent-color);
+            }
+        }
+
+        &:hover {
+            background-color: var(--rdp-accent-color);
+            color: var(--button-color);
+        }
+    }
 
     &:hover {
-      background-color: transparent;
+        background-color: rgba(var(--center-channel-color-rgb), 0.08);
+        color: var(--center-channel-color);
     }
-  }
+
+    &:active {
+        background-color: rgba(var(--button-bg-rgb), 0.12);
+        color: var(--button-bg);
+    }
+
+    &.rdp-day_disabled {
+        color: rgba(var(--center-channel-color-rgb), 0.32);
+        cursor: default;
+        opacity: unset;
+
+        &:hover {
+            background-color: transparent;
+        }
+    }
 }
