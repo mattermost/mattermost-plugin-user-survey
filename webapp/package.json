@@ -5,7 +5,7 @@
     "build:watch": "webpack --mode=production --watch",
     "debug": "webpack --mode=none",
     "debug:watch": "webpack --mode=development --watch",
-    "check": "npm run check:eslint && npm run check:stylelint",
+    "lint": "npm run check:eslint && npm run check:stylelint",
     "check:eslint": "eslint --ignore-pattern node_modules --ignore-pattern dist --ext .js --ext .jsx --ext tsx --ext ts ./src --quiet --cache",
     "check:stylelint": "stylelint \"**/*.{css,scss}\" --cache",
     "fix": "eslint --ignore-pattern node_modules --ignore-pattern dist --ext .js --ext .jsx --ext tsx --ext ts ./src --quiet --fix --cache && stylelint \"**/*.{css,scss}\" --fix --cache",
