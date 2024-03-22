@@ -41,6 +41,7 @@
     "stylelint": "16.2.1",
     "stylelint-config-idiomatic-order": "10.0.0",
     "stylelint-config-recommended-scss": "14.0.0",
+    "ts-jest": "29.1.2",
     "ts-loader": "9.5.1",
     "webpack": "5.90.3",
     "webpack-cli": "5.1.4"
@@ -51,6 +52,8 @@
     "classnames": "2.5.1",
     "core-js": "3.36.0",
     "date-fns": "3.3.1",
+    "enzyme": "3.11.0",
+    "enzyme-to-json": "3.6.2",
     "mattermost-redux": "5.33.1",
     "react": "18.2.0",
     "react-day-picker": "8.10.0",
@@ -60,6 +63,10 @@
     "typescript": "4.9.5"
   },
   "jest": {
+    "preset": "ts-jest",
+    "snapshotSerializers": [
+      "<rootDir>/node_modules/enzyme-to-json/serializer"
+    ],
     "testPathIgnorePatterns": [
       "/node_modules/",
       "/non_npm_dependencies/"
@@ -76,10 +83,15 @@
       "^.+\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "identity-obj-proxy",
       "^.+\\.(css|less|scss)$": "identity-obj-proxy",
       "^.*i18n.*\\.(json)$": "<rootDir>/tests/i18n_mock.json",
-      "^bundle-loader\\?lazy\\!(.*)$": "$1"
+      "^bundle-loader\\?lazy\\!(.*)$": "$1",
+      "^reselect": "<rootDir>/node_modules/mattermost-webapp/packages/reselect/src",
+      "^mattermost-redux(.*)$": "<rootDir>/node_modules/mattermost-webapp/packages/mattermost-redux/src$1",
+      "^@mattermost/(types)/(.*)$": "<rootDir>/node_modules/mattermost-webapp/packages/$1/src/$2",
+      "^@mattermost/(client)$": "<rootDir>/node_modules/mattermost-webapp/packages/$1/src",
+      "^@mattermost/(components)$": "<rootDir>/node_modules/mattermost-webapp/packages/$1/src"
     },
     "moduleDirectories": [
-      "",
+      "<rootDir>",
       "node_modules",
       "non_npm_dependencies"
     ],
