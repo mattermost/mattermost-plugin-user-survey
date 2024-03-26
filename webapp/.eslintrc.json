@@ -2,5 +2,6 @@
   "root": true,
   "extends": [
     "plugin:@mattermost/react"
-  ]
+  ],
+  "ignorePatterns": ["src/**/*.js"]
 }
