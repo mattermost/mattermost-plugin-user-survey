@@ -2,11 +2,17 @@
 // See LICENSE.txt for license information.
 
 import {format} from 'date-fns';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 
 import DatePicker from 'components/common/datePicker';
 
 import './style.scss';
+
+const dateFormattingOptions: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: '2-digit',
+    day: 'numeric',
+};
 
 export type Props = {
     value: Date;
@@ -14,6 +20,12 @@ export type Props = {
 };
 
 const SurveyDateSelector = ({value, onChange}: Props) => {
+    const [formatedDate, setFormattedDate] = useState<string>('');
+
+    useEffect(() => {
+        setFormattedDate(value.toLocaleDateString(undefined, dateFormattingOptions));
+    }, [value]);
+
     return (
         <DatePicker
             onSelect={onChange}
@@ -24,7 +36,7 @@ const SurveyDateSelector = ({value, onChange}: Props) => {
                 <input
                     className='input'
                     disabled={true}
-                    value={format(value, 'dd/MM/yyyy')}
+                    value={formatedDate}
                 />
             </div>
         </DatePicker>
