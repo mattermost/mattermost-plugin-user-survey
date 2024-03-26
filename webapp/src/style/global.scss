@@ -1,0 +1,25 @@
+.horizontal {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 12px;
+
+    &:before, &:after  {
+        content: none;
+    }
+
+    input.form-control {
+        height: 38px;
+        padding: 0 8px;
+        border-radius: 4px;
+        box-shadow: none;
+
+        &:hover, &:focus {
+            border-color: hsl(0deg, 0%, 70%) !important;
+        }
+
+        &:focus {
+            box-shadow: none !important;
+        }
+    }
+}

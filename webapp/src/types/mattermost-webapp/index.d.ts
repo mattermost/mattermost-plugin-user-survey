@@ -10,13 +10,18 @@ export type DateTimeConfig = {
     time: string;
 }
 
-export type CustomConfigTypes = DateTimeConfig;
+export type ExpiryConfig = {
+    days: number;
+}
+
+export type CustomConfigTypes = DateTimeConfig | ExpiryConfig;
 
 export type Config = AdminConfig & {
     PluginSettings?: {
         Plugins?: {
             'com.mattermost.user-survey'?: {
                 surveydatetime: DateTimeConfig;
+                surveyexpiry: ExpiryConfig;
             };
         };
     };
