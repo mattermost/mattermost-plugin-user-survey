@@ -11,12 +11,14 @@ import SurveyDateTime from 'components/systemConsole/surveyDateTime/surveyDateTi
 import type {PluginRegistry} from 'types/mattermost-webapp';
 
 import manifest from './manifest';
+import TeamFilter from 'components/systemConsole/teamFilter/teamFilter';
 
 export default class Plugin {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
     public async initialize(registry: PluginRegistry, store: Store<GlobalState, Action<Record<string, unknown>>>) {
         registry.registerAdminConsoleCustomSetting('SurveyDateTime', SurveyDateTime, {showTitle: true});
         registry.registerAdminConsoleCustomSetting('SurveyExpiry', Expiry, {showTitle: true});
+        registry.registerAdminConsoleCustomSetting('TeamFilter', TeamFilter, {showTitle: true});
     }
 }
 

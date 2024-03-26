@@ -1,0 +1,14 @@
+.customOption_row {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  height: 22px;
+
+  .teamImage {
+    height: 22px;
+    width: 22px;
+    background-size: contain !important;
+    border-radius: 4px;
+    background-color: lightgrey !important;
+  }
+}

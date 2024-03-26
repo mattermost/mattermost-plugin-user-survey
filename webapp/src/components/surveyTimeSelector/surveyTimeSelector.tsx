@@ -41,6 +41,7 @@ const SurveyTimeSelector = ({value, onChange}: Props) => {
     }, [value]);
 
     const onChangeHandler = useCallback((newValue: DropdownOption) => {
+        console.log('AAA');
         onChange(newValue.value);
     }, [onChange]);
 

@@ -29,6 +29,11 @@
                 "key": "SurveyExpiry",
                 "display_name": "Survey expiry (days):",
                 "type": "custom"
+            },
+            {
+                "key": "TeamFilter",
+                "display_name": "Exclude specific teams:",
+                "type": "custom"
             }
         ]
     }
