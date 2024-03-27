@@ -1,9 +1,11 @@
-.teamImage {
-  height: 22px;
-  width: 22px;
-  background-size: contain !important;
-  border-radius: 4px;
-  background-color: lightgrey !important;
-  text-align: center;
-  font-weight: bold;
+.customOption_imageContainer {
+  .teamImage {
+    height: 22px;
+    width: 22px;
+    border-radius: 4px;
+    background-size: contain !important;
+    background-color: lightgrey !important;
+    text-align: center;
+    font-weight: bold;
+  }
 }

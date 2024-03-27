@@ -29,9 +29,7 @@ function TeamIcon({data}: Props) {
     }
     return (
         <div className='customOption_imageContainer'>
-            <div
-                className='teamImage'
-            >
+            <div className='teamImage'>
                 <span className='teamImagePlaceholder'>{data.label[0]}</span>
             </div>
         </div>

@@ -14,7 +14,11 @@ export type ExpiryConfig = {
     days: number;
 }
 
-export type CustomConfigTypes = DateTimeConfig | ExpiryConfig;
+export type TeamFilter = {
+    filteredTeamIDs: string[];
+}
+
+export type CustomConfigTypes = DateTimeConfig | ExpiryConfig | TeamFilter;
 
 export type Config = AdminConfig & {
     PluginSettings?: {
@@ -22,6 +26,7 @@ export type Config = AdminConfig & {
             'com.mattermost.user-survey'?: {
                 surveydatetime: DateTimeConfig;
                 surveyexpiry: ExpiryConfig;
+                teamfilter: TeamFilter;
             };
         };
     };

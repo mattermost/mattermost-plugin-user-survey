@@ -15,7 +15,7 @@ export const CustomOption = ({children, data, ...props}: OptionProps<DropdownOpt
         <components.Option {...{data, ...props}}>
             <div className='customOption_row'>
                 <TeamIcon data={data}/>
-                {children}
+                <span className='childrenContainer'>{children}</span>
             </div>
         </components.Option>
     );

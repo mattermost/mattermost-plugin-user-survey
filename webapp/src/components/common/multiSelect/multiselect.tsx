@@ -1,32 +1,34 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback} from 'react';
 
 import './style.scss';
 import {DropdownOption} from 'components/common/dropdown/dropdown';
-import Select, {type MultiValue, type SingleValue} from 'react-select';
+import Select, {GroupBase, type MultiValue, type SingleValue} from 'react-select';
+import {SelectComponentsConfig} from 'react-select/dist/declarations/src/components';
+
+export type CustomComponentsDefinition = SelectComponentsConfig<DropdownOption, true, GroupBase<DropdownOption>>
 
 export type Props = {
     options: DropdownOption[];
     values?: DropdownOption[];
-    customComponents?: any;
+    customComponents?: CustomComponentsDefinition;
+    onChange: (selectedValues: DropdownOption[]) => void;
 }
 
-function Multiselect({options, values, customComponents}: Props) {
-    const [val, setVal] = useState<DropdownOption[]>([]);
-
+function Multiselect({options, values, customComponents, onChange}: Props) {
     const onChangeHandler = useCallback((newValue: SingleValue<DropdownOption> | MultiValue<DropdownOption>) => {
         if (Array.isArray(newValue)) {
-            setVal(newValue);
+            onChange(newValue);
         }
-    }, []);
+    }, [onChange]);
 
     return (
         <Select
             isMulti={true}
             isClearable={false}
-            value={val}
+            value={values}
             options={options}
             components={customComponents}
             onChange={onChangeHandler}
