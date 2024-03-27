@@ -17,16 +17,15 @@ function Multiselect({options, values, customComponents}: Props) {
     const [val, setVal] = useState<DropdownOption[]>([]);
 
     const onChangeHandler = useCallback((newValue: SingleValue<DropdownOption> | MultiValue<DropdownOption>) => {
-        if (!Array.isArray(newValue)) {
-            setVal(existing => {
-                existing.push(newValue);
-                return existing;
-            });
+        if (Array.isArray(newValue)) {
+            setVal(newValue);
         }
     }, []);
 
     return (
         <Select
+            isMulti={true}
+            isClearable={false}
             value={val}
             options={options}
             components={customComponents}

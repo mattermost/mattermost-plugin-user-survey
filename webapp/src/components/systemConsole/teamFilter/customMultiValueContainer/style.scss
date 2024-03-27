@@ -1,0 +1,10 @@
+.CustomMultiValueContainer {
+  border-radius: 20px;
+  overflow: hidden;
+  margin: 3px;
+
+  >div {
+    margin: 0;
+    padding: 5px 10px;
+  }
+}

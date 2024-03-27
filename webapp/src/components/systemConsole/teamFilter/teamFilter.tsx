@@ -12,6 +12,9 @@ import type {Team} from 'mattermost-redux/types/teams';
 import type {DropdownOption} from 'components/common/dropdown/dropdown';
 import Multiselect from 'components/common/multiSelect/multiselect';
 import {CustomOption} from 'components/systemConsole/teamFilter/customOption/customOption';
+import {
+    CustomMultiValueContainer
+} from 'components/systemConsole/teamFilter/customMultiValueContainer/customMultiValueContainer';
 
 function TeamFilter({id, setSaveNeeded, onChange, config}: CustomComponentProps) {
     const [allTeamsOptions, setAllTeamsOptions] = useState<DropdownOption[]>([]);
@@ -25,6 +28,7 @@ function TeamFilter({id, setSaveNeeded, onChange, config}: CustomComponentProps)
                     return {
                         value: team.id,
                         label: team.display_name,
+                        raw: team,
                     };
                 });
             setAllTeamsOptions(options);
@@ -33,9 +37,17 @@ function TeamFilter({id, setSaveNeeded, onChange, config}: CustomComponentProps)
         task();
     }, []);
 
+    const customComponents = useMemo(() => (
+        {
+            Option: CustomOption,
+            MultiValueContainer: CustomMultiValueContainer,
+        }
+    ), []);
+
     return (
         <Multiselect
             options={allTeamsOptions}
+            customComponents={customComponents}
         />
     );
 }
