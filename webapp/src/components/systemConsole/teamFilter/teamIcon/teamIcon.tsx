@@ -4,17 +4,22 @@
 import React from 'react';
 
 import {Client4} from 'mattermost-redux/client';
-import type {Team} from 'mattermost-redux/types/teams';
 
 import type {DropdownOption} from 'components/common/dropdown/dropdown';
 
 import './style.scss';
 
+import type {Team} from '@mattermost/types/teams';
+
 export type Props = {
     data: DropdownOption;
 }
 function TeamIcon({data}: Props) {
+    // @ts-expect-error last_team_icon_update
+    // field will be included in latest types release,
+    // but its there in the data already
     if (data.raw.last_team_icon_update) {
+        // @ts-expect-error sane reason as above about the last_team_icon_update field
         const teamURL = Client4.getTeamIconUrl(data.value, (data.raw as Team)?.last_team_icon_update);
         return (
             <div className='customOption_imageContainer'>
