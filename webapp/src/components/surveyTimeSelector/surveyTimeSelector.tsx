@@ -3,13 +3,14 @@
 
 import React, {useCallback, useMemo} from 'react';
 
-import Dropdown, {DropdownOption} from 'components/common/dropdown/dropdown';
+import type {DropdownOption} from 'components/common/dropdown/dropdown';
+import Dropdown from 'components/common/dropdown/dropdown';
 
 import './style.scss';
 
 export type Props = {
-    value?: string
-    onChange: (value: string) => void
+    value?: string;
+    onChange: (value: string) => void;
 };
 
 const SurveyTimeSelector = ({value, onChange}: Props) => {
@@ -32,6 +33,8 @@ const SurveyTimeSelector = ({value, onChange}: Props) => {
         return timeStrings;
     }, []);
 
+    const dropdownValue = useMemo(() => (value ? {value, label: value} : options[18]), [options, value]);
+
     const onChangeHandler = useCallback((newValue: DropdownOption) => {
         onChange(newValue.value);
     }, [onChange]);
@@ -39,7 +42,7 @@ const SurveyTimeSelector = ({value, onChange}: Props) => {
     return (
         <div className='SurveyTimeSelector'>
             <Dropdown
-                value={value ? {value, label: value} : options[18]}
+                value={dropdownValue}
                 options={options}
                 onChange={onChangeHandler}
             />

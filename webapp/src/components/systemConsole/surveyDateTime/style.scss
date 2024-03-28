@@ -1,21 +1,21 @@
 .SurveyDateTime {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-
-  .SurveyTimeSelector, .DatePicker {
-    flex: 1;
-    cursor: pointer;
-  }
-
-  .row {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     gap: 12px;
-    justify-content: space-between;
 
-    &:before, &:after  {
-      content: none;
+    .SurveyTimeSelector, .DatePicker {
+        flex: 1;
+        cursor: pointer;
     }
-  }
+
+    .horizontal {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 12px;
+
+        &:before, &:after  {
+            content: none;
+        }
+    }
 }

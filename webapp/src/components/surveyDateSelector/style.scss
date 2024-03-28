@@ -1,26 +1,26 @@
 .SurveyDateSelector {
-  border: 1px solid hsl(0deg, 0%, 0%, 80%);
-  box-shadow: none;
-  border-radius: 4px;
-  padding: 0 8px;
-  display: flex;
-  flex-direction: row;
-  gap: 8px;
-  height: 38px;
+    display: flex;
+    height: 38px;
+    flex-direction: row;
+    padding: 0 8px;
+    border: 1px solid hsl(0deg, 0%, 0%, 80%);
+    border-radius: 4px;
+    box-shadow: none;
+    gap: 8px;
 
-  &:hover {
-    border-color: hsl(0deg, 0%, 70%) !important;
-  }
+    &:hover {
+        border-color: hsl(0deg, 0%, 70%) !important;
+    }
 
-  .input {
-    flex: 1;
-    border: none;
-    font-size: 14px;
-    pointer-events: none;
-    background: none;
-  }
+    .input {
+        flex: 1;
+        border: none;
+        background: none;
+        font-size: 14px;
+        pointer-events: none;
+    }
 
-  i.icon-calendar-outline {
-    padding-top: 7px;
-  }
+    i.icon-calendar-outline {
+        padding-top: 7px;
+    }
 }

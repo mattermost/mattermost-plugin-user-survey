@@ -1,28 +1,32 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback} from 'react';
-import {format} from 'date-fns';
+import React, {useMemo} from 'react';
 
 import DatePicker from 'components/common/datePicker';
 
 import './style.scss';
 
+const dateFormattingOptions: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: '2-digit',
+    day: 'numeric',
+};
+
 export type Props = {
-    value: Date
-    onChange?: (value: Date) => void
+    value: Date;
+    onChange: (value: Date) => void;
 };
 
 const SurveyDateSelector = ({value, onChange}: Props) => {
-    const onSelectHandler = useCallback((newValue: Date) => {
-        if (onChange) {
-            onChange(newValue);
-        }
-    }, [onChange]);
+    const formattedDate = useMemo(
+        () => value.toLocaleDateString(undefined, dateFormattingOptions),
+        [value],
+    );
 
     return (
         <DatePicker
-            onSelect={onSelectHandler}
+            onSelect={onChange}
             value={value}
         >
             <div className='SurveyDateSelector form-control'>
@@ -30,7 +34,7 @@ const SurveyDateSelector = ({value, onChange}: Props) => {
                 <input
                     className='input'
                     disabled={true}
-                    value={format(value, 'dd/MM/yyyy')}
+                    value={formattedDate}
                 />
             </div>
         </DatePicker>

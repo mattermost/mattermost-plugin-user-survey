@@ -2,9 +2,10 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
-import {components, ControlProps} from 'react-select';
+import type {ControlProps} from 'react-select';
+import {components} from 'react-select';
 
-import {DropdownOption} from 'components/common/dropdown/dropdown';
+import type {DropdownOption} from 'components/common/dropdown/dropdown';
 
 const Control = ({children, ...rest}: ControlProps<DropdownOption>) => {
     return (
