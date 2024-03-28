@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useEffect, useState} from 'react';
+import React, {useMemo} from 'react';
 
 import DatePicker from 'components/common/datePicker';
 
@@ -19,11 +19,10 @@ export type Props = {
 };
 
 const SurveyDateSelector = ({value, onChange}: Props) => {
-    const [formatedDate, setFormattedDate] = useState<string>('');
-
-    useEffect(() => {
-        setFormattedDate(value.toLocaleDateString(undefined, dateFormattingOptions));
-    }, [value]);
+    const formattedDate = useMemo(
+        () => value.toLocaleDateString(undefined, dateFormattingOptions),
+        [value],
+    );
 
     return (
         <DatePicker
@@ -35,7 +34,7 @@ const SurveyDateSelector = ({value, onChange}: Props) => {
                 <input
                     className='input'
                     disabled={true}
-                    value={formatedDate}
+                    value={formattedDate}
                 />
             </div>
         </DatePicker>

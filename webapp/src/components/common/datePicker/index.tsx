@@ -23,16 +23,14 @@ export type Props = {
     closeOnSelect?: boolean;
 };
 
-const DatePicker = ({value, children, onSelect, closeOnSelect}: Props) => {
+const DatePicker = ({value, children, onSelect, closeOnSelect = true}: Props) => {
     const [isPopupOpen, setPopupOpen] = useState<boolean>(false);
     const currentDate = useRef<Date>(new Date());
 
     const onSelectHandler = useCallback((day: Date) => {
         onSelect(day);
 
-        // Checking it this way to handle null and undefined.
-        // The default behavior is to close on select.
-        if (closeOnSelect || typeof closeOnSelect === 'undefined') {
+        if (closeOnSelect) {
             setPopupOpen(false);
         }
     }, [closeOnSelect, onSelect]);
