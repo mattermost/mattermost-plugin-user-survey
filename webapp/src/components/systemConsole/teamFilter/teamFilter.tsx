@@ -3,8 +3,6 @@
 
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
-import type {CustomComponentProps, TeamFilter} from 'types/mattermost-webapp';
-
 import './style.scss';
 import {Client4} from 'mattermost-redux/client';
 import type {Team} from 'mattermost-redux/types/teams';
@@ -16,6 +14,8 @@ import {
     CustomMultiValueContainer,
 } from 'components/systemConsole/teamFilter/customMultiValueContainer/customMultiValueContainer';
 import {CustomOption} from 'components/systemConsole/teamFilter/customOption/customOption';
+
+import type {CustomComponentProps, TeamFilterConfig} from 'types/mattermost-webapp';
 
 function TeamFilter({id, setSaveNeeded, onChange, config}: CustomComponentProps) {
     const [selectedTeams, setSelectedTeams] = useState<DropdownOption[]>([]);
@@ -65,7 +65,7 @@ function TeamFilter({id, setSaveNeeded, onChange, config}: CustomComponentProps)
     const saveSettings = useCallback((teams: DropdownOption[]) => {
         setSaveNeeded();
 
-        const setting: TeamFilter = {
+        const setting: TeamFilterConfig = {
             filteredTeamIDs: teams.map((option) => option.value),
         };
         onChange(id, setting);

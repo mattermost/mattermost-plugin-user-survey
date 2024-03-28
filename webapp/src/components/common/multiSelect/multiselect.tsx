@@ -2,12 +2,11 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback} from 'react';
+import type {GroupBase, MultiValue, SingleValue} from 'react-select';
+import Select from 'react-select';
+import type {SelectComponentsConfig} from 'react-select/dist/declarations/src/components';
 
-import './style.scss';
-import {DropdownOption} from 'components/common/dropdown/dropdown';
-import Select, {GroupBase, type MultiValue, type SingleValue} from 'react-select';
-import {SelectComponentsConfig} from 'react-select/dist/declarations/src/components';
-
+import type {DropdownOption} from 'components/common/dropdown/dropdown';
 export type CustomComponentsDefinition = SelectComponentsConfig<DropdownOption, true, GroupBase<DropdownOption>>
 
 export type Props = {

@@ -1,16 +1,16 @@
 .customOption_imageContainer {
-  .teamImage {
-    height: 22px;
-    width: 22px;
-    border-radius: 4px;
-    background-size: contain !important;
-    background-color: lightgrey !important;
-    text-align: center;
-    font-weight: bold;
-    text-transform: uppercase;
+    .teamImage {
+        width: 22px;
+        height: 22px;
+        border-radius: 4px;
+        background-color: lightgrey !important;
+        background-size: contain !important;
+        font-weight: bold;
+        text-align: center;
+        text-transform: uppercase;
 
-    span.teamImagePlaceholder {
-      font-size: 10px;
+        span.teamImagePlaceholder {
+            font-size: 10px;
+        }
     }
-  }
 }

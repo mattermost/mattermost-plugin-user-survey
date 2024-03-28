@@ -6,9 +6,9 @@ import type {OptionProps} from 'react-select';
 import {components} from 'react-select';
 
 import type {DropdownOption} from 'components/common/dropdown/dropdown';
+import TeamIcon from 'components/systemConsole/teamFilter/teamIcon/teamIcon';
 
 import './style.scss';
-import TeamIcon from 'components/systemConsole/teamFilter/teamIcon/teamIcon';
 
 export const CustomOption = ({children, data, ...props}: OptionProps<DropdownOption>) => {
     return (

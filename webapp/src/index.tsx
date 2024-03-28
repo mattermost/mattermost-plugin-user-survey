@@ -7,11 +7,11 @@ import type {GlobalState} from 'mattermost-redux/types/store';
 
 import Expiry from 'components/systemConsole/expiry/expiry';
 import SurveyDateTime from 'components/systemConsole/surveyDateTime/surveyDateTime';
+import TeamFilter from 'components/systemConsole/teamFilter/teamFilter';
 
 import type {PluginRegistry} from 'types/mattermost-webapp';
 
 import manifest from './manifest';
-import TeamFilter from 'components/systemConsole/teamFilter/teamFilter';
 
 export default class Plugin {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function

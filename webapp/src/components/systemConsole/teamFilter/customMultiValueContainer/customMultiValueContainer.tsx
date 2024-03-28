@@ -2,13 +2,13 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
-
-import './style.scss';
 import type {MultiValueGenericProps} from 'react-select';
 import {components} from 'react-select';
 
 import type {DropdownOption} from 'components/common/dropdown/dropdown';
 import TeamIcon from 'components/systemConsole/teamFilter/teamIcon/teamIcon';
+
+import './style.scss';
 
 export function CustomMultiValueContainer({children, data, ...props}: MultiValueGenericProps<DropdownOption>) {
     return (

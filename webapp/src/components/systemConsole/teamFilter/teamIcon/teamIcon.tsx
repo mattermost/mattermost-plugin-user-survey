@@ -3,13 +3,13 @@
 
 import React from 'react';
 
+import type {Team} from '@mattermost/types/teams';
+
 import {Client4} from 'mattermost-redux/client';
 
 import type {DropdownOption} from 'components/common/dropdown/dropdown';
 
 import './style.scss';
-
-import type {Team} from '@mattermost/types/teams';
 
 export type Props = {
     data: DropdownOption;

@@ -36,7 +36,6 @@ const SurveyTimeSelector = ({value, onChange}: Props) => {
     const dropdownValue = useMemo(() => (value ? {value, label: value} : options[18]), [options, value]);
 
     const onChangeHandler = useCallback((newValue: DropdownOption) => {
-        console.log('AAA');
         onChange(newValue.value);
     }, [onChange]);
 
