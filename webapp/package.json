@@ -12,10 +12,11 @@
     "test": "jest --forceExit --detectOpenHandles --verbose",
     "test:watch": "jest --watch",
     "test-ci": "jest --forceExit --detectOpenHandles --maxWorkers=2",
-    "check-types": "tsc"
+    "check-types": "tsc --noEmit"
   },
   "devDependencies": {
     "@mattermost/eslint-plugin": "1.1.0-0",
+    "@mattermost/types": "9.6.0",
     "@stylistic/stylelint-plugin": "2.1.0",
     "@testing-library/jest-dom": "6.4.2",
     "@types/jest": "29.5.12",

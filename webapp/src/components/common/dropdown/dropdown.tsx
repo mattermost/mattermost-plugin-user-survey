@@ -10,6 +10,7 @@ import Control from 'components/common/dropdown/control';
 export type DropdownOption = {
     value: string;
     label: string;
+    raw?: unknown;
 };
 
 export type Props = {

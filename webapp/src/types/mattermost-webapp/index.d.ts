@@ -10,13 +10,23 @@ export type DateTimeConfig = {
     time: string;
 }
 
-export type CustomConfigTypes = DateTimeConfig;
+export type ExpiryConfig = {
+    days: number;
+}
+
+export type TeamFilterConfig = {
+    filteredTeamIDs: string[];
+}
+
+export type CustomConfigTypes = DateTimeConfig | ExpiryConfig | TeamFilterConfig;
 
 export type Config = AdminConfig & {
     PluginSettings?: {
         Plugins?: {
             'com.mattermost.user-survey'?: {
                 surveydatetime: DateTimeConfig;
+                surveyexpiry: ExpiryConfig;
+                teamfilter: TeamFilterConfig;
             };
         };
     };
@@ -29,6 +39,8 @@ export type CustomComponentProps = {
     setSaveNeeded: () => void;
     onChange: (settingId: string, settings: CustomConfigTypes) => void;
     config: Config;
+    registerSaveAction: (saveAction: () => Promise<unknown>) => void;
+    unRegisterSaveAction: (saveAction: () => Promise<unknown>) => void;
 }
 
 export interface PluginRegistry {
