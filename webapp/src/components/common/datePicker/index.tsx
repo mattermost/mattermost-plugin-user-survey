@@ -1,9 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useRef, useState} from 'react';
-
-import './style.scss';
 import {
     autoUpdate,
     flip,
@@ -14,25 +11,26 @@ import {
     useFloating,
     useInteractions,
 } from '@floating-ui/react';
-
+import React, {useCallback, useRef, useState} from 'react';
 import {DayPicker} from 'react-day-picker';
 
+import './style.scss';
+
 export type Props = {
-    value?: Date
-    children: React.ReactNode
-    onSelect: (date: Date) => void
-    closeOnSelect?: boolean
+    value?: Date;
+    children: React.ReactNode;
+    onSelect: (date: Date) => void;
+    closeOnSelect?: boolean;
 };
 
-const DatePicker = ({value, children, onSelect, closeOnSelect}: Props) => {
+const DatePicker = ({value, children, onSelect, closeOnSelect = true}: Props) => {
     const [isPopupOpen, setPopupOpen] = useState<boolean>(false);
+    const currentDate = useRef<Date>(new Date());
 
     const onSelectHandler = useCallback((day: Date) => {
         onSelect(day);
 
-        // Checking it this way to handle null and undefined.
-        // The default behavior is to close on select.
-        if (closeOnSelect !== false) {
+        if (closeOnSelect) {
             setPopupOpen(false);
         }
     }, [closeOnSelect, onSelect]);
@@ -84,7 +82,7 @@ const DatePicker = ({value, children, onSelect, closeOnSelect}: Props) => {
                                 defaultMonth={value}
                                 className='DatePicker-day-picker'
                                 disabled={{
-                                    before: new Date(),
+                                    before: currentDate.current,
                                 }}
                                 onDayClick={onSelectHandler}
                             />
