@@ -39,6 +39,8 @@ export type CustomComponentProps = {
     setSaveNeeded: () => void;
     onChange: (settingId: string, settings: CustomConfigTypes) => void;
     config: Config;
+    registerSaveAction: (saveAction: () => Promise<unknown>) => void;
+    unRegisterSaveAction: (saveAction: () => Promise<unknown>) => void;
 }
 
 export interface PluginRegistry {
