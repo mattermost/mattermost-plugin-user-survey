@@ -1,9 +1,4 @@
-.horizontal {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    gap: 12px;
-
+@mixin inputs {
     &:before, &:after  {
         content: none;
     }
@@ -22,4 +17,22 @@
             box-shadow: none !important;
         }
     }
+}
+
+.horizontal {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 12px;
+
+    @include inputs;
+}
+
+.vertical {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+
+    @include inputs;
 }

@@ -4,4 +4,8 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+
+    .errorMessage {
+        color: var(--error-text);
+    }
 }

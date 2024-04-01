@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import type {ChangeEvent} from 'react';
-import React, {useMemo, useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 
 import type {CustomComponentProps, ExpiryConfig} from 'types/mattermost-webapp';
 
@@ -10,7 +10,7 @@ import './style.scss';
 
 const defaultExpiry = '30';
 
-const Expiry = ({id, setSaveNeeded, onChange, config, registerSaveAction, unRegisterSaveAction}: CustomComponentProps) => {
+const Expiry = ({id, setSaveNeeded, onChange, config}: CustomComponentProps) => {
     const [expiryDays, setExpiryDays] = useState<string>(defaultExpiry);
     const [error, setError] = useState<string>('');
 
@@ -24,20 +24,6 @@ const Expiry = ({id, setSaveNeeded, onChange, config, registerSaveAction, unRegi
         }
     }, [config.PluginSettings?.Plugins]);
 
-    const handleSave = useMemo(() => {
-        return async () => {
-            return {error: {message: error}};
-        };
-    }, [error]);
-
-    useEffect(() => {
-        registerSaveAction(handleSave);
-
-        return () => {
-            unRegisterSaveAction(handleSave);
-        };
-    }, [handleSave, registerSaveAction, unRegisterSaveAction]);
-
     const saveSettings = useCallback((setting: ExpiryConfig) => {
         setSaveNeeded();
         onChange(id, setting);
@@ -49,9 +35,9 @@ const Expiry = ({id, setSaveNeeded, onChange, config, registerSaveAction, unRegi
 
         const numberValue = Number.parseInt(e.target.value, 10);
         if (isNaN(numberValue)) {
-            console.log('error set');
-            setError('Please enter a valid number larger than "1"');
+            setError('Please enter a valid number');
         } else {
+            setError('');
             saveSettings({days: numberValue});
         }
     }, [saveSettings, setSaveNeeded]);
@@ -67,7 +53,13 @@ const Expiry = ({id, setSaveNeeded, onChange, config, registerSaveAction, unRegi
                 />
             </div>
 
-            <div className='horizontal'>
+            <div className='vertical'>
+                {
+                    error &&
+                    <p className='errorMessage'>
+                        {error}
+                    </p>
+                }
                 <p>
                     {'Select the number of days for which the survey will stay active and users will be able to respond to it. No more responses for this survey will be accepted after the set number of days have passed. '}
                 </p>
