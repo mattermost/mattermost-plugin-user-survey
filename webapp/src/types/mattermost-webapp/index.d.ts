@@ -4,6 +4,7 @@
 import type React from 'react';
 
 import type {AdminConfig} from 'mattermost-redux/src/types/config';
+import {Question} from 'components/systemConsole/questions/questions';
 
 export type DateTimeConfig = {
     date: string;
@@ -18,7 +19,9 @@ export type TeamFilterConfig = {
     filteredTeamIDs: string[];
 }
 
-export type CustomConfigTypes = DateTimeConfig | ExpiryConfig | TeamFilterConfig;
+export type SurveyQuestionsConfig = Question[];
+
+export type CustomConfigTypes = DateTimeConfig | ExpiryConfig | TeamFilterConfig | SurveyQuestionsConfig;
 
 export type Config = AdminConfig & {
     PluginSettings?: {
@@ -27,6 +30,7 @@ export type Config = AdminConfig & {
                 surveydatetime: DateTimeConfig;
                 surveyexpiry: ExpiryConfig;
                 teamfilter: TeamFilterConfig;
+                surveyquestions: SurveyQuestionsConfig;
             };
         };
     };
