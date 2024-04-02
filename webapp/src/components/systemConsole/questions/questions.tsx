@@ -82,9 +82,12 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config}: CustomComponentP
 
     const questionOnChangeHandler = useDebouncedCallback(
         useCallback((e: React.ChangeEvent<HTMLInputElement>, questionID: string) => {
-            const newQuestions = questions;
+            const newQuestions = [...questions];
             const i = questions.findIndex((q) => q.id === questionID);
-            newQuestions[i].text = e.target.value;
+            newQuestions[i] = {
+                ...newQuestions[i],
+                text: e.target.value,
+            };
             setQuestions(newQuestions);
             saveSettings(newQuestions);
         }, [questions, saveSettings]),

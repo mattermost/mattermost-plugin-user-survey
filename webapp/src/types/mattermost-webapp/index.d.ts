@@ -21,7 +21,14 @@ export type TeamFilterConfig = {
 
 export type SurveyQuestionsConfig = Question[];
 
-export type CustomConfigTypes = DateTimeConfig | ExpiryConfig | TeamFilterConfig | SurveyQuestionsConfig;
+export type CombinedConfig = {
+    SurveyDateTime: DateTimeConfig;
+    SurveyExpiry: ExpiryConfig;
+    TeamFilter: TeamFilterConfig;
+    SurveyQuestions: SurveyQuestionsConfig;
+};
+
+export type CustomConfigTypes = DateTimeConfig | ExpiryConfig | TeamFilterConfig | SurveyQuestionsConfig | CombinedConfig;
 
 export type Config = AdminConfig & {
     PluginSettings?: {
