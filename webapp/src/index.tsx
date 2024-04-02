@@ -13,10 +13,13 @@ import type {PluginRegistry} from 'types/mattermost-webapp';
 
 import manifest from './manifest';
 import SurveyQuestions from 'components/systemConsole/questions/questions';
+import SystemConsoleSetting from 'components/systemConsole';
 
 export default class Plugin {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
     public async initialize(registry: PluginRegistry, store: Store<GlobalState, Action<Record<string, unknown>>>) {
+        registry.registerAdminConsoleCustomSetting('SystemConsoleSetting', SystemConsoleSetting, {showTitle: false});
+
         registry.registerAdminConsoleCustomSetting('SurveyDateTime', SurveyDateTime, {showTitle: true});
         registry.registerAdminConsoleCustomSetting('SurveyExpiry', Expiry, {showTitle: true});
         registry.registerAdminConsoleCustomSetting('TeamFilter', TeamFilter, {showTitle: true});
