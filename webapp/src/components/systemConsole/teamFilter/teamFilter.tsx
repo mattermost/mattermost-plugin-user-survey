@@ -4,8 +4,9 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
 import './style.scss';
+import type {Team} from '@mattermost/types/teams';
+
 import {Client4} from 'mattermost-redux/client';
-import type {Team} from 'mattermost-redux/types/teams';
 
 import type {DropdownOption} from 'components/common/dropdown/dropdown';
 import type {CustomComponentsDefinition} from 'components/common/multiSelect/multiselect';
@@ -25,9 +26,13 @@ function TeamFilter({id, setSaveNeeded, onChange, config}: CustomComponentProps)
     useEffect(() => {
         const task = async () => {
             const teams: Team[] = await Client4.getTeams(0, 10000, false) as Team[];
+
+            const teamsByID: {[key: string]: Team} = {};
             const options = teams.
                 filter((team) => team.delete_at === 0).
                 map((team): DropdownOption => {
+                    teamsByID[team.id] = team;
+
                     return {
                         value: team.id,
                         label: team.display_name,
@@ -38,16 +43,16 @@ function TeamFilter({id, setSaveNeeded, onChange, config}: CustomComponentProps)
 
             const savedSetting = config.PluginSettings.Plugins['com.mattermost.user-survey']?.teamfilter;
             if (savedSetting?.filteredTeamIDs) {
-                const intialOptions: DropdownOption[] = savedSetting.filteredTeamIDs.map((teamId) => {
-                    const team = options.find((option) => option.value === teamId);
+                const initialOptions: DropdownOption[] = savedSetting.filteredTeamIDs.map((teamId) => {
+                    const team = teamsByID[teamId];
                     return {
-                        label: team?.label || `Archived Team: ${teamId}`,
+                        label: team?.display_name || `Archived Team: ${teamId}`,
                         value: teamId,
-                        raw: team?.raw,
+                        raw: team,
                     };
                 });
 
-                setSelectedTeams(intialOptions);
+                setSelectedTeams(initialOptions);
             }
         };
 
@@ -58,7 +63,6 @@ function TeamFilter({id, setSaveNeeded, onChange, config}: CustomComponentProps)
         {
             Option: CustomOption,
             MultiValueContainer: CustomMultiValueContainer,
-
         }
     ), []);
 
