@@ -1,0 +1,15 @@
+.EnableSurvey.horizontal {
+    justify-content: normal;
+    gap: 32px;
+    padding-bottom: 20px;
+
+    .option {
+        input[type="radio"] {
+            margin-top: -4px;
+        }
+
+        input, label {
+            cursor: pointer;
+        }
+    }
+}

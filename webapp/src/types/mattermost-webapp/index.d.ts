@@ -22,25 +22,23 @@ export type TeamFilterConfig = {
 
 export type SurveyQuestionsConfig = Question[];
 
+export type SurveyEnabledConfig = boolean;
+
 export type CombinedConfig = {
     SurveyDateTime: DateTimeConfig;
     SurveyExpiry: ExpiryConfig;
     TeamFilter: TeamFilterConfig;
     SurveyQuestions: SurveyQuestionsConfig;
+    SurveyEnabled: SurveyEnabledConfig;
 };
 
-export type CustomConfigTypes = DateTimeConfig | ExpiryConfig | TeamFilterConfig | SurveyQuestionsConfig | CombinedConfig;
+export type CustomConfigTypes = DateTimeConfig | ExpiryConfig | TeamFilterConfig | SurveyQuestionsConfig | SurveyEnabledConfig | CombinedConfig;
 
 export type Config = AdminConfig & {
     PluginSettings?: {
         Plugins?: {
             'com.mattermost.user-survey'?: {
-                systemconsolesetting: {
-                    SurveyDateTime: DateTimeConfig;
-                    SurveyExpiry: ExpiryConfig;
-                    TeamFilter: TeamFilterConfig;
-                    SurveyQuestions: SurveyQuestionsConfig;
-                };
+                systemconsolesetting: CombinedConfig;
             };
         };
     };

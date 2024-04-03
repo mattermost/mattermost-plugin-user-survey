@@ -4,6 +4,7 @@
 import React, {useCallback, useMemo, useState} from 'react';
 
 import './style.scss';
+import EnableSurvey from 'components/systemConsole/enableSurvey';
 import Expiry from 'components/systemConsole/expiry/expiry';
 import Questions from 'components/systemConsole/questions/questions';
 import SurveyDateTime from 'components/systemConsole/surveyDateTime/surveyDateTime';
@@ -55,6 +56,18 @@ function SystemConsoleSetting(props: CustomComponentProps) {
 
     return (
         <div className='SystemConsoleSetting vertical'>
+            <div className='horizontal'>
+                <div className='settingLabel'>
+                    {'Enable survey:'}
+                </div>
+                <div className='customSettingComponent'>
+                    <EnableSurvey
+                        {...modifiedProps}
+                        id='EnableSurvey'
+                    />
+                </div>
+            </div>
+
             <div className='horizontal'>
                 <div className='settingLabel'>
                     {'Send next survey at:'}
