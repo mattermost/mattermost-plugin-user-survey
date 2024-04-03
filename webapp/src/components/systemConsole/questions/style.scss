@@ -1,39 +1,39 @@
 .SurveyQuestions {
-  background: white;
-  border-radius: 4px;
-  box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.08);
+    border-radius: 4px;
+    background: white;
+    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.08);
 
-  .header {
-    padding: 24px 32px;
-    border-bottom: 1px solid rgba(63, 67, 80, 0.12);
+    .header {
+        padding: 24px 32px;
+        border-bottom: 1px solid rgba(63, 67, 80, 0.12);
 
-    h5 {
-      font-weight: bold;
+        h5 {
+            font-weight: bold;
+        }
     }
-  }
 
-  .body {
-    padding: 24px 32px;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+    .body {
+        display: flex;
+        flex-direction: column;
+        padding: 24px 32px;
+        gap: 24px;
 
-    .question {
-      .questionTitle {
-        color: #3D3C40;
-        font-size: 12px;
-        font-weight: 600;
-        line-height: 16px;
-        margin: 0;
-      }
+        .question {
+            .questionTitle {
+                margin: 0;
+                color: #3D3C40;
+                font-size: 12px;
+                font-weight: 600;
+                line-height: 16px;
+            }
 
-      .questionHelpText {
-        color: rgba(61, 60, 64, 0.72);
-        font-size: 12px;
-        font-style: normal;
-        font-weight: 400;
-        line-height: 20px;
-      }
+            .questionHelpText {
+                color: rgba(61, 60, 64, 0.72);
+                font-size: 12px;
+                font-style: normal;
+                font-weight: 400;
+                line-height: 20px;
+            }
+        }
     }
-  }
 }

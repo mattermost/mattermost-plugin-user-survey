@@ -2,44 +2,51 @@
 // See LICENSE.txt for license information.
 
 import {format, parse} from 'date-fns';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
 import SurveyDateSelector from 'components/surveyDateSelector/surveyDateSelector';
 import SurveyTimeSelector from 'components/surveyTimeSelector/surveyTimeSelector';
+import type {CustomSettingChildComponentProp} from 'components/systemConsole/index';
 
-import type {CustomComponentProps, DateTimeConfig} from 'types/mattermost-webapp';
+import type {DateTimeConfig} from 'types/mattermost-webapp';
 
 import './style.scss';
 
-const defaultSurveyTime = '09:00';
+function SurveyDateTime({id, setSaveNeeded, onChange, config, setInitialSetting}: CustomSettingChildComponentProp) {
+    // Default settings
+    const defaultSurveyTime = '09:00';
+    const defaultSurveyDate = useMemo(() => new Date(), []); // useMemo as new Date() is different in every render cycle
 
-function SurveyDateTime({id, setSaveNeeded, onChange, config}: CustomComponentProps) {
     const [surveyTime, setSurveyTime] = useState<string>(defaultSurveyTime);
-    const [surveyDate, setSurveyDate] = useState<Date>(new Date());
+    const [surveyDate, setSurveyDate] = useState<Date>(defaultSurveyDate);
 
+    // sets the date picker and time picker to the values saved in config on load
     useEffect(() => {
-        // sets the date picker and time picker to the values saved in config on load
+        const dateTimeConfig = config.PluginSettings?.Plugins?.['com.mattermost.user-survey']?.systemconsolesetting.SurveyDateTime;
 
-        const dateTimeConfig = config.PluginSettings?.Plugins?.['com.mattermost.user-survey']?.surveydatetime;
+        const initialConfig: DateTimeConfig = {
+            time: defaultSurveyTime,
+            date: format(defaultSurveyDate, 'dd/MM/yyyy'),
+        };
 
         if (dateTimeConfig?.time) {
             setSurveyTime(dateTimeConfig.time);
+            initialConfig.time = dateTimeConfig.time;
         }
 
         if (dateTimeConfig?.date) {
             setSurveyDate(parse(dateTimeConfig.date, 'dd/MM/yyyy', new Date()));
+            initialConfig.date = dateTimeConfig.date;
         } else {
             const monthFromNow = new Date();
             monthFromNow.setDate(monthFromNow.getDate() + 30);
             setSurveyDate(monthFromNow);
+            initialConfig.date = format(monthFromNow, 'dd/MM/yyyy');
         }
-    }, [config.PluginSettings?.Plugins]);
 
-    // Tells MM system console that some setting(s) have changed.
-    // This makes the "Save" button active and prompts the user
-    // about unsaved changes when navigating away from the plugin setting page.
-    // It also informs MM webapp about the settings so it can save it when user
-    // clicks the "Save" button.
+        setInitialSetting(id, initialConfig);
+    }, [config.PluginSettings?.Plugins, defaultSurveyDate, id, setInitialSetting]);
+
     const saveSettings = useCallback((setting: DateTimeConfig) => {
         setSaveNeeded();
         onChange(id, setting);

@@ -10,20 +10,21 @@ import type {Team} from 'mattermost-redux/types/teams';
 import type {DropdownOption} from 'components/common/dropdown/dropdown';
 import type {CustomComponentsDefinition} from 'components/common/multiSelect/multiselect';
 import Multiselect from 'components/common/multiSelect/multiselect';
+import type {CustomSettingChildComponentProp} from 'components/systemConsole/index';
 import {
     CustomMultiValueContainer,
 } from 'components/systemConsole/teamFilter/customMultiValueContainer/customMultiValueContainer';
 import {CustomOption} from 'components/systemConsole/teamFilter/customOption/customOption';
 
-import type {CustomComponentProps, TeamFilterConfig} from 'types/mattermost-webapp';
+import type {TeamFilterConfig} from 'types/mattermost-webapp';
 
-function TeamFilter({id, setSaveNeeded, onChange, config}: CustomComponentProps) {
+function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: CustomSettingChildComponentProp) {
     const [selectedTeams, setSelectedTeams] = useState<DropdownOption[]>([]);
     const [allTeamsOptions, setAllTeamsOptions] = useState<DropdownOption[]>([]);
 
-    // fetch all teams to populate options
     useEffect(() => {
         const task = async () => {
+            // fetch all teams to populate options
             const teams: Team[] = await Client4.getTeams(0, 10000, false) as Team[];
             const options = teams.
                 filter((team) => team.delete_at === 0).
@@ -36,9 +37,9 @@ function TeamFilter({id, setSaveNeeded, onChange, config}: CustomComponentProps)
                 });
             setAllTeamsOptions(options);
 
-            const savedSetting = config.PluginSettings.Plugins['com.mattermost.user-survey']?.teamfilter;
+            const savedSetting = config.PluginSettings.Plugins['com.mattermost.user-survey']?.systemconsolesetting.TeamFilter;
             if (savedSetting?.filteredTeamIDs) {
-                const intialOptions: DropdownOption[] = savedSetting.filteredTeamIDs.map((teamId) => {
+                const initialOptions: DropdownOption[] = savedSetting.filteredTeamIDs.map((teamId) => {
                     const team = options.find((option) => option.value === teamId);
                     return {
                         label: team?.label || `Archived Team: ${teamId}`,
@@ -47,28 +48,26 @@ function TeamFilter({id, setSaveNeeded, onChange, config}: CustomComponentProps)
                     };
                 });
 
-                setSelectedTeams(intialOptions);
+                setSelectedTeams(initialOptions);
+                setInitialSetting(id, optionsToConfig(initialOptions));
             }
         };
 
         task();
-    }, [config.PluginSettings.Plugins]);
+    }, [config.PluginSettings.Plugins, id, setInitialSetting]);
 
-    const customComponents: CustomComponentsDefinition = useMemo(() => (
-        {
-            Option: CustomOption,
-            MultiValueContainer: CustomMultiValueContainer,
+    const customComponents: CustomComponentsDefinition = useMemo(() => ({
+        Option: CustomOption,
+        MultiValueContainer: CustomMultiValueContainer,
+    }), []);
 
-        }
-    ), []);
+    const optionsToConfig = (teams: DropdownOption[]): TeamFilterConfig => ({
+        filteredTeamIDs: teams.map((option) => option.value),
+    });
 
     const saveSettings = useCallback((teams: DropdownOption[]) => {
         setSaveNeeded();
-
-        const setting: TeamFilterConfig = {
-            filteredTeamIDs: teams.map((option) => option.value),
-        };
-        onChange(id, setting);
+        onChange(id, optionsToConfig(teams));
     }, [id, onChange, setSaveNeeded]);
 
     const teamFilterOnChangeHandler = useCallback((selectedTeams: DropdownOption[]) => {

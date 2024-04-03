@@ -1,13 +1,14 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {ChangeEventHandler, useCallback, useEffect, useMemo, useState} from 'react';
-
-import type {CustomComponentProps, SurveyQuestionsConfig} from 'types/mattermost-webapp';
-
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import './style.scss';
 import {useDebouncedCallback} from 'use-debounce';
 import utils from 'utils/utils';
+
+import type {CustomSettingChildComponentProp} from 'components/systemConsole/index';
+
+import type {SurveyQuestionsConfig} from 'types/mattermost-webapp';
 
 export type QuestionType = 'linear_scale' | 'text';
 
@@ -26,11 +27,10 @@ export type Question = {
     helpText?: string;
 };
 
-function SurveyQuestions({id, setSaveNeeded, onChange, config}: CustomComponentProps) {
+function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting}: CustomSettingChildComponentProp) {
     const [questions, setQuestions] = useState<Question[]>([]);
 
     const generateDefaultQuestions = (): Question[] => {
-        console.log('generateDefaultQuestions called');
         return [
             {
                 id: utils.uuid(),
@@ -66,14 +66,12 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config}: CustomComponentP
 
     useEffect(() => {
         // Set initial value from saved config
-        const savedQuestions = config.PluginSettings.Plugins?.['com.mattermost.user-survey']?.surveyquestions;
+        const savedQuestions = config.PluginSettings.Plugins?.['com.mattermost.user-survey']?.systemconsolesetting.SurveyQuestions;
 
-        if (savedQuestions) {
-            setQuestions(savedQuestions);
-        } else {
-            setQuestions(generateDefaultQuestions());
-        }
-    }, [config.PluginSettings?.Plugins]);
+        const initialSetting = savedQuestions || generateDefaultQuestions();
+        setQuestions(initialSetting);
+        setInitialSetting(id, initialSetting);
+    }, [config.PluginSettings.Plugins, id, setInitialSetting]);
 
     const saveSettings = useCallback((setting: SurveyQuestionsConfig) => {
         setSaveNeeded();

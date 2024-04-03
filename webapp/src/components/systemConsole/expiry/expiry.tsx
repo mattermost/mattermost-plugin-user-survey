@@ -4,25 +4,34 @@
 import type {ChangeEvent} from 'react';
 import React, {useCallback, useEffect, useState} from 'react';
 
-import type {CustomComponentProps, ExpiryConfig} from 'types/mattermost-webapp';
+import type {CustomSettingChildComponentProp} from 'components/systemConsole/index';
+
+import type {ExpiryConfig} from 'types/mattermost-webapp';
 
 import './style.scss';
 
-const defaultExpiry = '30';
+const Expiry = ({id, setSaveNeeded, onChange, config, setInitialSetting}: CustomSettingChildComponentProp) => {
+    // default values
+    const defaultExpiry = '30';
 
-const Expiry = ({id, setSaveNeeded, onChange, config}: CustomComponentProps) => {
     const [expiryDays, setExpiryDays] = useState<string>(defaultExpiry);
     const [error, setError] = useState<string>('');
 
+    // Set initial value from saved config
     useEffect(() => {
-        // Set initial value from saved config
+        const expiryConfig = config.PluginSettings?.Plugins?.['com.mattermost.user-survey']?.systemconsolesetting?.SurveyExpiry;
 
-        const expiryConfig = config.PluginSettings?.Plugins?.['com.mattermost.user-survey']?.surveyexpiry;
+        const initialSetting: ExpiryConfig = {
+            days: Number.parseInt(defaultExpiry, 10),
+        };
 
         if (expiryConfig?.days) {
             setExpiryDays(expiryConfig.days.toString());
+            initialSetting.days = expiryConfig.days;
         }
-    }, [config.PluginSettings?.Plugins]);
+
+        setInitialSetting(id, initialSetting);
+    }, [config.PluginSettings?.Plugins, id, setInitialSetting]);
 
     const saveSettings = useCallback((setting: ExpiryConfig) => {
         setSaveNeeded();
