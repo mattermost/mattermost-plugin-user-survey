@@ -13,7 +13,7 @@ function EnableSurvey({id, setSaveNeeded, onChange, config, setInitialSetting}: 
     const [enabled, setEnabled] = useState<boolean>(defaultValue);
 
     useEffect(() => {
-        const enabledSurveyConfig = config.PluginSettings.Plugins['com.mattermost.user-survey']?.systemconsolesetting.SurveyEnabled;
+        const enabledSurveyConfig = config.PluginSettings.Plugins['com.mattermost.user-survey']?.systemconsolesetting.EnableSurvey;
 
         const initialValue = enabledSurveyConfig || defaultValue;
         setEnabled(initialValue);
@@ -21,12 +21,15 @@ function EnableSurvey({id, setSaveNeeded, onChange, config, setInitialSetting}: 
     }, [config.PluginSettings.Plugins, defaultValue, id, setInitialSetting]);
 
     const optionOnChangeHandler = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        let value = false;
         if (e.target.name === 'surveyEnabled') {
-            setEnabled(true);
-        } else if (e.target.name === 'surveyDisabled') {
-            setEnabled(false);
+            value = true;
         }
-    }, []);
+
+        setEnabled(value);
+        onChange(id, value);
+        setSaveNeeded();
+    }, [id, onChange, setSaveNeeded]);
 
     return (
         <div className='EnableSurvey horizontal'>

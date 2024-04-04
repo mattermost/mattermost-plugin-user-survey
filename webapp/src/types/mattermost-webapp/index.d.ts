@@ -29,7 +29,7 @@ export type CombinedConfig = {
     SurveyExpiry: ExpiryConfig;
     TeamFilter: TeamFilterConfig;
     SurveyQuestions: SurveyQuestionsConfig;
-    SurveyEnabled: SurveyEnabledConfig;
+    EnableSurvey: SurveyEnabledConfig;
 };
 
 export type CustomConfigTypes = DateTimeConfig | ExpiryConfig | TeamFilterConfig | SurveyQuestionsConfig | SurveyEnabledConfig | CombinedConfig;
