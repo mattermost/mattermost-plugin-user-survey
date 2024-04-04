@@ -15,16 +15,9 @@ export type Props = {
     data: DropdownOption;
 }
 function TeamIcon({data}: Props) {
-    // @ts-expect-error last_team_icon_update
-    // field will be included in latest types release,
-    // but its there in the data already
-    if (data.raw.last_team_icon_update) {
-        // last_team_icon_update is set whenever a team icon is set or updated.
-        // So, a truthy value of `last_team_icon_update` field indicates precense of
-        // team icons, so here we use it to show the team icon image.
-
-        // @ts-expect-error sane reason as above about the last_team_icon_update field
-        const teamURL = Client4.getTeamIconUrl(data.value, (data.raw as Team)?.last_team_icon_update);
+    const teamIconLastUpdated = (data.raw as Team).last_team_icon_update;
+    if (teamIconLastUpdated) {
+        const teamURL = Client4.getTeamIconUrl(data.value, teamIconLastUpdated);
         return (
             <div className='customOption_imageContainer'>
                 <div
