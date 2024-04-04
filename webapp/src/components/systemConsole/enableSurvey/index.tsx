@@ -21,11 +21,7 @@ function EnableSurvey({id, setSaveNeeded, onChange, config, setInitialSetting}: 
     }, [config.PluginSettings.Plugins, defaultValue, id, setInitialSetting]);
 
     const optionOnChangeHandler = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        let value = false;
-        if (e.target.name === 'surveyEnabled') {
-            value = true;
-        }
-
+        const value = e.target.name === 'surveyEnabled';
         setEnabled(value);
         onChange(id, value);
         setSaveNeeded();
