@@ -61,3 +61,15 @@ export interface PluginRegistry {
 
     // Add more if needed from https://developers.mattermost.com/extend/plugins/webapp/reference
 }
+
+export type SurveyStatus = 'in_progress' | 'ended';
+
+export type SurveyResult = {
+    surveyId: string;
+    startDate: string;
+    endDate: string;
+    npsScore: number;
+    receiptsCount: number;
+    responseCount: number;
+    status: SurveyStatus;
+}
