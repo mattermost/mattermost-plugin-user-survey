@@ -1,0 +1,8 @@
+.CustomSurveyPost {
+    .CustomSurveyPost_survey {
+      border: 1px solid rgba(var(--center-channel-color-rgb), 0.12);
+      border-radius: 4px;
+      border-left: 3px solid var(--sidebar-text-active-border, #5D89EA);
+      padding: 16px;
+    }
+}

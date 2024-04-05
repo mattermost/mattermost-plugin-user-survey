@@ -3,6 +3,8 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"github.com/mattermost/mattermost/server/public/model"
+	"github.com/pkg/errors"
 	"net/http"
 	"sync"
 
@@ -47,6 +49,41 @@ func (p *Plugin) OnActivate() error {
 
 	p.store = sqlStore
 	p.app = app
+
+	botID, err := p.API.EnsureBotUser(&model.Bot{
+		Username:    "dwight.schrute",
+		DisplayName: "Dwight Schrute",
+		Description: "Bears, beets, battlestar galactica",
+	})
+
+	if err != nil {
+		p.API.LogError(err.Error())
+		return err
+	}
+
+	dm, appErr := p.API.GetDirectChannel(botID, "npeb4h6nejgitesg3ah931ubry")
+	if appErr != nil {
+		p.API.LogError(appErr.Error())
+		return errors.New(appErr.Error())
+	}
+
+	props := make(model.StringInterface)
+
+	props["surveyQuestions"] = "[{\"helpText\":\"This text will be sent in the bot message preceding the survey.\",\"id\":\"cd2fc07e-62a0-4145-b418-baa2008c5625\",\"mandatory\":true,\"system\":false,\"text\":\"dkjifsidfisdhyf\",\"title\":\"Survey message text\",\"type\":\"text\"},{\"id\":\"a4d75e2d-f8c1-4dc4-a4d2-0df14793568b\",\"mandatory\":true,\"system\":true,\"text\":\"How likely are you to recommend Mattermost?\",\"type\":\"linear_scale\"},{\"id\":\"fcc38501-8946-4ca8-9642-3532194bc2eb\",\"mandatory\":true,\"system\":true,\"text\":\"How can we make your experience better?\",\"type\":\"text\"},{\"id\":\"881c9ac6-bfe6-49a6-b339-7a654e09bdd0\",\"mandatory\":false,\"system\":false,\"text\":\"alkfd ashfksdh\",\"type\":\"text\"}]"
+
+	post := &model.Post{
+		UserId:    botID,
+		Type:      "custom_user_survey",
+		Message:   ":wave: Hey @sysadmin! Please take a few moments to help us improve your experience with Mattermost.",
+		ChannelId: dm.Id,
+	}
+	post.SetProps(props)
+
+	_, appErr = p.API.CreatePost(post)
+	if appErr != nil {
+		p.API.LogError(appErr.Error())
+		return errors.New(appErr.Error())
+	}
 
 	return nil
 }

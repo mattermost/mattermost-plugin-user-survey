@@ -1,0 +1,31 @@
+.scale {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  width: min-content;
+  background: rgba(var(--button-bg-rgb), 0.08);
+  border-radius: 16px;
+}
+
+.indent {
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+  padding-top: 3px;
+  text-align: center;
+  /* background: rgba(var(--button-bg-rgb), 0.08); */
+  cursor: pointer;
+}
+
+.indent:first-child {border-radius: 16px 0 0 16px;}
+
+.indent:last-child {
+  border-radius: 0 16px 16px 0;
+}
+
+.scale {
+}
+
+.indent:hover {
+  background: rgba(var(--button-bg-rgb), 0.4);
+}

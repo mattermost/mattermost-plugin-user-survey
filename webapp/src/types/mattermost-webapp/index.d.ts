@@ -3,6 +3,8 @@
 
 import type React from 'react';
 
+import type {Post} from '@mattermost/types/posts';
+
 import type {AdminConfig} from 'mattermost-redux/src/types/config';
 
 import type {Question} from 'components/systemConsole/questions/questions';
@@ -72,4 +74,22 @@ export type SurveyResult = {
     receiptsCount: number;
     responseCount: number;
     status: SurveyStatus;
+}
+
+export type FormatTextOptions = {
+    markdown?: boolean;
+}
+
+export type PostUtils = {
+    formatText: (text: string, option: Partial<FormatTextOptions>) => string;
+    messageHtmlToComponent: (html: string, isRHS: boolean) => React.ReactNode;
+}
+
+export type MattermostWindow = {
+    PostUtils: PostUtils;
+}
+
+export type CustomPostTypeComponentProps = {
+    post: Post;
+    isRHS: boolean;
 }
