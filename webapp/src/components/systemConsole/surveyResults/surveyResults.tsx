@@ -1,20 +1,17 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {parse} from 'date-fns';
 import React, {useEffect, useMemo, useState} from 'react';
-
 import './style.scss';
 import utils from 'utils/utils';
 
 import Button from 'components/common/button/button';
-import type {CustomSettingChildComponentProp} from 'components/systemConsole/index';
 
 import type {SurveyResult} from 'types/mattermost-webapp';
 
-import {parse} from 'date-fns';
-
-function SurveyResults({id, setSaveNeeded, onChange, config, setInitialSetting}: CustomSettingChildComponentProp) {
-    // dummy survey respones.
+function SurveyResults() {
+    // dummy survey response.
     // Will be replaced by data fetched from API later on
     const dummySurveyResults = (): SurveyResult[] => {
         return [

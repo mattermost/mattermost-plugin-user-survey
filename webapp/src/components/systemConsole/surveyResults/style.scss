@@ -1,69 +1,69 @@
 .SurveyResults {
-  border-radius: 4px;
-  background: white;
-  box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.08);
+    border-radius: 4px;
+    background: white;
+    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.08);
 
-  .panelHeader {
-    padding: 24px 32px;
-    border-bottom: 1px solid rgba(63, 67, 80, 0.12);
+    .panelHeader {
+        padding: 24px 32px;
+        border-bottom: 1px solid rgba(63, 67, 80, 0.12);
 
-    h5 {
-      font-weight: bold;
-      font-size: 16px;
-    }
-  }
-
-  .panelBody {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    padding: 24px 0;
-    font-size: 12px;
-
-    .actions {
-      min-width: 162px;
-    }
-
-    .resultHeader {
-      border-top: 1px solid rgba(63, 67, 80, 0.08);
-      border-bottom: 1px solid rgba(63, 67, 80, 0.08);
-      padding: 12px 32px;
-      font-weight: bold;
-      color: rgba(63, 67, 80, 0.64);
-
-      div {
-        flex: 1;
-      }
-    }
-
-    .surveyResultRow {
-      padding: 11px 32px;
-      border-bottom: 1px solid rgba(63, 67, 80, 0.08);
-      color: #3F4350;
-
-      div {
-        flex: 1;
-
-        span {
-            margin-top: 7px;
-            display: block;
+        h5 {
+            font-size: 16px;
+            font-weight: bold;
         }
-      }
-
-      .startDate, .endDate {
-        font-weight: bold;
-      }
-
-      .actions {
-        .surveyResultActions {
-          gap: 0;
-
-          .btn {
-            font-size: 12px;
-            height: 32px;
-          }
-        }
-      }
     }
-  }
+
+    .panelBody {
+        display: flex;
+        flex-direction: column;
+        padding: 24px 0;
+        font-size: 12px;
+        gap: 0;
+
+        .actions {
+            min-width: 162px;
+        }
+
+        .resultHeader {
+            padding: 12px 32px;
+            border-top: 1px solid rgba(63, 67, 80, 0.08);
+            border-bottom: 1px solid rgba(63, 67, 80, 0.08);
+            color: rgba(63, 67, 80, 0.64);
+            font-weight: bold;
+
+            div {
+                flex: 1;
+            }
+        }
+
+        .surveyResultRow {
+            padding: 11px 32px;
+            border-bottom: 1px solid rgba(63, 67, 80, 0.08);
+            color: #3F4350;
+
+            div {
+                flex: 1;
+
+                span {
+                    display: block;
+                    margin-top: 7px;
+                }
+            }
+
+            .startDate, .endDate {
+                font-weight: bold;
+            }
+
+            .actions {
+                .surveyResultActions {
+                    gap: 0;
+
+                    .btn {
+                        height: 32px;
+                        font-size: 12px;
+                    }
+                }
+            }
+        }
+    }
 }
