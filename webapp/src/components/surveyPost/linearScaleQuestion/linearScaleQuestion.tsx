@@ -27,10 +27,16 @@ function LinearScaleQuestion({question}: Props) {
     }, []);
 
     return (
-        <div className='LinearScaleQuestion'>
+        <div className='LinearScaleQuestion vertical'>
             <div className='questionTitle'>{question.text}</div>
-            <div className='scale'>
-                {indents}
+            <div className='scale vertical'>
+                <div className='scaleLabels horizontal'>
+                    <div className='scaleLabel'>{'Not Likely'}</div>
+                    <div className='scaleLabel'>{'Very Likely'}</div>
+                </div>
+                <div className='indents'>
+                    {indents}
+                </div>
             </div>
         </div>
     );

@@ -4,10 +4,11 @@
 import React, {useEffect, useMemo, useState} from 'react';
 
 import './style.scss';
-import type {CustomPostTypeComponentProps, MattermostWindow, SurveyQuestionsConfig} from 'types/mattermost-webapp';
-import Questions, {Question} from 'components/systemConsole/questions/questions';
-import questions from 'components/systemConsole/questions/questions';
 import LinearScaleQuestion from 'components/surveyPost/linearScaleQuestion/linearScaleQuestion';
+import type {Question} from 'components/systemConsole/questions/questions';
+
+import type {CustomPostTypeComponentProps, MattermostWindow, SurveyQuestionsConfig} from 'types/mattermost-webapp';
+import TextQuestion from 'components/surveyPost/textQuestion/textQuestion';
 
 function SurveyPost(props: CustomPostTypeComponentProps) {
     console.log(props);
@@ -31,10 +32,25 @@ function SurveyPost(props: CustomPostTypeComponentProps) {
 
     const renderQuestions = useMemo(() => {
         return surveyQuestions.map((question) => {
+            let questionComponent: React.ReactNode;
+
             switch (question.type) {
             case 'linear_scale':
-                return <LinearScaleQuestion question={question}/>;
+                questionComponent = <LinearScaleQuestion question={question}/>;
+                break;
+            case 'text':
+                questionComponent = <TextQuestion question={question}/>;
+                break;
             }
+
+            return (
+                <div
+                    key={question.id}
+                    className='question'
+                >
+                    {questionComponent}
+                </div>
+            );
         });
     }, [surveyQuestions]);
 
