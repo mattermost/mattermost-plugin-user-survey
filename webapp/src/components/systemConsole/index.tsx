@@ -117,10 +117,7 @@ function SystemConsoleSetting(props: CustomComponentProps) {
 
             <div className='horizontal'>
                 <div className='customSettingComponent'>
-                    <SurveyResults
-                        {...modifiedProps}
-                        id='SurveyResults'
-                    />
+                    <SurveyResults/>
                 </div>
             </div>
         </div>
