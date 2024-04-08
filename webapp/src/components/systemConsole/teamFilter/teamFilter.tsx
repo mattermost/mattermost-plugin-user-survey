@@ -43,8 +43,9 @@ function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: Cu
             setAllTeamsOptions(options);
 
             const savedSetting = config.PluginSettings.Plugins['com.mattermost.user-survey']?.systemconsolesetting.TeamFilter;
+            let initialOptions: DropdownOption[] = [];
             if (savedSetting?.filteredTeamIDs) {
-                const initialOptions: DropdownOption[] = savedSetting.filteredTeamIDs.map((teamId) => {
+                initialOptions = savedSetting.filteredTeamIDs.map((teamId) => {
                     const team = teamsByID[teamId];
                     return {
                         label: team?.display_name || `Archived Team: ${teamId}`,
@@ -52,10 +53,10 @@ function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: Cu
                         raw: team,
                     };
                 });
-
-                setSelectedTeams(initialOptions);
-                setInitialSetting(id, optionsToConfig(initialOptions));
             }
+
+            setSelectedTeams(initialOptions);
+            setInitialSetting(id, optionsToConfig(initialOptions));
         };
 
         task();
