@@ -1,0 +1,100 @@
+// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
+// See LICENSE.txt for license information.
+
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
+
+import './style.scss';
+import type {Team} from '@mattermost/types/teams';
+
+import {Client4} from 'mattermost-redux/client';
+
+import type {DropdownOption} from 'components/common/dropdown/dropdown';
+import type {CustomComponentsDefinition} from 'components/common/multiSelect/multiselect';
+import Multiselect from 'components/common/multiSelect/multiselect';
+import {
+    CustomMultiValueContainer,
+} from 'components/systemConsole/teamFilter/customMultiValueContainer/customMultiValueContainer';
+import {CustomOption} from 'components/systemConsole/teamFilter/customOption/customOption';
+
+import type {CustomComponentProps, TeamFilterConfig} from 'types/mattermost-webapp';
+
+function TeamFilter({id, setSaveNeeded, onChange, config}: CustomComponentProps) {
+    const [selectedTeams, setSelectedTeams] = useState<DropdownOption[]>([]);
+    const [allTeamsOptions, setAllTeamsOptions] = useState<DropdownOption[]>([]);
+
+    // fetch all teams to populate options
+    useEffect(() => {
+        const task = async () => {
+            const teams: Team[] = await Client4.getTeams(0, 10000, false) as Team[];
+
+            const teamsByID: {[key: string]: Team} = {};
+            const options = teams.
+                filter((team) => team.delete_at === 0).
+                map((team): DropdownOption => {
+                    teamsByID[team.id] = team;
+
+                    return {
+                        value: team.id,
+                        label: team.display_name,
+                        raw: team,
+                    };
+                });
+            setAllTeamsOptions(options);
+
+            const savedSetting = config.PluginSettings.Plugins['com.mattermost.user-survey']?.teamfilter;
+            if (savedSetting?.filteredTeamIDs) {
+                const initialOptions: DropdownOption[] = savedSetting.filteredTeamIDs.map((teamId) => {
+                    const team = teamsByID[teamId];
+                    return {
+                        label: team?.display_name || `Archived Team: ${teamId}`,
+                        value: teamId,
+                        raw: team,
+                    };
+                });
+
+                setSelectedTeams(initialOptions);
+            }
+        };
+
+        task();
+    }, [config.PluginSettings.Plugins]);
+
+    const customComponents: CustomComponentsDefinition = useMemo(() => (
+        {
+            Option: CustomOption,
+            MultiValueContainer: CustomMultiValueContainer,
+        }
+    ), []);
+
+    const saveSettings = useCallback((teams: DropdownOption[]) => {
+        setSaveNeeded();
+
+        const setting: TeamFilterConfig = {
+            filteredTeamIDs: teams.map((option) => option.value),
+        };
+        onChange(id, setting);
+    }, [id, onChange, setSaveNeeded]);
+
+    const teamFilterOnChangeHandler = useCallback((selectedTeams: DropdownOption[]) => {
+        setSelectedTeams(selectedTeams);
+        saveSettings(selectedTeams);
+    }, [saveSettings]);
+
+    return (
+        <div className='TeamFilter'>
+            <Multiselect
+                options={allTeamsOptions}
+                customComponents={customComponents}
+                values={selectedTeams}
+                onChange={teamFilterOnChangeHandler}
+            />
+            <div className='horizontal'>
+                <p>
+                    {'Select the teams that the next survey should NOT be sent to. The survey will be sent to all teams if nothing is selected in this field.'}
+                </p>
+            </div>
+        </div>
+    );
+}
+
+export default TeamFilter;
