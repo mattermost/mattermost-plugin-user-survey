@@ -17,30 +17,22 @@ const questionTypeDisplayName = new Map<QuestionType, string>([
     ['text', 'Textual question'],
 ]);
 
+const DEFAULT_SURVEY_MESSAGE_TEXT = 'Please take a few moments to help us improve your experience with Mattermost.';
+
 export type Question = {
     id: string;
-    title?: string;
     text?: string;
     type: QuestionType;
     system: boolean;
     mandatory: boolean;
-    helpText?: string;
 };
 
 function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting}: CustomSettingChildComponentProp) {
     const [questions, setQuestions] = useState<Question[]>([]);
+    const [surveyMessageText, setSurveyMessageText] = useState<string>(DEFAULT_SURVEY_MESSAGE_TEXT);
 
     const generateDefaultQuestions = (): Question[] => {
         return [
-            {
-                id: utils.uuid(),
-                title: 'Survey message text',
-                text: 'Please take a few moments to help us improve your experience with Mattermost.',
-                type: 'text',
-                system: false,
-                mandatory: true,
-                helpText: 'This text will be sent in the bot message preceding the survey.',
-            },
             {
                 id: utils.uuid(),
                 text: 'How likely are you to recommend Mattermost?',
@@ -66,10 +58,17 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting
 
     useEffect(() => {
         // Set initial value from saved config
-        const savedQuestions = config.PluginSettings.Plugins?.['com.mattermost.user-survey']?.systemconsolesetting.SurveyQuestions;
+        const questionConfig = config.PluginSettings.Plugins?.['com.mattermost.user-survey']?.systemconsolesetting.SurveyQuestions;
+        const initialSavedQuestions = questionConfig?.questions;
+        const initialSurveyMessageText = questionConfig?.surveyMessageText;
 
-        const initialSetting = savedQuestions || generateDefaultQuestions();
-        setQuestions(initialSetting);
+        const initialSetting: SurveyQuestionsConfig = {
+            questions: initialSavedQuestions || generateDefaultQuestions(),
+            surveyMessageText: initialSurveyMessageText || DEFAULT_SURVEY_MESSAGE_TEXT,
+        };
+
+        setQuestions(initialSetting.questions);
+        setSurveyMessageText(initialSetting.surveyMessageText);
         setInitialSetting(id, initialSetting);
     }, [config.PluginSettings.Plugins, id, setInitialSetting]);
 
@@ -79,7 +78,7 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting
     }, [id, onChange, setSaveNeeded]);
 
     const questionOnChangeHandler = useDebouncedCallback(
-        useCallback((e: React.ChangeEvent<HTMLInputElement>, questionID: string) => {
+        (e: React.ChangeEvent<HTMLInputElement>, questionID: string) => {
             const newQuestions = [...questions];
             const i = questions.findIndex((q) => q.id === questionID);
             newQuestions[i] = {
@@ -87,12 +86,25 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting
                 text: e.target.value,
             };
             setQuestions(newQuestions);
-            saveSettings(newQuestions);
-        }, [questions, saveSettings]),
+            saveSettings({
+                questions: newQuestions,
+                surveyMessageText,
+            });
+        },
         500,
     );
 
-    const renderQuestions = useMemo(() => {
+    const surveyMessageTextChangeHandler = useDebouncedCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            setSurveyMessageText(e.target.value);
+            saveSettings({
+                questions,
+                surveyMessageText: e.target.value,
+            });
+        },
+    );
+
+    const renderedQuestions = useMemo(() => {
         return questions.map((question) => {
             return (
                 <div
@@ -100,11 +112,7 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting
                     className='vertical question'
                 >
                     <span className='questionTitle'>
-                        {question.title && question.title}
-                        {
-                            !question.title &&
-                            (`${questionTypeDisplayName.get(question.type)} ${question.mandatory ? '' : '(Optional)'}`)
-                        }
+                        {`${questionTypeDisplayName.get(question.type)} ${question.mandatory ? '' : '(Optional)'}`}
                     </span>
 
                     <input
@@ -115,15 +123,6 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting
                         disabled={question.system}
                         placeholder='Question'
                     />
-
-                    {
-                        question.helpText &&
-                        (
-                            <span className='questionHelpText'>
-                                {question.helpText}
-                            </span>
-                        )
-                    }
                 </div>
             );
         });
@@ -137,7 +136,26 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting
             </div>
 
             <div className='body'>
-                {renderQuestions}
+                <div className='vertical question'>
+                    <span className='questionTitle'>
+                        {'Survey message text'}
+                    </span>
+
+                    <input
+                        maxLength={1000}
+                        className='form-control questionInput'
+                        defaultValue={DEFAULT_SURVEY_MESSAGE_TEXT}
+                        placeholder='Survey message text'
+                        required={true}
+                        onChange={surveyMessageTextChangeHandler}
+                    />
+
+                    <span className='questionHelpText'>
+                        {'This text will be sent in the bot message preceding the survey.'}
+                    </span>
+                </div>
+
+                {renderedQuestions}
             </div>
 
         </div>

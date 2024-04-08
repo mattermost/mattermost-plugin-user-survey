@@ -22,7 +22,10 @@ export type TeamFilterConfig = {
     filteredTeamIDs: string[];
 }
 
-export type SurveyQuestionsConfig = Question[];
+export type SurveyQuestionsConfig = {
+    surveyMessageText: string;
+    questions: Question[];
+};
 
 export type SurveyEnabledConfig = boolean;
 
