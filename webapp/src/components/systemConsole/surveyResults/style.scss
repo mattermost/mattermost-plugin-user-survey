@@ -64,6 +64,13 @@
                     }
                 }
             }
+
+            &.noSurveyResults {
+                padding: 20px;
+                color: rgba(63, 67, 80, 0.64);
+                font-size: 14px;
+                text-align: center;
+            }
         }
     }
 }

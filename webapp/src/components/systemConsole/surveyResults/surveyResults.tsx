@@ -100,6 +100,15 @@ function SurveyResults() {
     };
 
     const renderedRows = useMemo(() => {
+        if (surveyResults.length === 0) {
+            return (
+                <div className='noSurveyResults surveyResultRow'>
+                    <p>{'No survey results yet'}</p>
+                    <p>{'Results will appear here once a survey starts'}</p>
+                </div>
+            );
+        }
+
         return surveyResults.map((result) => {
             return (
                 <div
