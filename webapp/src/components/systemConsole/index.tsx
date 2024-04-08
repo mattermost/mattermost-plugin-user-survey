@@ -41,7 +41,7 @@ function SystemConsoleSetting(props: CustomComponentProps) {
     //
     // This is needed so that on change in one sub-setting, we know all other sub-settings as well and thus
     // can save the entire setting object on server side.
-    // Otherwise the displayed default values will never get saved unless a user changes them.
+    // Otherwise, the displayed default values will never get saved unless a user changes them.
     const setDefaults = useCallback((settingId: string, settings: CustomConfigTypes) => {
         setConfig((existingConfig) => ({
             ...existingConfig,
@@ -55,71 +55,66 @@ function SystemConsoleSetting(props: CustomComponentProps) {
         setInitialSetting: setDefaults,
     }), [onChangeWrapper, props, setDefaults]);
 
+    const settings = useMemo(() => {
+        return [
+            {
+                id: 'EnableSurvey',
+                title: 'Enable survey:',
+                Component: EnableSurvey,
+            },
+            {
+                id: 'SurveyDateTime',
+                title: 'Send next survey at:',
+                Component: SurveyDateTime,
+            },
+            {
+                id: 'SurveyExpiry',
+                title: 'Survey expiry (days):',
+                Component: Expiry,
+            },
+            {
+                id: 'TeamFilter',
+                title: 'Exclude specific teams',
+                Component: TeamFilter,
+            },
+            {
+                id: 'SurveyQuestions',
+                Component: Questions,
+            },
+            {
+                id: 'SurveyResults',
+                Component: SurveyResults,
+            },
+        ];
+    }, []);
+
+    const body = useMemo(() => {
+        return settings.map((Setting) => {
+            return (
+                <div
+                    key={Setting.id}
+                    className='horizontal'
+                >
+                    {
+                        Setting.title &&
+                        <div className='settingLabel'>
+                            {Setting.title}
+                        </div>
+                    }
+                    <div className='customSettingComponent'>
+                        <Setting.Component
+                            {...modifiedProps}
+                            id={Setting.id}
+                        />
+                    </div>
+                </div>
+            );
+        });
+    }, [modifiedProps, settings]);
+
     return (
         <div className='SystemConsoleSetting vertical'>
-            <div className='horizontal'>
-                <div className='settingLabel'>
-                    {'Enable survey:'}
-                </div>
-                <div className='customSettingComponent'>
-                    <EnableSurvey
-                        {...modifiedProps}
-                        id='EnableSurvey'
-                    />
-                </div>
-            </div>
-
-            <div className='horizontal'>
-                <div className='settingLabel'>
-                    {'Send next survey at:'}
-                </div>
-
-                <div className='customSettingComponent'>
-                    <SurveyDateTime
-                        {...modifiedProps}
-                        id='SurveyDateTime'
-                    />
-                </div>
-            </div>
-
-            <div className='horizontal'>
-                <div className='settingLabel'>
-                    {'Survey expiry (days):'}
-                </div>
-                <div className='customSettingComponent'>
-                    <Expiry
-                        {...modifiedProps}
-                        id='SurveyExpiry'
-                    />
-                </div>
-            </div>
-
-            <div className='horizontal'>
-                <div className='settingLabel'>
-                    {'Exclude specific teams:'}
-                </div>
-                <div className='customSettingComponent'>
-                    <TeamFilter
-                        {...modifiedProps}
-                        id='TeamFilter'
-                    />
-                </div>
-            </div>
-
-            <div className='horizontal'>
-                <div className='customSettingComponent'>
-                    <Questions
-                        {...modifiedProps}
-                        id='SurveyQuestions'
-                    />
-                </div>
-            </div>
-
-            <div className='horizontal'>
-                <div className='customSettingComponent'>
-                    <SurveyResults/>
-                </div>
-            </div>
+            {body}
         </div>
     );
 }
