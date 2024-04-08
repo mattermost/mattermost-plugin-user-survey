@@ -66,10 +66,6 @@ function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: Cu
         MultiValueContainer: CustomMultiValueContainer,
     }), []);
 
-    const optionsToConfig = (teams: DropdownOption[]): TeamFilterConfig => ({
-        filteredTeamIDs: teams.map((option) => option.value),
-    });
-
     const saveSettings = useCallback((teams: DropdownOption[]) => {
         setSaveNeeded();
         onChange(id, optionsToConfig(teams));
@@ -96,5 +92,9 @@ function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: Cu
         </div>
     );
 }
+
+const optionsToConfig = (teams: DropdownOption[]): TeamFilterConfig => ({
+    filteredTeamIDs: teams.map((option) => option.value),
+});
 
 export default TeamFilter;

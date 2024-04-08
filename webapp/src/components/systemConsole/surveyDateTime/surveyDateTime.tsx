@@ -12,12 +12,17 @@ import type {DateTimeConfig} from 'types/mattermost-webapp';
 
 import './style.scss';
 
-function SurveyDateTime({id, setSaveNeeded, onChange, config, setInitialSetting}: CustomSettingChildComponentProp) {
-    // Default settings
-    const defaultSurveyTime = '09:00';
-    const defaultSurveyDate = useMemo(() => new Date(), []); // useMemo as new Date() is different in every render cycle
+const DEFAULT_SURVEY_TIME = '09:00';
 
-    const [surveyTime, setSurveyTime] = useState<string>(defaultSurveyTime);
+function SurveyDateTime({id, setSaveNeeded, onChange, config, setInitialSetting}: CustomSettingChildComponentProp) {
+    // This default setting it here instead of outside the component like other defaults
+    // is because we want the default to be the time admin opens the plugin config page.
+    // If this was outside, the value would be when the admin first opened mattermost, which can
+    // create quite a difference. And also because this need memomization as new Date() is a new
+    // useMemo as new Date() is different in every render cycle
+    const defaultSurveyDate = useMemo(() => new Date(), []);
+
+    const [surveyTime, setSurveyTime] = useState<string>(DEFAULT_SURVEY_TIME);
     const [surveyDate, setSurveyDate] = useState<Date>(defaultSurveyDate);
 
     // sets the date picker and time picker to the values saved in config on load
@@ -25,7 +30,7 @@ function SurveyDateTime({id, setSaveNeeded, onChange, config, setInitialSetting}
         const dateTimeConfig = config.PluginSettings?.Plugins?.['com.mattermost.user-survey']?.systemconsolesetting.SurveyDateTime;
 
         const initialConfig: DateTimeConfig = {
-            time: defaultSurveyTime,
+            time: DEFAULT_SURVEY_TIME,
             date: format(defaultSurveyDate, 'dd/MM/yyyy'),
         };
 

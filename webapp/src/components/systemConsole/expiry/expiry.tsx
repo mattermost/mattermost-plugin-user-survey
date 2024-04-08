@@ -10,11 +10,10 @@ import type {ExpiryConfig} from 'types/mattermost-webapp';
 
 import './style.scss';
 
-const Expiry = ({id, setSaveNeeded, onChange, config, setInitialSetting}: CustomSettingChildComponentProp) => {
-    // default values
-    const defaultExpiry = '30';
+const DEFAULT_SURVEY_EXPIRY = '30';
 
-    const [expiryDays, setExpiryDays] = useState<string>(defaultExpiry);
+const Expiry = ({id, setSaveNeeded, onChange, config, setInitialSetting}: CustomSettingChildComponentProp) => {
+    const [expiryDays, setExpiryDays] = useState<string>(DEFAULT_SURVEY_EXPIRY);
     const [error, setError] = useState<string>('');
 
     // Set initial value from saved config
@@ -22,7 +21,7 @@ const Expiry = ({id, setSaveNeeded, onChange, config, setInitialSetting}: Custom
         const expiryConfig = config.PluginSettings?.Plugins?.['com.mattermost.user-survey']?.systemconsolesetting?.SurveyExpiry;
 
         const initialSetting: ExpiryConfig = {
-            days: Number.parseInt(defaultExpiry, 10),
+            days: Number.parseInt(DEFAULT_SURVEY_EXPIRY, 10),
         };
 
         if (expiryConfig?.days) {

@@ -7,18 +7,18 @@ import type {CustomSettingChildComponentProp} from 'components/systemConsole/ind
 
 import './style.scss';
 
-function EnableSurvey({id, setSaveNeeded, onChange, config, setInitialSetting}: CustomSettingChildComponentProp) {
-    const defaultValue = false;
+const DEFAULT_ENABLE_SURVEY = false;
 
-    const [enabled, setEnabled] = useState<boolean>(defaultValue);
+function EnableSurvey({id, setSaveNeeded, onChange, config, setInitialSetting}: CustomSettingChildComponentProp) {
+    const [enabled, setEnabled] = useState<boolean>(DEFAULT_ENABLE_SURVEY);
 
     useEffect(() => {
         const enabledSurveyConfig = config.PluginSettings.Plugins['com.mattermost.user-survey']?.systemconsolesetting.EnableSurvey;
 
-        const initialValue = enabledSurveyConfig || defaultValue;
+        const initialValue = enabledSurveyConfig || DEFAULT_ENABLE_SURVEY;
         setEnabled(initialValue);
         setInitialSetting(id, initialValue);
-    }, [config.PluginSettings.Plugins, defaultValue, id, setInitialSetting]);
+    }, [config.PluginSettings.Plugins, id, setInitialSetting]);
 
     const optionOnChangeHandler = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.name === 'surveyEnabled';
