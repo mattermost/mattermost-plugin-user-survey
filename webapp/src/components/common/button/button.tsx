@@ -12,8 +12,10 @@ export type Props = {
     danger?: boolean;
     iconClass?: string;
     iconPlacement?: 'left' | 'right';
+    disabled?: boolean;
+    onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void
 };
-function Button({text, type = 'tertiary', danger = false, iconClass, iconPlacement = 'left'}: Props) {
+function Button({text, type = 'tertiary', danger = false, iconClass, iconPlacement = 'left', disabled = false, onClick}: Props) {
     const buttonClassName = classNames({
         btn: true,
         iconButton: !text,
@@ -33,7 +35,11 @@ function Button({text, type = 'tertiary', danger = false, iconClass, iconPlaceme
     }, [iconClass]);
 
     return (
-        <button className={buttonClassName}>
+        <button
+            className={buttonClassName}
+            disabled={disabled}
+            onClick={onClick}
+        >
             {iconClass && iconPlacement === 'left' && iconComponent}
 
             {text}

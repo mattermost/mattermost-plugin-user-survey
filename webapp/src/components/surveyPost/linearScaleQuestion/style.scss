@@ -1,4 +1,8 @@
 .LinearScaleQuestion {
+  &.vertical {
+    gap: 8px;
+  }
+
   .questionTitle {
     color: #3D3C40;
     font-size: 14px;
