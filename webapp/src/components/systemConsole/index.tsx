@@ -8,6 +8,7 @@ import EnableSurvey from 'components/systemConsole/enableSurvey';
 import Expiry from 'components/systemConsole/expiry/expiry';
 import Questions from 'components/systemConsole/questions/questions';
 import SurveyDateTime from 'components/systemConsole/surveyDateTime/surveyDateTime';
+import SurveyResults from 'components/systemConsole/surveyResults/surveyResults';
 import TeamFilter from 'components/systemConsole/teamFilter/teamFilter';
 
 import type {CombinedConfig, CustomComponentProps, CustomConfigTypes} from 'types/mattermost-webapp';
@@ -79,6 +80,10 @@ function SystemConsoleSetting(props: CustomComponentProps) {
             {
                 id: 'SurveyQuestions',
                 Component: Questions,
+            },
+            {
+                id: 'SurveyResults',
+                Component: SurveyResults,
             },
         ];
     }, []);

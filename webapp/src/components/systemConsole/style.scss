@@ -1,5 +1,7 @@
 .SystemConsoleSetting {
-    gap: 32px;
+    &.vertical {
+        gap: 32px;
+    }
 
     .settingLabel {
         max-width: 32%;
