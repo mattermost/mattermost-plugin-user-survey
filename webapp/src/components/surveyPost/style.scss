@@ -1,39 +1,44 @@
 .CustomSurveyPost {
-  padding: 10px 0;
+    max-width: 665px;
+    padding: 10px 0;
 
-  .CustomSurveyPost_survey {
-    border: 1px solid rgba(var(--center-channel-color-rgb), 0.12);
-    border-radius: 4px;
-    border-left: 3px solid var(--sidebar-text-active-border, #5D89EA);
-    padding: 16px 19px;
-    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.08);
-    background: var(--center-channel-bg, #FFF);
+    .CustomSurveyPost_survey {
+        padding: 16px 19px;
+        border: 1px solid rgba(var(--center-channel-color-rgb), 0.12);
+        border-radius: 4px;
+        border-left: 3px solid var(--sidebar-text-active-border, #5D89EA);
+        background: var(--center-channel-bg, #FFF);
+        box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.08);
 
-    input::placeholder {
-      color: rgba(63, 67, 80, 0.64);
-      opacity: 1;
-    }
-
-    .questions {
-      .question {
-        padding: 20px 0;
-        border-bottom: 1px solid rgba(var(--center-channel-color-rgb), 0.16);
-
-        &:first-child {
-          padding-top: 0;
+        input::placeholder {
+            color: rgba(63, 67, 80, 0.64);
+            opacity: 1;
         }
 
-        &:last-child {
-          padding-bottom: 0;
-          border-bottom: none;
-        }
-      }
-    }
+        .questions {
+            .question {
+                padding: 20px 0;
+                border-bottom: 1px solid rgba(var(--center-channel-color-rgb), 0.16);
 
-    .surveyMessage {
-      color: var(--center-channel-color-72, rgba(63, 67, 80, 0.72));
-      font-size: 14px;
-      font-weight: 400;
+                &:first-child {
+                    padding-top: 0;
+                }
+
+                &:last-child {
+                    padding-bottom: 0;
+                    border-bottom: none;
+                }
+            }
+        }
+
+        .surveyMessage {
+            color: var(--center-channel-color-72, rgba(63, 67, 80, 0.72));
+            font-size: 14px;
+            font-weight: 400;
+
+            &.danger {
+                color: var(--error-text);
+            }
+        }
     }
-  }
 }

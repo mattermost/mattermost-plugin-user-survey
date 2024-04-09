@@ -1,99 +1,120 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {format} from 'date-fns';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-
-import './style.scss';
-import {types} from 'sass';
 import {useDebouncedCallback} from 'use-debounce';
-import utils from 'utils/utils';
 
 import Button from 'components/common/button/button';
 import LinearScaleQuestion from 'components/surveyPost/linearScaleQuestion/linearScaleQuestion';
 import TextQuestion from 'components/surveyPost/textQuestion/textQuestion';
-import type {Question} from 'components/systemConsole/questions/questions';
 
-import type {CustomPostTypeComponentProps, MattermostWindow, SurveyResponse} from 'types/mattermost-webapp';
+import './style.scss';
 
-import {format, parse} from 'date-fns';
+import type {
+    CustomPostTypeComponentProps,
+    MattermostWindow,
+    SurveyResponse, UserSurvey,
+} from 'types/mattermost-webapp';
 
 function SurveyPost(props: CustomPostTypeComponentProps) {
     const {post, isRHS} = props;
 
-    const surveyID = useRef<string>(post.props.surveyID);
-    const [surveyQuestions, setSurveyQuestions] = useState<Question[]>([]);
-    const [savedSurveyResponse, setSavedSurveyResponse] = useState<SurveyResponse>();
+    const [survey, setSurvey] = useState<UserSurvey>();
+    const [disabled, setDisabled] = useState<boolean>(false);
+    const [expired, setExpired] = useState<boolean>(false);
     const draftResponse = useRef<SurveyResponse>();
     const [errorMessage, setErrorMessage] = useState<string>('');
 
-    useEffect(() => {
-        // setting dummy survey questions
-        setSurveyQuestions([
-            {
-                id: '49fc9a85-b4d8-424e-b13f-40344b168123',
-                mandatory: true,
-                system: true,
-                text: 'How likely are you to recommend Mattermost?',
-                type: 'linear_scale',
-            },
-            {
-                id: 'aa026055-c97c-48d7-a025-c44590078963',
-                mandatory: true,
-                system: true,
-                text: 'How can we make your experience better?',
-                type: 'text',
-            },
-            {
-                id: '0eee4429-5083-41ef-bda7-2ee9c5ece929',
-                mandatory: false,
-                system: false,
-                text: 'option question text',
-                type: 'text',
-            },
-        ]);
+    const fetchUserSurvey = async (surveyID: string) => {
+        // make actual API call to fetch survey here...
+        const survey: UserSurvey = {
+            surveyId: surveyID,
+            startDate: '01/04/2024',
+            endDate: '30/04/2024',
+            questions: [
+                {
+                    id: '49fc9a85-b4d8-424e-b13f-40344b168123',
+                    mandatory: true,
+                    system: true,
+                    text: 'How likely are you to recommend Mattermost?',
+                    type: 'linear_scale',
+                },
+                {
+                    id: 'aa026055-c97c-48d7-a025-c44590078963',
+                    mandatory: true,
+                    system: true,
+                    text: 'How can we make your experience better?',
+                    type: 'text',
+                },
+                {
+                    id: '0eee4429-5083-41ef-bda7-2ee9c5ece929',
+                    mandatory: false,
+                    system: false,
+                    text: 'option question text',
+                    type: 'text',
+                },
+            ],
+            status: 'in_progress',
 
-        // setting dummy saved response
-        setSavedSurveyResponse({
-            SurveyID: utils.uuid(),
-            Responses: {
-                '49fc9a85-b4d8-424e-b13f-40344b168123': '8',
-                'aa026055-c97c-48d7-a025-c44590078963': 'Response 1',
-                // '0eee4429-5083-41ef-bda7-2ee9c5ece929': 'Response 2',
-            },
-            DateCreated: format(new Date(), 'dd/MM/yyyy'),
-        });
+            // response: {
+            //     responses: {
+            //         '49fc9a85-b4d8-424e-b13f-40344b168123': '8',
+            //         'aa026055-c97c-48d7-a025-c44590078963': 'Response 1',
+            //         '0eee4429-5083-41ef-bda7-2ee9c5ece929': 'Response 2',
+            //     },
+            //     dateCreated: format(new Date(), 'dd/MM/yyyy'),
+            // },
+        };
+
+        setSurvey(survey);
+
+        const responsesExist = survey.response !== undefined;
+        const surveyExpired = survey.status === 'ended';
+
+        setDisabled(responsesExist || surveyExpired);
+        setExpired(surveyExpired);
+    };
+
+    // fetch data on initial mount
+    useEffect(() => {
+        fetchUserSurvey(post.props.surveyID);
     }, [post.props]);
 
     const questionResponseChangeHandler = useDebouncedCallback(
         (questionID: string, response: string) => {
             const newDraftResponse: SurveyResponse = draftResponse.current || {
-                SurveyID: surveyID.current,
-                Responses: {},
-                DateCreated: format(new Date(), 'dd/MM/yyyy'),
+                responses: {},
+                dateCreated: format(new Date(), 'dd/MM/yyyy'),
             };
-            newDraftResponse.Responses[questionID] = response;
+            newDraftResponse.responses[questionID] = response;
             draftResponse.current = newDraftResponse;
         },
         500,
     );
 
     const submitSurveyHandler = useCallback(async () => {
-        if (!draftResponse.current || Object.keys(draftResponse.current?.Responses).length === 0) {
+        if (!draftResponse.current ||
+            Object.keys(draftResponse.current?.responses).length === 0
+        ) {
             return;
         }
 
         const response = await submitSurveyResponse();
-        if (response.success) {
-            setSavedSurveyResponse(draftResponse.current);
+        if (response.success && survey !== undefined) {
+            const newSurvey: UserSurvey = {
+                ...survey,
+                response: draftResponse.current,
+            };
+            setSurvey(newSurvey);
             setErrorMessage('');
         } else if (response.error) {
             setErrorMessage('Failed to submit survey response. Please try again.');
         }
-    }, []);
+    }, [survey]);
 
     const submitSurveyResponse = async () => {
         // make API call here. Send draftResponse.current as payload...
-        console.log(draftResponse.current);
         return {success: true, error: false};
     };
 
@@ -105,7 +126,11 @@ function SurveyPost(props: CustomPostTypeComponentProps) {
     }, [post.message, isRHS]);
 
     const renderQuestions = useMemo(() => {
-        return surveyQuestions.map((question) => {
+        if (!survey) {
+            return null;
+        }
+
+        return survey.questions.map((question) => {
             let questionComponent: React.ReactNode;
 
             switch (question.type) {
@@ -114,8 +139,8 @@ function SurveyPost(props: CustomPostTypeComponentProps) {
                     <LinearScaleQuestion
                         question={question}
                         responseChangeHandler={questionResponseChangeHandler}
-                        disabled={savedSurveyResponse !== undefined}
-                        value={savedSurveyResponse?.Responses[question.id]}
+                        disabled={disabled}
+                        value={survey.response?.responses[question.id]}
                     />
                 );
                 break;
@@ -124,8 +149,8 @@ function SurveyPost(props: CustomPostTypeComponentProps) {
                     <TextQuestion
                         question={question}
                         responseChangeHandler={questionResponseChangeHandler}
-                        disabled={savedSurveyResponse !== undefined}
-                        value={savedSurveyResponse?.Responses[question.id]}
+                        disabled={disabled}
+                        value={survey.response?.responses[question.id]}
                     />);
                 break;
             }
@@ -139,7 +164,7 @@ function SurveyPost(props: CustomPostTypeComponentProps) {
                 </div>
             );
         });
-    }, [questionResponseChangeHandler, savedSurveyResponse, surveyQuestions]);
+    }, [disabled, questionResponseChangeHandler, survey]);
 
     return (
         <div className='CustomSurveyPost vertical'>
@@ -151,7 +176,14 @@ function SurveyPost(props: CustomPostTypeComponentProps) {
                 </div>
 
                 {
-                    !savedSurveyResponse &&
+                    errorMessage &&
+                    <div className='surveyMessage error'>
+                        {errorMessage}
+                    </div>
+                }
+
+                {
+                    !disabled &&
                     <div>
                         <Button
                             text='Submit'
@@ -162,9 +194,16 @@ function SurveyPost(props: CustomPostTypeComponentProps) {
                 }
 
                 {
-                    savedSurveyResponse &&
+                    disabled && !expired &&
                     <div className='surveyMessage submitted'>
-                        {`Response submitted on ${savedSurveyResponse.DateCreated}.`}
+                        {`Response submitted on ${survey?.response?.dateCreated}.`}
+                    </div>
+                }
+
+                {
+                    disabled && expired &&
+                    <div className='surveyMessage submitted'>
+                        {`Survey expired on ${survey?.endDate}.`}
                     </div>
                 }
             </div>

@@ -1,12 +1,12 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import classNames from 'classnames';
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
-import type {Question} from 'components/systemConsole/questions/questions';
+import type {Question} from 'types/mattermost-webapp';
 
 import './style.scss';
-import classNames from 'classnames';
 
 export type Props = {
     question: Question;

@@ -8,7 +8,7 @@ import utils from 'utils/utils';
 
 import type {CustomSettingChildComponentProp} from 'components/systemConsole/index';
 
-import type {SurveyQuestionsConfig} from 'types/mattermost-webapp';
+import type {Question, SurveyQuestionsConfig} from 'types/mattermost-webapp';
 
 export type QuestionType = 'linear_scale' | 'text';
 
@@ -18,14 +18,6 @@ const questionTypeDisplayName = new Map<QuestionType, string>([
 ]);
 
 const DEFAULT_SURVEY_MESSAGE_TEXT = 'Please take a few moments to help us improve your experience with Mattermost.';
-
-export type Question = {
-    id: string;
-    text?: string;
-    type: QuestionType;
-    system: boolean;
-    mandatory: boolean;
-};
 
 function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting}: CustomSettingChildComponentProp) {
     const [questions, setQuestions] = useState<Question[]>([]);

@@ -7,7 +7,7 @@ import type {Post} from '@mattermost/types/posts';
 
 import type {AdminConfig} from 'mattermost-redux/src/types/config';
 
-import type {Question} from 'components/systemConsole/questions/questions';
+import type {Question, QuestionType} from 'components/systemConsole/questions/questions';
 
 export type DateTimeConfig = {
     date: string;
@@ -98,7 +98,26 @@ export type CustomPostTypeComponentProps = {
 }
 
 export type SurveyResponse = {
-    SurveyID: string;
-    Responses: {[key: string]: string};
-    DateCreated: string;
+    responses: {[key: string]: string};
+    dateCreated: string;
+}
+
+export type Survey = {
+    surveyId: string;
+    startDate: string;
+    endDate: string;
+    questions: Question[];
+    status: SurveyStatus;
+}
+
+export type Question = {
+    id: string;
+    text?: string;
+    type: QuestionType;
+    system: boolean;
+    mandatory: boolean;
+};
+
+export type UserSurvey = Survey & {
+    response?: SurveyResponse;
 }

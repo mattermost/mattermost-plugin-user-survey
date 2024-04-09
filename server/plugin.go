@@ -3,10 +3,11 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/pkg/errors"
 	"net/http"
 	"sync"
+
+	"github.com/mattermost/mattermost/server/public/model"
+	"github.com/pkg/errors"
 
 	"github.com/mattermost/mattermost/server/public/pluginapi"
 

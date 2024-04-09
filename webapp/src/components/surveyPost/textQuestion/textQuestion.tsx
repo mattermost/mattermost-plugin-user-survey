@@ -3,7 +3,7 @@
 
 import React, {useCallback} from 'react';
 
-import type {Question} from 'components/systemConsole/questions/questions';
+import type {Question} from 'types/mattermost-webapp';
 
 import './style.scss';
 
