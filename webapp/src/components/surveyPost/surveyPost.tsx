@@ -17,8 +17,6 @@ import type {CustomPostTypeComponentProps, MattermostWindow, SurveyResponse} fro
 
 import {format, parse} from 'date-fns';
 
-import Boolean = types.Boolean;
-
 function SurveyPost(props: CustomPostTypeComponentProps) {
     const {post, isRHS} = props;
 
@@ -55,15 +53,15 @@ function SurveyPost(props: CustomPostTypeComponentProps) {
         ]);
 
         // setting dummy saved response
-        // setSavedSurveyResponse({
-        //     SurveyID: utils.uuid(),
-        //     Responses: {
-        //         '49fc9a85-b4d8-424e-b13f-40344b168123': '10',
-        //         'aa026055-c97c-48d7-a025-c44590078963': 'Response 1',
-        //         '0eee4429-5083-41ef-bda7-2ee9c5ece929': 'Response 2',
-        //     },
-        //     DateCreated: format(new Date(), 'dd/MM/yyyy'),
-        // });
+        setSavedSurveyResponse({
+            SurveyID: utils.uuid(),
+            Responses: {
+                '49fc9a85-b4d8-424e-b13f-40344b168123': '8',
+                'aa026055-c97c-48d7-a025-c44590078963': 'Response 1',
+                '0eee4429-5083-41ef-bda7-2ee9c5ece929': 'Response 2',
+            },
+            DateCreated: format(new Date(), 'dd/MM/yyyy'),
+        });
     }, [post.props]);
 
     const questionResponseChangeHandler = useDebouncedCallback(
@@ -117,6 +115,7 @@ function SurveyPost(props: CustomPostTypeComponentProps) {
                         question={question}
                         responseChangeHandler={questionResponseChangeHandler}
                         disabled={savedSurveyResponse !== undefined}
+                        value={savedSurveyResponse?.Responses[question.id]}
                     />
                 );
                 break;

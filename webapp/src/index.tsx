@@ -5,12 +5,12 @@ import type {Store, Action} from 'redux';
 
 import type {GlobalState} from 'mattermost-redux/types/store';
 
+import SurveyPost from 'components/surveyPost/surveyPost';
 import SystemConsoleSetting from 'components/systemConsole';
 
 import type {PluginRegistry} from 'types/mattermost-webapp';
 
 import manifest from './manifest';
-import SurveyPost from 'components/surveyPost/surveyPost';
 
 export default class Plugin {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function

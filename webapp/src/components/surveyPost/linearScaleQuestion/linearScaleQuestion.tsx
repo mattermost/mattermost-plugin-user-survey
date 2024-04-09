@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
 import type {Question} from 'components/systemConsole/questions/questions';
 
@@ -12,13 +12,23 @@ export type Props = {
     question: Question;
     responseChangeHandler: (questionID: string, response: string) => void;
     disabled?: boolean;
+    value?: string;
 }
 
 const scaleStart = 1;
 const scaleEnd = 10;
 
-function LinearScaleQuestion({question, responseChangeHandler, disabled}: Props) {
+function LinearScaleQuestion({question, responseChangeHandler, disabled, value}: Props) {
     const [selectedValue, setSelectedValue] = useState<number>();
+
+    useEffect(() => {
+        if (value) {
+            const numberValue = Number.parseInt(value, 10);
+            if (!isNaN(numberValue)) {
+                setSelectedValue(numberValue);
+            }
+        }
+    }, [value]);
 
     const indentClickHandler = useCallback((value: number) => {
         setSelectedValue(value);
