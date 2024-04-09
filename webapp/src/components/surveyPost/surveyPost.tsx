@@ -17,17 +17,18 @@ import type {
     SurveyResponse, UserSurvey,
 } from 'types/mattermost-webapp';
 
-function SurveyPost(props: CustomPostTypeComponentProps) {
-    const {post, isRHS} = props;
-
+function SurveyPost({post, isRHS}: CustomPostTypeComponentProps) {
     const [survey, setSurvey] = useState<UserSurvey>();
     const [disabled, setDisabled] = useState<boolean>(false);
     const [expired, setExpired] = useState<boolean>(false);
     const draftResponse = useRef<SurveyResponse>();
-    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [errorMessage, setErrorMessage] = useState<string>();
+
+    const linearScaleQuestionID = useRef<string>();
 
     const fetchUserSurvey = async (surveyID: string) => {
         // make actual API call to fetch survey here...
+        // Replace dummy data with data fetched from API call.
         const survey: UserSurvey = {
             surveyId: surveyID,
             startDate: '01/04/2024',
@@ -69,6 +70,10 @@ function SurveyPost(props: CustomPostTypeComponentProps) {
 
         setSurvey(survey);
 
+        // the first linear scale question is the system default rating question
+        const linearScaleQuestion = survey.questions.find((question) => question.type === 'linear_scale');
+        linearScaleQuestionID.current = linearScaleQuestion?.id;
+
         const responsesExist = survey.response !== undefined;
         const surveyExpired = survey.status === 'ended';
 
@@ -82,13 +87,18 @@ function SurveyPost(props: CustomPostTypeComponentProps) {
     }, [post.props]);
 
     const questionResponseChangeHandler = useDebouncedCallback(
-        (questionID: string, response: string) => {
+        (questionID: string, response: unknown) => {
             const newDraftResponse: SurveyResponse = draftResponse.current || {
                 responses: {},
                 dateCreated: format(new Date(), 'dd/MM/yyyy'),
             };
             newDraftResponse.responses[questionID] = response;
             draftResponse.current = newDraftResponse;
+
+            // if this is the system rating question, submit response ASAP
+            if (questionID === linearScaleQuestionID.current) {
+                submitRating();
+            }
         },
         500,
     );
@@ -118,6 +128,25 @@ function SurveyPost(props: CustomPostTypeComponentProps) {
         return {success: true, error: false};
     };
 
+    // this function is to submit the linear scale rating as soon as a user selects it,
+    // even without pressing the submit button.
+    const submitRating = async () => {
+        if (!linearScaleQuestionID.current || !draftResponse.current) {
+            return;
+        }
+
+        const ratingQuestionResponse = draftResponse.current?.responses[linearScaleQuestionID.current];
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const payload: SurveyResponse = {
+            responses: {
+                [linearScaleQuestionID.current]: ratingQuestionResponse,
+            },
+            dateCreated: draftResponse.current?.dateCreated,
+        };
+
+        // send payload to submit survey response API here...
+    };
+
     const renderedMessage = useMemo(() => {
         // @ts-expect-error window is definitely MattermostWindow in plugins
         const mmWindow = window as MattermostWindow;
@@ -140,7 +169,7 @@ function SurveyPost(props: CustomPostTypeComponentProps) {
                         question={question}
                         responseChangeHandler={questionResponseChangeHandler}
                         disabled={disabled}
-                        value={survey.response?.responses[question.id]}
+                        value={survey.response?.responses[question.id] as number}
                     />
                 );
                 break;
@@ -150,7 +179,7 @@ function SurveyPost(props: CustomPostTypeComponentProps) {
                         question={question}
                         responseChangeHandler={questionResponseChangeHandler}
                         disabled={disabled}
-                        value={survey.response?.responses[question.id]}
+                        value={survey.response?.responses[question.id] as string}
                     />);
                 break;
             }

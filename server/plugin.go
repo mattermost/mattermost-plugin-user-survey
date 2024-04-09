@@ -6,9 +6,6 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/pkg/errors"
-
 	"github.com/mattermost/mattermost/server/public/pluginapi"
 
 	"github.com/mattermost/mattermost-plugin-user-survey/server/app"
@@ -50,40 +47,6 @@ func (p *Plugin) OnActivate() error {
 
 	p.store = sqlStore
 	p.app = app
-
-	botID, err := p.API.EnsureBotUser(&model.Bot{
-		Username:    "dwight.schrute",
-		DisplayName: "Dwight Schrute",
-		Description: "Bears, beets, battlestar galactica",
-	})
-
-	if err != nil {
-		p.API.LogError(err.Error())
-		return err
-	}
-
-	dm, appErr := p.API.GetDirectChannel(botID, "npeb4h6nejgitesg3ah931ubry")
-	if appErr != nil {
-		p.API.LogError(appErr.Error())
-		return errors.New(appErr.Error())
-	}
-
-	props := make(model.StringInterface)
-	props["surveyID"] = "survey_id_1"
-
-	post := &model.Post{
-		UserId:    botID,
-		Type:      "custom_user_survey",
-		Message:   ":wave: Hey @sysadmin! Please take a few moments to help us improve your experience with Mattermost.",
-		ChannelId: dm.Id,
-	}
-	post.SetProps(props)
-
-	_, appErr = p.API.CreatePost(post)
-	if appErr != nil {
-		p.API.LogError(appErr.Error())
-		return errors.New(appErr.Error())
-	}
 
 	return nil
 }
