@@ -21,18 +21,8 @@
     "settings_schema": {
         "settings": [
             {
-                "key": "SurveyDateTime",
-                "display_name": "Send next survey at:",
-                "type": "custom"
-            },
-            {
-                "key": "SurveyExpiry",
-                "display_name": "Survey expiry (days):",
-                "type": "custom"
-            },
-            {
-                "key": "TeamFilter",
-                "display_name": "Exclude specific teams:",
+                "key": "SystemConsoleSetting",
+                "display_name": "Configure User Survey:",
                 "type": "custom"
             }
         ]

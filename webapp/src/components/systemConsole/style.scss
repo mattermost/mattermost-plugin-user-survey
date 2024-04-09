@@ -1,0 +1,15 @@
+.SystemConsoleSetting {
+    gap: 32px;
+
+    .settingLabel {
+        max-width: 32%;
+        flex: 4;
+        padding-right: 0;
+        font-weight: 600;
+        text-align: left;
+    }
+
+    .customSettingComponent {
+        flex: 8;
+    }
+}
