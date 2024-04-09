@@ -31,6 +31,15 @@
       background: rgba(var(--button-bg-rgb), 0.08);
       border-radius: 16px;
 
+      &.disabled {
+        background: var(--center-channel-color-8, rgba(63, 67, 80, 0.08));
+        pointer-events: none;
+
+        .indent.selected {
+          background: var(--center-channel-color-72, rgba(63, 67, 80, 0.72));
+        }
+      }
+
       .indent {
         width: 32px;
         height: 32px;
@@ -38,6 +47,16 @@
         padding-top: 3px;
         text-align: center;
         cursor: pointer;
+        border-radius: 50%;
+
+        &.selected {
+          background: var(--button-bg, #1C58D9);
+          color: var(--center-channel-bg, #FFF);
+
+          &:hover {
+            background: var(--button-bg, #1C58D9);
+          }
+        }
 
         &:hover {
           background: rgba(var(--button-bg-rgb), 0.4);

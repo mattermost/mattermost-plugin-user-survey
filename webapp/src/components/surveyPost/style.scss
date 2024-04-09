@@ -27,5 +27,11 @@
         }
       }
     }
+
+    .surveyMessage {
+      color: var(--center-channel-color-72, rgba(63, 67, 80, 0.72));
+      font-size: 14px;
+      font-weight: 400;
+    }
   }
 }

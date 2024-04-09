@@ -13,7 +13,7 @@ export type Props = {
     iconClass?: string;
     iconPlacement?: 'left' | 'right';
     disabled?: boolean;
-    onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void
+    onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 };
 function Button({text, type = 'tertiary', danger = false, iconClass, iconPlacement = 'left', disabled = false, onClick}: Props) {
     const buttonClassName = classNames({

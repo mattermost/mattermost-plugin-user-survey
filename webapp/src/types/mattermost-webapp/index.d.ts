@@ -96,3 +96,9 @@ export type CustomPostTypeComponentProps = {
     post: Post;
     isRHS: boolean;
 }
+
+export type SurveyResponse = {
+    SurveyID: string;
+    Responses: {[key: string]: string};
+    DateCreated: string;
+}
