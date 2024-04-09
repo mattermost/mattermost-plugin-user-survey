@@ -11,9 +11,10 @@ export type Props = {
     question: Question;
     responseChangeHandler: (questionID: string, response: string) => void;
     disabled?: boolean;
+    value?: string;
 }
 
-function TextQuestion({question, responseChangeHandler, disabled}: Props) {
+function TextQuestion({question, responseChangeHandler, disabled, value}: Props) {
     const changeHandler = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         responseChangeHandler(question.id, e.target.value);
     }, [question.id, responseChangeHandler]);
@@ -25,9 +26,10 @@ function TextQuestion({question, responseChangeHandler, disabled}: Props) {
                 <input
                     maxLength={5000}
                     className='form-control questionInput'
-                    placeholder={`Add your answer here${question.mandatory ? '' : ' (Optional'}`}
+                    placeholder={disabled ? '' : `Add your answer here${question.mandatory ? '' : ' (Optional)'}`}
                     onChange={changeHandler}
                     disabled={disabled}
+                    value={value}
                 />
             </div>
         </div>
