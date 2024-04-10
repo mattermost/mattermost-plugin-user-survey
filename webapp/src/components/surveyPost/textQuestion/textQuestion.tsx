@@ -1,9 +1,10 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback} from 'react';
+import React from 'react';
+import {useDebouncedCallback} from 'use-debounce';
 
-import type {Question} from 'types/mattermost-webapp';
+import type {Question} from 'types/plugin';
 
 import './style.scss';
 
@@ -15,9 +16,9 @@ export type Props = {
 }
 
 function TextQuestion({question, responseChangeHandler, disabled, value}: Props) {
-    const changeHandler = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const changeHandler = useDebouncedCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         responseChangeHandler(question.id, e.target.value);
-    }, [question.id, responseChangeHandler]);
+    }, 200);
 
     return (
         <div className='TextQuestion vertical'>

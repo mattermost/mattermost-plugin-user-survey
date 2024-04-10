@@ -3,41 +3,18 @@
 
 import type React from 'react';
 
-import type {Post} from '@mattermost/types/posts';
-
 import type {AdminConfig} from 'mattermost-redux/src/types/config';
 
-import type {Question, QuestionType} from 'components/systemConsole/questions/questions';
+import type {CombinedConfig, CustomConfigTypes, FormatTextOptions} from 'types/plugin';
 
-export type DateTimeConfig = {
-    date: string;
-    time: string;
+export type PostUtils = {
+    formatText: (text: string, option: Partial<FormatTextOptions>) => string;
+    messageHtmlToComponent: (html: string, isRHS: boolean) => React.ReactNode;
 }
 
-export type ExpiryConfig = {
-    days: number;
+export type MattermostWindow = {
+    PostUtils: PostUtils;
 }
-
-export type TeamFilterConfig = {
-    filteredTeamIDs: string[];
-}
-
-export type SurveyQuestionsConfig = {
-    surveyMessageText: string;
-    questions: Question[];
-};
-
-export type SurveyEnabledConfig = boolean;
-
-export type CombinedConfig = {
-    SurveyDateTime: DateTimeConfig;
-    SurveyExpiry: ExpiryConfig;
-    TeamFilter: TeamFilterConfig;
-    SurveyQuestions: SurveyQuestionsConfig;
-    EnableSurvey: SurveyEnabledConfig;
-};
-
-export type CustomConfigTypes = DateTimeConfig | ExpiryConfig | TeamFilterConfig | SurveyQuestionsConfig | SurveyEnabledConfig | CombinedConfig;
 
 export type Config = AdminConfig & {
     PluginSettings?: {
@@ -67,57 +44,3 @@ export interface PluginRegistry {
     // Add more if needed from https://developers.mattermost.com/extend/plugins/webapp/reference
 }
 
-export type SurveyStatus = 'in_progress' | 'ended';
-
-export type SurveyResult = {
-    surveyId: string;
-    startDate: string;
-    endDate: string;
-    npsScore: number;
-    receiptsCount: number;
-    responseCount: number;
-    status: SurveyStatus;
-}
-
-export type FormatTextOptions = {
-    markdown?: boolean;
-}
-
-export type PostUtils = {
-    formatText: (text: string, option: Partial<FormatTextOptions>) => string;
-    messageHtmlToComponent: (html: string, isRHS: boolean) => React.ReactNode;
-}
-
-export type MattermostWindow = {
-    PostUtils: PostUtils;
-}
-
-export type CustomPostTypeComponentProps = {
-    post: Post;
-    isRHS: boolean;
-}
-
-export type SurveyResponse = {
-    responses: {[key: string]: unknown};
-    dateCreated: string;
-}
-
-export type Survey = {
-    surveyId: string;
-    startDate: string;
-    endDate: string;
-    questions: Question[];
-    status: SurveyStatus;
-}
-
-export type Question = {
-    id: string;
-    text?: string;
-    type: QuestionType;
-    system: boolean;
-    mandatory: boolean;
-};
-
-export type UserSurvey = Survey & {
-    response?: SurveyResponse;
-}

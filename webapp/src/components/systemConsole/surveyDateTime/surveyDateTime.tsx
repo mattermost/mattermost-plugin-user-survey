@@ -8,7 +8,7 @@ import SurveyDateSelector from 'components/surveyDateSelector/surveyDateSelector
 import SurveyTimeSelector from 'components/surveyTimeSelector/surveyTimeSelector';
 import type {CustomSettingChildComponentProp} from 'components/systemConsole/index';
 
-import type {DateTimeConfig} from 'types/mattermost-webapp';
+import type {DateTimeConfig} from 'types/plugin';
 
 import './style.scss';
 

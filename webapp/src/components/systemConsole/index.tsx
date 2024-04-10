@@ -3,7 +3,6 @@
 
 import React, {useCallback, useMemo, useState} from 'react';
 
-import './style.scss';
 import EnableSurvey from 'components/systemConsole/enableSurvey';
 import Expiry from 'components/systemConsole/expiry/expiry';
 import Questions from 'components/systemConsole/questions/questions';
@@ -11,7 +10,10 @@ import SurveyDateTime from 'components/systemConsole/surveyDateTime/surveyDateTi
 import SurveyResults from 'components/systemConsole/surveyResults/surveyResults';
 import TeamFilter from 'components/systemConsole/teamFilter/teamFilter';
 
-import type {CombinedConfig, CustomComponentProps, CustomConfigTypes} from 'types/mattermost-webapp';
+import type {CustomComponentProps} from 'types/mattermost-webapp';
+import type {CombinedConfig, CustomConfigTypes} from 'types/plugin';
+
+import './style.scss';
 
 export type CustomSettingChildComponentProp = CustomComponentProps & {
     setInitialSetting: (settingId: string, settings: CustomConfigTypes) => void;

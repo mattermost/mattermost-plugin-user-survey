@@ -2,13 +2,14 @@
 // See LICENSE.txt for license information.
 
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import './style.scss';
 import {useDebouncedCallback} from 'use-debounce';
 import utils from 'utils/utils';
 
 import type {CustomSettingChildComponentProp} from 'components/systemConsole/index';
 
-import type {Question, SurveyQuestionsConfig} from 'types/mattermost-webapp';
+import type {Question, SurveyQuestionsConfig} from 'types/plugin';
+
+import './style.scss';
 
 export type QuestionType = 'linear_scale' | 'text';
 
@@ -83,7 +84,7 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting
                 surveyMessageText,
             });
         },
-        500,
+        200,
     );
 
     const surveyMessageTextChangeHandler = useDebouncedCallback(
@@ -94,6 +95,7 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting
                 surveyMessageText: e.target.value,
             });
         },
+        200,
     );
 
     const renderedQuestions = useMemo(() => {

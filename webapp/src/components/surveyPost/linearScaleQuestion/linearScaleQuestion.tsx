@@ -2,9 +2,10 @@
 // See LICENSE.txt for license information.
 
 import classNames from 'classnames';
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useMemo, useState} from 'react';
+import {useDebouncedCallback} from 'use-debounce';
 
-import type {Question} from 'types/mattermost-webapp';
+import type {Question} from 'types/plugin';
 
 import './style.scss';
 
@@ -17,13 +18,20 @@ export type Props = {
     scaleEnd?: number;
 }
 
-function LinearScaleQuestion({question, responseChangeHandler, disabled, value, scaleStart = 1, scaleEnd = 10}: Props) {
+function LinearScaleQuestion({
+    question,
+    responseChangeHandler,
+    disabled,
+    value,
+    scaleStart = 1,
+    scaleEnd = 10,
+}: Props) {
     const [selectedValue, setSelectedValue] = useState<number | undefined>(value);
 
-    const indentClickHandler = useCallback((value: number) => {
+    const indentClickHandler = useDebouncedCallback((value: number) => {
         setSelectedValue(value);
         responseChangeHandler(question.id, value);
-    }, [question.id, responseChangeHandler]);
+    }, 200);
 
     const indents = useMemo(() => {
         const indentElements = [];

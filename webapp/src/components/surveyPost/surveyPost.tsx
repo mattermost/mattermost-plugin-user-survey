@@ -3,7 +3,6 @@
 
 import {format} from 'date-fns';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {useDebouncedCallback} from 'use-debounce';
 
 import Button from 'components/common/button/button';
 import LinearScaleQuestion from 'components/surveyPost/linearScaleQuestion/linearScaleQuestion';
@@ -12,19 +11,25 @@ import TextQuestion from 'components/surveyPost/textQuestion/textQuestion';
 import './style.scss';
 
 import type {
-    CustomPostTypeComponentProps,
     MattermostWindow,
-    SurveyResponse, UserSurvey,
 } from 'types/mattermost-webapp';
+import type {CustomPostTypeComponentProps, SurveyResponse, UserSurvey} from 'types/plugin';
 
 function SurveyPost({post, isRHS}: CustomPostTypeComponentProps) {
     const [survey, setSurvey] = useState<UserSurvey>();
-    const [disabled, setDisabled] = useState<boolean>(false);
-    const [expired, setExpired] = useState<boolean>(false);
-    const draftResponse = useRef<SurveyResponse>();
     const [errorMessage, setErrorMessage] = useState<string>();
 
+    const draftResponse = useRef<SurveyResponse>({
+        responses: {},
+        dateCreated: format(new Date(), 'dd/MM/yyyy'),
+    });
     const linearScaleQuestionID = useRef<string>();
+
+    const responsesExist = survey?.response !== undefined;
+    const surveyExpired = survey?.status === 'ended';
+
+    const disabled = responsesExist || surveyExpired;
+    const expired = surveyExpired;
 
     const fetchUserSurvey = async (surveyID: string) => {
         // make actual API call to fetch survey here...
@@ -73,12 +78,6 @@ function SurveyPost({post, isRHS}: CustomPostTypeComponentProps) {
         // the first linear scale question is the system default rating question
         const linearScaleQuestion = survey.questions.find((question) => question.type === 'linear_scale');
         linearScaleQuestionID.current = linearScaleQuestion?.id;
-
-        const responsesExist = survey.response !== undefined;
-        const surveyExpired = survey.status === 'ended';
-
-        setDisabled(responsesExist || surveyExpired);
-        setExpired(surveyExpired);
     };
 
     // fetch data on initial mount
@@ -86,21 +85,18 @@ function SurveyPost({post, isRHS}: CustomPostTypeComponentProps) {
         fetchUserSurvey(post.props.surveyID);
     }, [post.props]);
 
-    const questionResponseChangeHandler = useDebouncedCallback(
+    const questionResponseChangeHandler = useCallback(
         (questionID: string, response: unknown) => {
-            const newDraftResponse: SurveyResponse = draftResponse.current || {
-                responses: {},
-                dateCreated: format(new Date(), 'dd/MM/yyyy'),
-            };
-            newDraftResponse.responses[questionID] = response;
-            draftResponse.current = newDraftResponse;
+            if (draftResponse.current) {
+                draftResponse.current.responses[questionID] = response;
+            }
 
             // if this is the system rating question, submit response ASAP
             if (questionID === linearScaleQuestionID.current) {
                 submitRating();
             }
         },
-        500,
+        [],
     );
 
     const submitSurveyHandler = useCallback(async () => {
@@ -118,7 +114,6 @@ function SurveyPost({post, isRHS}: CustomPostTypeComponentProps) {
             };
             setSurvey(newSurvey);
             setErrorMessage('');
-            setDisabled(true);
         } else if (response.error) {
             setErrorMessage('Failed to submit survey response. Please try again.');
         }
@@ -217,7 +212,7 @@ function SurveyPost({post, isRHS}: CustomPostTypeComponentProps) {
                     <div>
                         <Button
                             text='Submit'
-                            type='primary'
+                            buttonType='primary'
                             onClick={submitSurveyHandler}
                         />
                     </div>

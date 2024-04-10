@@ -6,7 +6,7 @@ import React, {useCallback, useEffect, useState} from 'react';
 
 import type {CustomSettingChildComponentProp} from 'components/systemConsole/index';
 
-import type {ExpiryConfig} from 'types/mattermost-webapp';
+import type {ExpiryConfig} from 'types/plugin';
 
 import './style.scss';
 
