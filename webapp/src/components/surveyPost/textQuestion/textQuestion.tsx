@@ -29,7 +29,7 @@ function TextQuestion({question, responseChangeHandler, disabled, value}: Props)
                     placeholder={disabled ? '' : `Add your answer here${question.mandatory ? '' : ' (Optional)'}`}
                     onChange={changeHandler}
                     disabled={disabled}
-                    value={value}
+                    defaultValue={value}
                 />
             </div>
         </div>

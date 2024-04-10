@@ -118,6 +118,7 @@ function SurveyPost({post, isRHS}: CustomPostTypeComponentProps) {
             };
             setSurvey(newSurvey);
             setErrorMessage('');
+            setDisabled(true);
         } else if (response.error) {
             setErrorMessage('Failed to submit survey response. Please try again.');
         }
