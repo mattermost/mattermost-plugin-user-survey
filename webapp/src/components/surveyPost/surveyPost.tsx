@@ -2,102 +2,39 @@
 // See LICENSE.txt for license information.
 
 import {format} from 'date-fns';
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useMemo, useRef, useState} from 'react';
 
 import Button from 'components/common/button/button';
+import {useUserSurvey} from 'components/hooks/survey';
 import LinearScaleQuestion from 'components/surveyPost/linearScaleQuestion/linearScaleQuestion';
 import TextQuestion from 'components/surveyPost/textQuestion/textQuestion';
 
+import type {MattermostWindow} from 'types/mattermost-webapp';
+import type {CustomPostTypeComponentProps, SurveyResponse} from 'types/plugin';
+
 import './style.scss';
 
-import type {
-    MattermostWindow,
-} from 'types/mattermost-webapp';
-import type {CustomPostTypeComponentProps, SurveyResponse, UserSurvey} from 'types/plugin';
+const QUESTION_COMPONENTS = {
+    linear_scale: LinearScaleQuestion,
+    text: TextQuestion,
+};
 
-function SurveyPost({post, isRHS}: CustomPostTypeComponentProps) {
-    const [survey, setSurvey] = useState<UserSurvey>();
+function SurveyPost({post}: CustomPostTypeComponentProps) {
     const [errorMessage, setErrorMessage] = useState<string>();
-
     const draftResponse = useRef<SurveyResponse>({
         responses: {},
         dateCreated: format(new Date(), 'dd/MM/yyyy'),
     });
-    const linearScaleQuestionID = useRef<string>();
 
-    const responsesExist = survey?.response !== undefined;
-    const surveyExpired = survey?.status === 'ended';
+    const {
+        survey,
+        linearScaleQuestionID,
+        surveyExpired,
+        responsesExist,
+        setResponses,
+    } = useUserSurvey(post.props.surveyID);
 
     const disabled = responsesExist || surveyExpired;
-    const expired = surveyExpired;
-
-    const fetchUserSurvey = async (surveyID: string) => {
-        // make actual API call to fetch survey here...
-        // Replace dummy data with data fetched from API call.
-        const survey: UserSurvey = {
-            surveyId: surveyID,
-            startDate: '01/04/2024',
-            endDate: '30/04/2024',
-            questions: [
-                {
-                    id: '49fc9a85-b4d8-424e-b13f-40344b168123',
-                    mandatory: true,
-                    system: true,
-                    text: 'How likely are you to recommend Mattermost?',
-                    type: 'linear_scale',
-                },
-                {
-                    id: 'aa026055-c97c-48d7-a025-c44590078963',
-                    mandatory: true,
-                    system: true,
-                    text: 'How can we make your experience better?',
-                    type: 'text',
-                },
-                {
-                    id: '0eee4429-5083-41ef-bda7-2ee9c5ece929',
-                    mandatory: false,
-                    system: false,
-                    text: 'option question text',
-                    type: 'text',
-                },
-            ],
-            status: 'in_progress',
-
-            // response: {
-            //     responses: {
-            //         '49fc9a85-b4d8-424e-b13f-40344b168123': '8',
-            //         'aa026055-c97c-48d7-a025-c44590078963': 'Response 1',
-            //         '0eee4429-5083-41ef-bda7-2ee9c5ece929': 'Response 2',
-            //     },
-            //     dateCreated: format(new Date(), 'dd/MM/yyyy'),
-            // },
-        };
-
-        setSurvey(survey);
-
-        // the first linear scale question is the system default rating question
-        const linearScaleQuestion = survey.questions.find((question) => question.type === 'linear_scale');
-        linearScaleQuestionID.current = linearScaleQuestion?.id;
-    };
-
-    // fetch data on initial mount
-    useEffect(() => {
-        fetchUserSurvey(post.props.surveyID);
-    }, [post.props]);
-
-    const questionResponseChangeHandler = useCallback(
-        (questionID: string, response: unknown) => {
-            if (draftResponse.current) {
-                draftResponse.current.responses[questionID] = response;
-            }
-
-            // if this is the system rating question, submit response ASAP
-            if (questionID === linearScaleQuestionID.current) {
-                submitRating();
-            }
-        },
-        [],
-    );
 
     const submitSurveyHandler = useCallback(async () => {
         if (!draftResponse.current ||
@@ -107,17 +44,13 @@ function SurveyPost({post, isRHS}: CustomPostTypeComponentProps) {
         }
 
         const response = await submitSurveyResponse();
-        if (response.success && survey !== undefined) {
-            const newSurvey: UserSurvey = {
-                ...survey,
-                response: draftResponse.current,
-            };
-            setSurvey(newSurvey);
+        if (response.success) {
+            setResponses(draftResponse.current);
             setErrorMessage('');
         } else if (response.error) {
             setErrorMessage('Failed to submit survey response. Please try again.');
         }
-    }, [survey]);
+    }, [setResponses]);
 
     const submitSurveyResponse = async () => {
         // make API call here. Send draftResponse.current as payload...
@@ -126,7 +59,7 @@ function SurveyPost({post, isRHS}: CustomPostTypeComponentProps) {
 
     // this function is to submit the linear scale rating as soon as a user selects it,
     // even without pressing the submit button.
-    const submitRating = async () => {
+    const submitRating = useCallback(async () => {
         if (!linearScaleQuestionID.current || !draftResponse.current) {
             return;
         }
@@ -141,14 +74,28 @@ function SurveyPost({post, isRHS}: CustomPostTypeComponentProps) {
         };
 
         // send payload to submit survey response API here...
-    };
+    }, [linearScaleQuestionID]);
+
+    const questionResponseChangeHandler = useCallback(
+        (questionID: string, response: unknown) => {
+            if (draftResponse.current) {
+                draftResponse.current.responses[questionID] = response;
+            }
+
+            // if this is the system rating question, submit response ASAP
+            if (questionID === linearScaleQuestionID.current) {
+                submitRating();
+            }
+        },
+        [linearScaleQuestionID, submitRating],
+    );
 
     const renderedMessage = useMemo(() => {
         // @ts-expect-error window is definitely MattermostWindow in plugins
         const mmWindow = window as MattermostWindow;
         const htmlString = mmWindow.PostUtils.formatText(post.message, {markdown: true});
-        return mmWindow.PostUtils.messageHtmlToComponent(htmlString, isRHS);
-    }, [post.message, isRHS]);
+        return mmWindow.PostUtils.messageHtmlToComponent(htmlString);
+    }, [post.message]);
 
     const renderQuestions = useMemo(() => {
         if (!survey) {
@@ -156,36 +103,19 @@ function SurveyPost({post, isRHS}: CustomPostTypeComponentProps) {
         }
 
         return survey.questions.map((question) => {
-            let questionComponent: React.ReactNode;
-
-            switch (question.type) {
-            case 'linear_scale':
-                questionComponent = (
-                    <LinearScaleQuestion
-                        question={question}
-                        responseChangeHandler={questionResponseChangeHandler}
-                        disabled={disabled}
-                        value={survey.response?.responses[question.id] as number}
-                    />
-                );
-                break;
-            case 'text':
-                questionComponent = (
-                    <TextQuestion
-                        question={question}
-                        responseChangeHandler={questionResponseChangeHandler}
-                        disabled={disabled}
-                        value={survey.response?.responses[question.id] as string}
-                    />);
-                break;
-            }
+            const Question = QUESTION_COMPONENTS[question.type];
 
             return (
                 <div
                     key={question.id}
                     className='question'
                 >
-                    {questionComponent}
+                    <Question
+                        question={question}
+                        responseChangeHandler={questionResponseChangeHandler}
+                        disabled={disabled}
+                        value={survey.response?.responses[question.id] as string}
+                    />
                 </div>
             );
         });
@@ -219,14 +149,14 @@ function SurveyPost({post, isRHS}: CustomPostTypeComponentProps) {
                 }
 
                 {
-                    disabled && !expired &&
+                    disabled && !surveyExpired &&
                     <div className='surveyMessage submitted'>
                         {`Response submitted on ${survey?.response?.dateCreated}.`}
                     </div>
                 }
 
                 {
-                    disabled && expired &&
+                    disabled && surveyExpired &&
                     <div className='surveyMessage submitted'>
                         {`Survey expired on ${survey?.endDate}.`}
                     </div>

@@ -9,7 +9,7 @@ import type {CombinedConfig, CustomConfigTypes, FormatTextOptions} from 'types/p
 
 export type PostUtils = {
     formatText: (text: string, option: Partial<FormatTextOptions>) => string;
-    messageHtmlToComponent: (html: string, isRHS: boolean) => React.ReactNode;
+    messageHtmlToComponent: (html: string) => React.ReactNode;
 }
 
 export type MattermostWindow = {

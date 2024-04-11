@@ -22,9 +22,15 @@ function TextQuestion({question, responseChangeHandler, disabled, value}: Props)
 
     return (
         <div className='TextQuestion vertical'>
-            <div className='questionTitle'>{question.text}</div>
+            <label
+                className='questionTitle'
+                htmlFor={`surveyQuestion_${question.id}`}
+            >
+                {question.text}
+            </label>
             <div>
                 <input
+                    id={`surveyQuestion_${question.id}`}
                     maxLength={5000}
                     className='form-control questionInput'
                     placeholder={disabled ? '' : `Add your answer here${question.mandatory ? '' : ' (Optional)'}`}

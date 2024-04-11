@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import classNames from 'classnames';
-import React, {useMemo, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import {useDebouncedCallback} from 'use-debounce';
 
 import type {Question} from 'types/plugin';
@@ -13,7 +13,7 @@ export type Props = {
     question: Question;
     responseChangeHandler: (questionID: string, response: number) => void;
     disabled?: boolean;
-    value?: number;
+    value?: string;
     scaleStart?: number;
     scaleEnd?: number;
 }
@@ -26,18 +26,21 @@ function LinearScaleQuestion({
     scaleStart = 1,
     scaleEnd = 10,
 }: Props) {
-    const [selectedValue, setSelectedValue] = useState<number | undefined>(value);
+    const [selectedValue, setSelectedValue] = useState<number | undefined>(value ? Number.parseInt(value, 10) : undefined);
 
-    const indentClickHandler = useDebouncedCallback((value: number) => {
+    const debouncedChangeHandler = useDebouncedCallback(responseChangeHandler);
+
+    const indentClickHandler = useCallback((value: number) => {
         setSelectedValue(value);
-        responseChangeHandler(question.id, value);
-    }, 200);
+        debouncedChangeHandler(question.id, value);
+    }, [debouncedChangeHandler, question.id]);
 
     const indents = useMemo(() => {
         const indentElements = [];
         for (let i = scaleStart; i <= scaleEnd; i++) {
             indentElements.push((
                 <div
+                    key={i}
                     className={classNames({indent: true, selected: selectedValue === i})}
                     onClick={() => indentClickHandler(i)}
                 >
