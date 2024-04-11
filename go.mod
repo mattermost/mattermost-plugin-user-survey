@@ -5,6 +5,7 @@ go 1.21
 require (
 	github.com/mattermost/mattermost/server/public v0.1.0
 	github.com/mattermost/morph v1.1.0
+	github.com/pborman/uuid v1.2.1
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.4
 )
@@ -34,7 +35,6 @@ require (
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
 	github.com/ncruces/go-strftime v0.1.9 // indirect
 	github.com/oklog/run v1.1.0 // indirect
-	github.com/pborman/uuid v1.2.1 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/philhofer/fwd v1.1.2 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
