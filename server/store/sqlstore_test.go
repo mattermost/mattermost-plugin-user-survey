@@ -19,7 +19,7 @@ const (
 // SetupTests initializes test database. It creates the test database,
 // runs all the migrations and generates a tearDown function.
 // Returns the generated sqlstore instance and a tear down function.
-func SetupTests(t *testing.T) (SQLStore, func()) {
+func SetupTests(t *testing.T) (*SQLStore, func()) {
 	dbType, connectionString, err := prepareNewTestDatabase()
 	require.NoError(t, err)
 
@@ -42,8 +42,11 @@ func SetupTests(t *testing.T) (SQLStore, func()) {
 	require.NoError(t, err)
 
 	tearDown := func() {
-		err := sqlStore.shut
+		err := sqlStore.Shutdown()
+		require.NoError(t, err)
 	}
+
+	return sqlStore, tearDown
 }
 
 func prepareNewTestDatabase() (string, string, error) {
