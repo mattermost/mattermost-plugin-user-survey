@@ -51,6 +51,16 @@ func (p *Plugin) OnActivate() error {
 	return nil
 }
 
+func (p *Plugin) OnDeactivate() error {
+	err := p.store.Shutdown()
+	if err != nil {
+		p.API.LogError("failed to close database connection on plugin deactivation.", "error", err.Error())
+		return err
+	}
+
+	return nil
+}
+
 func (p *Plugin) initStore() (*store.SQLStore, error) {
 	storeParams, err := p.createStoreParams()
 	if err != nil {
