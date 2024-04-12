@@ -9,9 +9,16 @@ import (
 	"testing"
 )
 
-func TestMigration(t *testing.T) {
-	t.Run("Running migration twice shouldn't cause error", func(t *testing.T) {
-		sqlStore, tearDown := SetupTests(t)
+func TestMigrations(t *testing.T) {
+	tests := []StoreTests{
+		testMigration,
+	}
+
+	testWithSupportedDatabases(t, tests)
+}
+
+func testMigration(t *testing.T, namePrefix string, sqlStore *SQLStore, tearDown func()) {
+	t.Run(namePrefix+" Running migration twice shouldn't cause error", func(t *testing.T) {
 		defer tearDown()
 
 		// check number of entries in schema migration table.

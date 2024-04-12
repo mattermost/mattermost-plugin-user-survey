@@ -1,28 +1,43 @@
 package store
 
 import (
+	"context"
 	"database/sql"
-	"fmt"
 	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
-	"github.com/mattermost/mattermost-plugin-user-survey/server/utils"
 	mmmodel "github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/plugin/plugintest"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"os"
-	"strings"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/modules/mysql"
+	"github.com/testcontainers/testcontainers-go/modules/postgres"
+	"github.com/testcontainers/testcontainers-go/wait"
+	"log"
 	"testing"
+	"time"
 )
 
-const (
-	testEnvVarPrefix = "USER_SURVEY_TEST_"
+var (
+	databaseTypes = []string{model.DBTypePostgres, model.DBTypeMySQL}
 )
 
-// SetupTests initializes test database. It creates the test database,
-// runs all the migrations and generates a tearDown function.
-// Returns the generated sqlstore instance and a tear down function.
-func SetupTests(t *testing.T) (*SQLStore, func()) {
-	dbType, connectionString, err := prepareNewTestDatabase()
+type StoreTests func(t *testing.T, namePrefix string, sqlStore *SQLStore, tearDown func())
+
+func SetupTests(t *testing.T, dbType string) (*SQLStore, func()) {
+	var connectionString string
+	var tearDown func()
+	var err error
+
+	switch dbType {
+	case model.DBTypePostgres:
+		connectionString, tearDown, err = preparePostgresDatabase()
+	case model.DBTypeMySQL:
+		connectionString, tearDown, err = prepareMySQLDatabase()
+	default:
+		t.Fatalf("Unknown database type encountered: " + dbType)
+	}
+
 	require.NoError(t, err)
 
 	db, err := sql.Open(dbType, connectionString)
@@ -44,85 +59,77 @@ func SetupTests(t *testing.T) (*SQLStore, func()) {
 
 	sqlStore, err := New(storeParams)
 	require.NoError(t, err)
-
-	tearDown := func() {
-		err := sqlStore.Shutdown()
-		require.NoError(t, err)
-	}
-
 	return sqlStore, tearDown
 }
 
-func prepareNewTestDatabase() (string, string, error) {
-	dbType := strings.TrimSpace(os.Getenv(testEnvVarPrefix + "DB_TYPE"))
-	if dbType == "" {
-		dbType = model.DBTypePostgres
+func testWithSupportedDatabases(t *testing.T, tests []StoreTests) {
+	for _, dbType := range databaseTypes {
+		sqlStore, tearDown := SetupTests(t, dbType)
+
+		for _, test := range tests {
+			t.Run(dbType, func(_ *testing.T) {
+				t.Fail()
+				test(t, dbType, sqlStore, tearDown)
+			})
+		}
 	}
-	port := strings.TrimSpace(os.Getenv(testEnvVarPrefix + "DATABASE_PORT"))
-
-	rootUsername := strings.TrimSpace(os.Getenv(testEnvVarPrefix + "ROOT_USERNAME"))
-	rootPassword := strings.TrimSpace(os.Getenv(testEnvVarPrefix + "ROOT_PASSWORD"))
-
-	testUsername := strings.TrimSpace(os.Getenv(testEnvVarPrefix + "TEST_USERNAME"))
-	testPassword := strings.TrimSpace(os.Getenv(testEnvVarPrefix + "TEST_PASSWORD"))
-
-	rootConnectionString, err := generateConnectionString(dbType, rootUsername, rootPassword, port, "")
-	if err != nil {
-		return "", "", err
-	}
-
-	testDBName, err := generateDatabase(dbType, rootConnectionString, rootUsername)
-	if err != nil {
-		return "", "", err
-	}
-
-	testConnectionString, err := generateConnectionString(dbType, testUsername, testPassword, port, testDBName)
-	if err != nil {
-		return "", "", err
-	}
-
-	return dbType, testConnectionString, nil
 }
 
-func generateConnectionString(dbType, username, password, port, dbName string) (string, error) {
-	var template string
+func preparePostgresDatabase() (string, func(), error) {
+	ctx := context.Background()
+	container, err := postgres.RunContainer(ctx,
+		testcontainers.WithImage("docker.io/postgres:15.2-alpine"),
+		postgres.WithUsername("username"),
+		postgres.WithPassword("password"),
+		testcontainers.WithWaitStrategy(
+			wait.ForLog("database system is ready to accept connections").
+				WithOccurrence(2).
+				WithStartupTimeout(5*time.Second)),
+	)
 
-	switch dbType {
-	case model.DBTypePostgres:
-		template = "postgres://%s:%s@localhost:%s/%s?sslmode=disable\u0026connect_timeout=10"
-	case model.DBTypeMySQL:
-		template = "%s:%s@tcp(localhost:%s)/%s?charset=utf8mb4,utf8&writeTimeout=30s"
-	default:
-		return "", fmt.Errorf("invalid database type encountered, dbType: '%s'", dbType)
-	}
-
-	return fmt.Sprintf(template, username, password, port, dbName), nil
-}
-
-func generateDatabase(dbType, rootConnectionString, rootUsername string) (string, error) {
-	db, err := sql.Open(dbType, rootConnectionString)
 	if err != nil {
-		return "", fmt.Errorf("failed to connect to dataabse, dbType: '%s', connection string: '%s', err: %w", dbType, rootConnectionString, err)
-	}
-	defer db.Close()
-
-	if err := db.Ping(); err != nil {
-		return "", fmt.Errorf("failed to ping database after connecting to it, dbType: '%s', connection string: '%s', err: %w", dbType, rootConnectionString, err)
+		return "", nil, errors.Wrap(err, "failed to create Postgres test container")
 	}
 
-	dbName := "user_survey_testdb_" + utils.NewId()
-	if _, err := db.Exec("CREATE DATABASE " + dbName); err != nil {
-		return "", fmt.Errorf("failed to create test database, dbType: '%s', connection string: '%s', dbName: %s, err: %w", dbType, rootConnectionString, dbName, err)
+	container.MustConnectionString(ctx, "sslmode=disable")
+	connectionString, err := container.ConnectionString(ctx, "sslmode=disable")
+	if err != nil {
+		return "", nil, errors.Wrap(err, "failed to generate Postgres connection string")
 	}
 
-	if dbType == model.DBTypeMySQL {
-		_, err := db.Exec(fmt.Sprintf("GRANT ALL PRIVILEGES ON %s.* TO %s", dbName, rootUsername))
-		if err != nil {
-			return "", fmt.Errorf("failed to grant permission on test database to root user, dbType: '%s', connection string: '%s', dbName: %s, err: %w", dbType, rootConnectionString, dbName, err)
+	tearDown := func() {
+		if err := container.Terminate(ctx); err != nil {
+			log.Fatalf("failed to terminate container: %s", err.Error())
 		}
 	}
 
-	return dbName, nil
+	return connectionString, tearDown, nil
+}
+
+func prepareMySQLDatabase() (string, func(), error) {
+	ctx := context.Background()
+	container, err := mysql.RunContainer(ctx,
+		testcontainers.WithImage("mysql:8.0.32"),
+		mysql.WithUsername("username"),
+		mysql.WithPassword("password"),
+	)
+
+	if err != nil {
+		return "", nil, errors.Wrap(err, "failed to create MySQL test container")
+	}
+
+	connectionString, err := container.ConnectionString(ctx)
+	if err != nil {
+		return "", nil, errors.Wrap(err, "failed to generate MySQL connection string")
+	}
+
+	tearDown := func() {
+		if err := container.Terminate(ctx); err != nil {
+			log.Fatalf("failed to terminate container: %s", err.Error())
+		}
+	}
+
+	return connectionString, tearDown, nil
 }
 
 func mockAPIWithBasicMocks(dbType string) *plugintest.API {
