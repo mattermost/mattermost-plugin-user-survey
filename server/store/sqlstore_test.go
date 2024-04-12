@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 	"github.com/mattermost/mattermost-plugin-user-survey/server/utils"
+	mmmodel "github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/plugin/plugintest"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"os"
 	"strings"
@@ -29,12 +31,14 @@ func SetupTests(t *testing.T) (*SQLStore, func()) {
 	err = db.Ping()
 	require.NoError(t, err)
 
+	mockPluginAPI := mockAPIWithBasicMocks(dbType)
+
 	storeParams := Params{
 		DBType:           dbType,
 		ConnectionString: connectionString,
 		TablePrefix:      "test_" + TablePrefix,
 		DB:               db,
-		PluginAPI:        &plugintest.API{},
+		PluginAPI:        mockPluginAPI,
 		SkipMigrations:   false,
 	}
 
@@ -50,8 +54,6 @@ func SetupTests(t *testing.T) (*SQLStore, func()) {
 }
 
 func prepareNewTestDatabase() (string, string, error) {
-	var dbName string
-
 	dbType := strings.TrimSpace(os.Getenv(testEnvVarPrefix + "DB_TYPE"))
 	if dbType == "" {
 		dbType = model.DBTypePostgres
@@ -69,7 +71,7 @@ func prepareNewTestDatabase() (string, string, error) {
 		return "", "", err
 	}
 
-	testDBName, err := generateDatabase(dbName, rootConnectionString, rootUsername)
+	testDBName, err := generateDatabase(dbType, rootConnectionString, rootUsername)
 	if err != nil {
 		return "", "", err
 	}
@@ -87,9 +89,9 @@ func generateConnectionString(dbType, username, password, port, dbName string) (
 
 	switch dbType {
 	case model.DBTypePostgres:
-		template = "%s:%s@tcp(localhost:%s)/%s?charset=utf8mb4,utf8&writeTimeout=30s"
-	case model.DBTypeMySQL:
 		template = "postgres://%s:%s@localhost:%s/%s?sslmode=disable\u0026connect_timeout=10"
+	case model.DBTypeMySQL:
+		template = "%s:%s@tcp(localhost:%s)/%s?charset=utf8mb4,utf8&writeTimeout=30s"
 	default:
 		return "", fmt.Errorf("invalid database type encountered, dbType: '%s'", dbType)
 	}
@@ -108,17 +110,46 @@ func generateDatabase(dbType, rootConnectionString, rootUsername string) (string
 		return "", fmt.Errorf("failed to ping database after connecting to it, dbType: '%s', connection string: '%s', err: %w", dbType, rootConnectionString, err)
 	}
 
-	dbName := "testdb_" + utils.NewId()
+	dbName := "user_survey_testdb_" + utils.NewId()
 	if _, err := db.Exec("CREATE DATABASE " + dbName); err != nil {
 		return "", fmt.Errorf("failed to create test database, dbType: '%s', connection string: '%s', dbName: %s, err: %w", dbType, rootConnectionString, dbName, err)
 	}
 
 	if dbType == model.DBTypeMySQL {
-		_, err := db.Exec(fmt.Sprintf("GRANT ALL PRIVILEGES ON %S.* TO %S", dbName, rootUsername))
+		_, err := db.Exec(fmt.Sprintf("GRANT ALL PRIVILEGES ON %s.* TO %s", dbName, rootUsername))
 		if err != nil {
 			return "", fmt.Errorf("failed to grant permission on test database to root user, dbType: '%s', connection string: '%s', dbName: %s, err: %w", dbType, rootConnectionString, dbName, err)
 		}
 	}
 
 	return dbName, nil
+}
+
+func mockAPIWithBasicMocks(dbType string) *plugintest.API {
+	mockAPI := &plugintest.API{}
+	MockLogs(mockAPI)
+
+	// these mocks are required for database migrations to run
+	mockAPI.On("KVSetWithOptions", "mutex_user_survey_migration_db_mutex", mock.Anything, mock.Anything).Return(true, nil)
+
+	mmConfig := &mmmodel.Config{
+		SqlSettings: mmmodel.SqlSettings{},
+	}
+
+	mmConfig.SqlSettings.DriverName = &dbType
+	mmConfig.SqlSettings.MaxIdleConns = mmmodel.NewInt(10)
+	mmConfig.SqlSettings.MaxOpenConns = mmmodel.NewInt(100)
+	mmConfig.SqlSettings.ConnMaxLifetimeMilliseconds = mmmodel.NewInt(3600000)
+	mmConfig.SqlSettings.ConnMaxIdleTimeMilliseconds = mmmodel.NewInt(300000)
+
+	mockAPI.On("GetUnsanitizedConfig").Return(mmConfig)
+
+	return mockAPI
+}
+
+func MockLogs(mockAPI *plugintest.API) {
+	mockAPI.On("LogDebug", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
+	mockAPI.On("LogInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
+	mockAPI.On("LogWarn", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
+	mockAPI.On("LogError", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
 }
