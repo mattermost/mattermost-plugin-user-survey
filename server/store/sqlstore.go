@@ -73,3 +73,7 @@ func (s *SQLStore) checkBinaryParams() (bool, error) {
 func (s *SQLStore) newMutex(name string) (*cluster.Mutex, error) {
 	return cluster.NewMutex(s.pluginAPI, name)
 }
+
+func (s *SQLStore) Shutdown() error {
+	return s.db.Close()
+}
