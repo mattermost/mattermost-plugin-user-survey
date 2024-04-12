@@ -5,8 +5,9 @@ package store
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestMigrations(t *testing.T) {
@@ -23,6 +24,7 @@ func testMigration(t *testing.T, namePrefix string, sqlStore *SQLStore, tearDown
 
 		// check number of entries in schema migration table.
 		// we'll match this row count with new row count after running migrations for the second time
+		//nolint: gosec
 		query := fmt.Sprintf("SELECT COUNT(version) FROM %sschema_migrations", sqlStore.tablePrefix)
 		row := sqlStore.db.QueryRow(query)
 		var oldCount int

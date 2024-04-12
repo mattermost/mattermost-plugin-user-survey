@@ -3,7 +3,10 @@ package store
 import (
 	"context"
 	"database/sql"
-	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
+	"log"
+	"testing"
+	"time"
+
 	mmmodel "github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/plugin/plugintest"
 	"github.com/pkg/errors"
@@ -13,9 +16,8 @@ import (
 	"github.com/testcontainers/testcontainers-go/modules/mysql"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
-	"log"
-	"testing"
-	"time"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 )
 
 var (
@@ -68,7 +70,6 @@ func testWithSupportedDatabases(t *testing.T, tests []StoreTests) {
 
 		for _, test := range tests {
 			t.Run(dbType, func(_ *testing.T) {
-				t.Fail()
 				test(t, dbType, sqlStore, tearDown)
 			})
 		}
