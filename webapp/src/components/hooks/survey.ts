@@ -55,8 +55,8 @@ export function useUserSurvey(surveyID: string) {
 
         setSurvey(survey);
 
-        // the first linear scale question is the system default rating question
-        const linearScaleQuestion = survey.questions.find((question) => question.type === 'linear_scale');
+        // the first system, linear scale question is the system default rating question
+        const linearScaleQuestion = survey.questions.find((question) => question.system && question.type === 'linear_scale');
 
         if (linearScaleQuestion) {
             linearScaleQuestionID.current = linearScaleQuestion.id;
@@ -68,16 +68,17 @@ export function useUserSurvey(surveyID: string) {
     }, [surveyID]);
 
     const setResponses = useCallback((responses: SurveyResponse) => {
-        if (!survey) {
-            return;
-        }
+        setSurvey((oldSurvey) => {
+            if (!oldSurvey) {
+                return oldSurvey;
+            }
 
-        const newSurvey: UserSurvey = {
-            ...survey,
-            response: responses,
-        };
-        setSurvey(newSurvey);
-    }, [survey]);
+            return {
+                ...oldSurvey,
+                response: responses,
+            };
+        });
+    }, []);
 
     return {
         survey,
