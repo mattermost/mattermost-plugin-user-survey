@@ -23,7 +23,8 @@
     "typeRoots": [ "./src/types", "./node_modules/@types"],
   },
   "include": [
-    "src"
+    "src",
+    "*.test.ts"
   ],
   "exclude": [
     "dist",
