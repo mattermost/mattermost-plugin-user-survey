@@ -2,7 +2,7 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
+	"github.com/mattermost/mattermost-plugin-user-survey/server/api"
 	"net/http"
 	"sync"
 
@@ -26,12 +26,13 @@ type Plugin struct {
 	configuration *configuration
 
 	store *store.SQLStore
-
-	app *app.UserSurveyApp
+	app   *app.UserSurveyApp
+	api   *api.API
 }
 
 func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Hello, world!")
+	p.API.LogError("EEEEEEE")
+	p.api.Router.ServeHTTP(w, r)
 }
 
 func (p *Plugin) OnActivate() error {
@@ -45,8 +46,11 @@ func (p *Plugin) OnActivate() error {
 		return err
 	}
 
+	api := p.initAPI(app)
+
 	p.store = sqlStore
 	p.app = app
+	p.api = api
 
 	return nil
 }
@@ -100,4 +104,8 @@ func (p *Plugin) getMasterDB() (*sql.DB, error) {
 
 func (p *Plugin) initApp(sqlStore *store.SQLStore) (*app.UserSurveyApp, error) {
 	return app.New(sqlStore)
+}
+
+func (p *Plugin) initAPI(app *app.UserSurveyApp) *api.API {
+	return api.New(app, p.API)
 }
