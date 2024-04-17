@@ -6,20 +6,27 @@ import React, {useMemo} from 'react';
 
 import './style.scss';
 
-export type Props = {
+export interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     text?: string;
-    type?: 'primary' | 'secondary' | 'tertiary';
+    buttonType?: 'primary' | 'secondary' | 'tertiary';
     danger?: boolean;
     iconClass?: string;
     iconPlacement?: 'left' | 'right';
-};
-function Button({text, type = 'tertiary', danger = false, iconClass, iconPlacement = 'left'}: Props) {
+}
+function Button({
+    text,
+    buttonType = 'tertiary',
+    danger = false,
+    iconClass,
+    iconPlacement = 'left',
+    ...rest
+}: Props) {
     const buttonClassName = classNames({
         btn: true,
         iconButton: !text,
-        'btn-primary': type === 'primary',
-        'btn-secondary': type === 'secondary',
-        'btn-tertiary': type === 'tertiary',
+        'btn-primary': buttonType === 'primary',
+        'btn-secondary': buttonType === 'secondary',
+        'btn-tertiary': buttonType === 'tertiary',
         'btn-danger': danger,
     });
 
@@ -33,7 +40,10 @@ function Button({text, type = 'tertiary', danger = false, iconClass, iconPlaceme
     }, [iconClass]);
 
     return (
-        <button className={buttonClassName}>
+        <button
+            className={buttonClassName}
+            {...rest}
+        >
             {iconClass && iconPlacement === 'left' && iconComponent}
 
             {text}

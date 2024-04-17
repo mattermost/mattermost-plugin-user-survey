@@ -3,12 +3,13 @@
 
 import {parse} from 'date-fns';
 import React, {useEffect, useMemo, useState} from 'react';
-import './style.scss';
 import utils from 'utils/utils';
 
 import Button from 'components/common/button/button';
 
-import type {SurveyResult} from 'types/mattermost-webapp';
+import type {SurveyResult} from 'types/plugin';
+
+import './style.scss';
 
 function SurveyResults() {
     // dummy survey response.
@@ -89,7 +90,7 @@ function SurveyResults() {
         return (
             <div className='surveyResultActions horizontal'>
                 <Button
-                    type='tertiary'
+                    buttonType='tertiary'
                     danger={true}
                     iconClass='icon-flag-checkered'
                     text='End survey'

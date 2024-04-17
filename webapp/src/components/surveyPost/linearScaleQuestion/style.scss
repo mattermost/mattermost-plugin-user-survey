@@ -1,0 +1,75 @@
+.LinearScaleQuestion {
+    &.vertical {
+        gap: 8px;
+    }
+
+    .questionTitle {
+        color: #3D3C40;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 16px;
+    }
+
+    .scale {
+        width: min-content;
+        gap: 4px;
+
+
+        .scaleLabels {
+            color: rgba(61, 60, 64, 0.72);
+            font-size: 12px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 20px;
+        }
+
+        .indents {
+            display: flex;
+            width: min-content;
+            flex-direction: row;
+            border-radius: 16px;
+            background: rgba(var(--button-bg-rgb), 0.08);
+            gap: 8px;
+
+            &.disabled {
+                background: var(--center-channel-color-8, rgba(63, 67, 80, 0.08));
+                pointer-events: none;
+
+                .indent.selected {
+                    background: var(--center-channel-color-72, rgba(63, 67, 80, 0.72));
+                }
+            }
+
+            .indent {
+                width: 32px;
+                height: 32px;
+                padding-top: 3px;
+                border-radius: 50%;
+                cursor: pointer;
+                font-size: 16px;
+                text-align: center;
+
+                &.selected {
+                    background: var(--button-bg, #1C58D9);
+                    color: var(--center-channel-bg, #FFF);
+
+                    &:hover {
+                        background: var(--button-bg, #1C58D9);
+                    }
+                }
+
+                &:hover {
+                    background: rgba(var(--button-bg-rgb), 0.4);
+                }
+
+                &:first-child {
+                    border-radius: 16px 0 0 16px;
+                }
+
+                &:last-child {
+                    border-radius: 0 16px 16px 0;
+                }
+            }
+        }
+    }
+}

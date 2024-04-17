@@ -5,6 +5,7 @@ import type {Store, Action} from 'redux';
 
 import type {GlobalState} from 'mattermost-redux/types/store';
 
+import SurveyPost from 'components/surveyPost/surveyPost';
 import SystemConsoleSetting from 'components/systemConsole';
 
 import type {PluginRegistry} from 'types/mattermost-webapp';
@@ -15,6 +16,7 @@ export default class Plugin {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
     public async initialize(registry: PluginRegistry, store: Store<GlobalState, Action<Record<string, unknown>>>) {
         registry.registerAdminConsoleCustomSetting('SystemConsoleSetting', SystemConsoleSetting, {showTitle: false});
+        registry.registerPostTypeComponent('custom_user_survey', SurveyPost);
     }
 }
 
