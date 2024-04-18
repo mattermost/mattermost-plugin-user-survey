@@ -23,16 +23,16 @@ type Plugin struct {
 
 	// configuration is the active plugin configuration. Consult getConfiguration and
 	// setConfiguration for usage.
-	configuration *configuration
+	configuration *Configuration
 
-	store *store.SQLStore
-	app   *app.UserSurveyApp
-	api   *api.API
+	store       *store.SQLStore
+	app         *app.UserSurveyApp
+	apiHandlers *api.APIHandlers
 }
 
 func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Request) {
 	p.API.LogError("EEEEEEE")
-	p.api.Router.ServeHTTP(w, r)
+	p.apiHandlers.Router.ServeHTTP(w, r)
 }
 
 func (p *Plugin) OnActivate() error {
@@ -50,7 +50,7 @@ func (p *Plugin) OnActivate() error {
 
 	p.store = sqlStore
 	p.app = app
-	p.api = api
+	p.apiHandlers = api
 
 	return nil
 }
@@ -103,9 +103,9 @@ func (p *Plugin) getMasterDB() (*sql.DB, error) {
 }
 
 func (p *Plugin) initApp(sqlStore *store.SQLStore) (*app.UserSurveyApp, error) {
-	return app.New(sqlStore)
+	return app.New(p.API, sqlStore)
 }
 
-func (p *Plugin) initAPI(app *app.UserSurveyApp) *api.API {
+func (p *Plugin) initAPI(app *app.UserSurveyApp) *api.APIHandlers {
 	return api.New(app, p.API)
 }

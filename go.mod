@@ -3,8 +3,10 @@ module github.com/mattermost/mattermost-plugin-user-survey
 go 1.21
 
 require (
+	github.com/gorilla/mux v1.8.1
 	github.com/mattermost/mattermost/server/public v0.1.0
 	github.com/mattermost/morph v1.1.0
+	github.com/mattermost/squirrel v0.4.0
 	github.com/pborman/uuid v1.2.1
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.9.0
@@ -47,6 +49,8 @@ require (
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/hashicorp/yamux v0.1.1 // indirect
 	github.com/klauspost/compress v1.16.0 // indirect
+	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
+	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect

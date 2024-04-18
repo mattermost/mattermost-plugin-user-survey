@@ -7,6 +7,6 @@ import (
 	"net/http"
 )
 
-func (api *API) connected(w http.ResponseWriter, r *http.Request) {
-	api.pluginAPI.LogInfo("connected API called!!!")
+func (api *APIHandlers) connected(w http.ResponseWriter, r *http.Request) {
+	api.pluginAPI.LogInfo("connected APIHandlers called!!!")
 }

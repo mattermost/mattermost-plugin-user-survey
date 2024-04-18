@@ -4,21 +4,20 @@
 package api
 
 import (
-	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/mattermost/mattermost-plugin-user-survey/server/app"
 	"github.com/mattermost/mattermost/server/public/plugin"
 	"net/http"
 )
 
-type API struct {
+type APIHandlers struct {
 	app       *app.UserSurveyApp
 	pluginAPI plugin.API
 	Router    *mux.Router
 }
 
-func New(app *app.UserSurveyApp, pluginAPI plugin.API) *API {
-	api := &API{
+func New(app *app.UserSurveyApp, pluginAPI plugin.API) *APIHandlers {
+	api := &APIHandlers{
 		app:       app,
 		pluginAPI: pluginAPI,
 	}
@@ -27,18 +26,9 @@ func New(app *app.UserSurveyApp, pluginAPI plugin.API) *API {
 	return api
 }
 
-func (api *API) initRoutes() {
+func (api *APIHandlers) initRoutes() {
 	api.Router = mux.NewRouter()
 	root := api.Router.PathPrefix("/api").Subrouter()
 
 	root.HandleFunc("/connected", api.connected).Methods(http.MethodGet)
-
-	api.pluginAPI.LogError("===============================================================")
-	api.Router.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
-		tpl, err1 := route.GetPathTemplate()
-		met, err2 := route.GetMethods()
-		fmt.Println(tpl, err1, met, err2)
-		return nil
-	})
-	api.pluginAPI.LogError("===============================================================")
 }

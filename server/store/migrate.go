@@ -6,9 +6,6 @@ import (
 	"database/sql"
 	"embed"
 	"fmt"
-	"html/template"
-	"path"
-
 	"github.com/mattermost/mattermost/server/public/shared/mlog"
 	sqlUtils "github.com/mattermost/mattermost/server/public/utils/sql"
 	"github.com/mattermost/morph"
@@ -16,6 +13,8 @@ import (
 	"github.com/mattermost/morph/drivers/mysql"
 	"github.com/mattermost/morph/drivers/postgres"
 	"github.com/mattermost/morph/sources/embedded"
+	"html/template"
+	"path"
 
 	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 )
@@ -194,7 +193,10 @@ func (s *SQLStore) generateMigrationAssets() (*embedded.AssetSource, error) {
 }
 
 func (s *SQLStore) GetTemplateHelperFuncs() template.FuncMap {
-	return template.FuncMap{}
+	return template.FuncMap{
+		"addColumnIfNeeded":  s.genAddColumnIfNeeded,
+		"dropColumnIfNeeded": s.genDropColumnIfNeeded,
+	}
 }
 
 func (s *SQLStore) runMigrations(engine *morph.Morph, driver drivers.Driver) error {
