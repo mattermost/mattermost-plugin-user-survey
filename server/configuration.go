@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
+	"github.com/pkg/errors"
 	"reflect"
 )
 
@@ -28,12 +30,12 @@ func (c *Configuration) Clone() *Configuration {
 // getConfiguration retrieves the active Configuration under lock, making it safe to use
 // concurrently. The active Configuration may change underneath the client of this method, but
 // the struct returned by this API call is considered immutable.
-func (p *Plugin) getConfiguration() *Configuration {
+func (p *Plugin) getConfiguration() *model.Config {
 	p.configurationLock.RLock()
 	defer p.configurationLock.RUnlock()
 
 	if p.configuration == nil {
-		return &Configuration{}
+		return &model.Config{}
 	}
 
 	return p.configuration
@@ -48,7 +50,7 @@ func (p *Plugin) getConfiguration() *Configuration {
 // This method panics if setConfiguration is called with the existing Configuration. This almost
 // certainly means that the Configuration was modified without being cloned and may result in
 // an unsafe access.
-func (p *Plugin) setConfiguration(configuration *Configuration) {
+func (p *Plugin) setConfiguration(configuration *model.Config) {
 	p.configurationLock.Lock()
 	defer p.configurationLock.Unlock()
 
@@ -69,18 +71,17 @@ func (p *Plugin) setConfiguration(configuration *Configuration) {
 // OnConfigurationChange is invoked when Configuration changes may have been made.
 // This is called for any Mattermost Configuration change, not just the plugin's config change.
 func (p *Plugin) OnConfigurationChange() error {
-	//var Configuration = new(Configuration)
-	//
-	//// Load the public Configuration fields from the Mattermost server Configuration.
-	//if err := p.API.LoadPluginConfiguration(Configuration); err != nil {
-	//	return errors.Wrap(err, "failed to load plugin Configuration")
-	//}
-	//
-	//p.setConfiguration(Configuration)
-
-	if p.app == nil {
-		return nil
+	type tempConfig struct {
+		SystemConsoleSetting *model.Config `json:"systemconsolesetting"`
 	}
+
+	var cfg = new(tempConfig)
+
+	if err := p.API.LoadPluginConfiguration(cfg); err != nil {
+		return errors.Wrap(err, "failed to load plugin configuration")
+	}
+
+	p.setConfiguration(cfg.SystemConsoleSetting)
 
 	p.app.HandleMattermostConfigChange()
 

@@ -3,6 +3,8 @@ package main
 import (
 	"database/sql"
 	"github.com/mattermost/mattermost-plugin-user-survey/server/api"
+	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
+	"github.com/mattermost/mattermost/server/public/pluginapi/cluster"
 	"net/http"
 	"sync"
 
@@ -23,15 +25,16 @@ type Plugin struct {
 
 	// configuration is the active plugin configuration. Consult getConfiguration and
 	// setConfiguration for usage.
-	configuration *Configuration
+	configuration *model.Config
 
 	store       *store.SQLStore
 	app         *app.UserSurveyApp
 	apiHandlers *api.APIHandlers
+
+	jobs []*cluster.Job
 }
 
 func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Request) {
-	p.API.LogError("EEEEEEE")
 	p.apiHandlers.Router.ServeHTTP(w, r)
 }
 
@@ -51,6 +54,10 @@ func (p *Plugin) OnActivate() error {
 	p.store = sqlStore
 	p.app = app
 	p.apiHandlers = api
+
+	if err := p.startScheduledJobs(); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -103,7 +110,10 @@ func (p *Plugin) getMasterDB() (*sql.DB, error) {
 }
 
 func (p *Plugin) initApp(sqlStore *store.SQLStore) (*app.UserSurveyApp, error) {
-	return app.New(p.API, sqlStore)
+	getConfigFunc := func() *model.Config {
+		return p.getConfiguration()
+	}
+	return app.New(p.API, sqlStore, getConfigFunc)
 }
 
 func (p *Plugin) initAPI(app *app.UserSurveyApp) *api.APIHandlers {

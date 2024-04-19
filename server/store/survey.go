@@ -10,16 +10,16 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (s *SQLStore) GetDraftSurvey() (*model.Survey, error) {
+func (s *SQLStore) GetInProgressSurvey() (*model.Survey, error) {
 	rows, err := s.getQueryBuilder().
 		Select(s.surveyColumns()...).
 		From(s.tablePrefix + "survey").
-		Where(sq.Eq{"status": model.SurveyStatusDraft}).
+		Where(sq.Eq{"status": model.SurveyStatusInProgress}).
 		Limit(1).
 		Query()
 
 	if err != nil {
-		return nil, errors.Wrap(err, "SQLStore.GetDraftSurvey failed to fetch draft survey from database")
+		return nil, errors.Wrap(err, "SQLStore.GetInProgressSurvey failed to fetch draft survey from database")
 	}
 
 	surveys, err := s.SurveysFromRows(rows)
@@ -39,9 +39,9 @@ func (s *SQLStore) SurveysFromRows(rows *sql.Rows) ([]*model.Survey, error) {
 
 	for rows.Next() {
 		var survey model.Survey
-		var questionJSON string
+		//var questionJSON string
 
-		err := rows.Scan(&survey.Id, &survey.ExcludedTeamIDs, &survey.CreateAt, &survey.UpdateAt, &survey.StartTime, &survey.Duration, &questionJSON, &survey.Status)
+		err := rows.Scan(&survey.Id, &survey.ExcludedTeamIDs, &survey.CreateAt, &survey.UpdateAt, &survey.StartTime, &survey.Duration, &survey.Questions, &survey.Status)
 
 		if err != nil {
 			return nil, errors.Wrap(err, "SurveysFromRows failed to scan survey row")

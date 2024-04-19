@@ -4,7 +4,8 @@
 package model
 
 const (
-	SurveyStatusDraft = "draft"
+	SurveyStatusDraft      = "draft"
+	SurveyStatusInProgress = "in_progress"
 
 	QuestionTypeLinearScale = "linear_scale"
 	QuestionType            = "text"
