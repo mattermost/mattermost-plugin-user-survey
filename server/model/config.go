@@ -49,12 +49,12 @@ func (c *Config) ParsedTime() (time.Time, error) {
 	layout := "02/01/2006 15:04"
 	location, err := time.LoadLocation("UTC")
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to load UTC time zone")
+		return time.Time{}, errors.Wrap(err, "failed to load UTC time zone")
 	}
 
 	parsedTime, err := time.ParseInLocation(layout, c.SurveyDateTime.Date+" "+c.SurveyDateTime.Time, location)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse survey date time from saved config")
+		return time.Time{}, errors.Wrap(err, "failed to parse survey date time from saved config")
 	}
 
 	return parsedTime, nil
