@@ -6,6 +6,7 @@ package store
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 	sq "github.com/mattermost/squirrel"
 	"github.com/pkg/errors"
@@ -87,6 +88,19 @@ func (s *SQLStore) SaveSurvey(survey *model.Survey) error {
 
 	if err != nil {
 		return errors.Wrap(err, "SaveSurvey: failed to save survey in database")
+	}
+
+	return nil
+}
+
+func (s *SQLStore) UpdateSurveyStatus(surveyID, status string) error {
+	_, err := s.getQueryBuilder().
+		Update(s.tablePrefix+"survey").
+		Set("status", status).
+		Where(sq.Eq{"id": surveyID}).Exec()
+
+	if err != nil {
+		return errors.Wrap(err, fmt.Sprintf("UpdateSurveyStatus: failed to update survey status in database, surveyID: %s, status: %s", surveyID, status))
 	}
 
 	return nil

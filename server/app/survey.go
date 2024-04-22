@@ -34,3 +34,12 @@ func (app *UserSurveyApp) GetInProgressSurvey() (*model.Survey, error) {
 
 	return surveys[0], nil
 }
+
+func (app *UserSurveyApp) StopSurvey(surveyID string) error {
+	err := app.store.UpdateSurveyStatus(surveyID, model.SurveyStatusEnded)
+	if err != nil {
+		return errors.Wrap(err, "StopSurvey: failed to stop survey")
+	}
+
+	return nil
+}

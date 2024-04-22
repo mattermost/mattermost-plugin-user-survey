@@ -31,7 +31,11 @@ func (a *UserSurveyApp) JobStartSurvey() {
 		// if the survey ends now, do check for new survey
 		a.api.LogDebug("JobStartSurvey: in progress survey exists in database but it ended")
 		checkForNewSurvey = true
-		// stop the survey here
+
+		if err := a.StopSurvey(inProgressSurvey.Id); err != nil {
+			a.api.LogError("JobStartSurvey: failed to stop survey", "error", err.Error())
+			return
+		}
 	} else {
 		// if the survey hasn't ended, don't check for new survey
 		a.api.LogDebug("JobStartSurvey: in progress survey exists in database and is still running")
@@ -48,6 +52,7 @@ func (a *UserSurveyApp) JobStartSurvey() {
 }
 
 func (a *UserSurveyApp) startNewSurveyIfNeeded() error {
+	a.api.LogDebug("JobStartSurvey: checking if new survey should start")
 	config := a.getConfig()
 	shouldStartSurvey, err := config.ShouldSurveyStart()
 	if err != nil {
@@ -55,6 +60,7 @@ func (a *UserSurveyApp) startNewSurveyIfNeeded() error {
 	}
 
 	if shouldStartSurvey {
+		a.api.LogDebug("JobStartSurvey: determined that the new survey should start")
 		now := mmModal.GetMillis()
 		startTime, err := config.ParsedTime()
 		if err != nil {
@@ -72,10 +78,13 @@ func (a *UserSurveyApp) startNewSurveyIfNeeded() error {
 			Status:          model.SurveyStatusInProgress,
 		}
 
+		a.api.LogDebug("JobStartSurvey: saving new survey")
 		err = a.SaveSurvey(survey)
 		if err != nil {
 			return errors.Wrap(err, "startNewSurveyIfNeeded: failed to save survey in database")
 		}
+
+		a.api.LogDebug("JobStartSurvey: saved new survey")
 	}
 
 	return nil

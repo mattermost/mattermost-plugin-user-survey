@@ -11,15 +11,15 @@ import (
 )
 
 const (
-	SurveyStatusDraft      = "draft"
 	SurveyStatusInProgress = "in_progress"
+	SurveyStatusEnded      = "ended"
 
 	QuestionTypeLinearScale = "linear_scale"
 	QuestionType            = "text"
 )
 
 var (
-	SurveyStatuses = []string{SurveyStatusDraft, SurveyStatusInProgress}
+	SurveyStatuses = []string{SurveyStatusInProgress, SurveyStatusEnded}
 )
 
 type Survey struct {
