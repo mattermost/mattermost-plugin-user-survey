@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func (api *Handlers) connected(w http.ResponseWriter, r *http.Request) {
+func (api *Handlers) handleConnected(w http.ResponseWriter, r *http.Request) {
 	// TODO, implement the API here
-	api.pluginAPI.LogInfo("connected APIHandlers called!!!")
+	api.pluginAPI.LogInfo("handleConnected APIHandlers called!!!")
 }

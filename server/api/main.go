@@ -4,6 +4,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -32,5 +33,10 @@ func (api *Handlers) initRoutes() {
 	api.Router = mux.NewRouter()
 	root := api.Router.PathPrefix("/api/v1").Subrouter()
 
-	root.HandleFunc("/connected", api.connected).Methods(http.MethodGet)
+	root.HandleFunc("/ping", api.handlePing).Methods(http.MethodGet)
+	root.HandleFunc("/handleConnected", api.handleConnected).Methods(http.MethodGet)
+}
+
+func (api *Handlers) handlePing(w http.ResponseWriter, r *http.Request) {
+	_, _ = fmt.Fprint(w, "Pong")
 }
