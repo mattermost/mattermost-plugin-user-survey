@@ -8,5 +8,6 @@ import (
 )
 
 func (api *APIHandlers) connected(w http.ResponseWriter, r *http.Request) {
+	// TODO, implement the API here
 	api.pluginAPI.LogInfo("connected APIHandlers called!!!")
 }

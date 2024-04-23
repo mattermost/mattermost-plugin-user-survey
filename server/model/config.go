@@ -4,7 +4,6 @@
 package model
 
 import (
-	"fmt"
 	"github.com/pkg/errors"
 	"time"
 )
@@ -36,7 +35,6 @@ type TeamFilter struct {
 }
 
 func (c *Config) ShouldSurveyStart() (bool, error) {
-	fmt.Println("asfdhskjdgfkjsdhgfjhg")
 	// survey should start if the UTC date and UTC time have passed
 	utcDateTime := time.Now().UTC()
 	parsedTime, err := c.ParsedTime()

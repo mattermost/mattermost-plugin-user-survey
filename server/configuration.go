@@ -83,7 +83,5 @@ func (p *Plugin) OnConfigurationChange() error {
 
 	p.setConfiguration(cfg.SystemConsoleSetting)
 
-	p.app.HandleMattermostConfigChange()
-
 	return nil
 }

@@ -28,7 +28,7 @@ func New(app *app.UserSurveyApp, pluginAPI plugin.API) *APIHandlers {
 
 func (api *APIHandlers) initRoutes() {
 	api.Router = mux.NewRouter()
-	root := api.Router.PathPrefix("/api").Subrouter()
+	root := api.Router.PathPrefix("/api/v1").Subrouter()
 
 	root.HandleFunc("/connected", api.connected).Methods(http.MethodGet)
 }

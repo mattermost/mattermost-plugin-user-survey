@@ -10,61 +10,63 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (a *UserSurveyApp) JobStartSurvey() {
-	a.api.LogDebug("JobStartSurvey: running, fetching in progress survey")
+// JobManageSurveyStatus is a scheduled job that ends a running survey if needed,
+// and starts a new survey if needed.
+func (a *UserSurveyApp) JobManageSurveyStatus() {
+	a.api.LogDebug("JobManageSurveyStatus: running, fetching in progress survey")
 
-	// first check if there is a running survey in the database
+	// first check if there is an in progress survey in the database
 	inProgressSurvey, err := a.GetInProgressSurvey()
 	if err != nil {
-		a.api.LogError("JobStartSurvey: failed to get in progress survey from database", "error", err.Error())
+		a.api.LogError("JobManageSurveyStatus: failed to get in progress survey from database", "error", err.Error())
 		return
 	}
 
 	var checkForNewSurvey bool
 
 	if inProgressSurvey == nil {
-		// if there is no active survey in database,
+		// if there is no in progress survey in database,
 		// do check for new survey
-		a.api.LogDebug("JobStartSurvey: no in progress survey found in the database")
+		a.api.LogDebug("JobManageSurveyStatus: no in progress survey found in the database")
 		checkForNewSurvey = true
 	} else if inProgressSurvey.ShouldSurveyStop() {
 		// if the survey ends now, do check for new survey
-		a.api.LogDebug("JobStartSurvey: in progress survey exists in database but it ended")
+		a.api.LogDebug("JobManageSurveyStatus: in progress survey exists in database but it ended")
 		checkForNewSurvey = true
 
 		if err := a.StopSurvey(inProgressSurvey.Id); err != nil {
-			a.api.LogError("JobStartSurvey: failed to stop survey", "error", err.Error())
+			a.api.LogError("JobManageSurveyStatus: failed to stop survey", "error", err.Error())
 			return
 		}
 	} else {
 		// if the survey hasn't ended, don't check for new survey
-		a.api.LogDebug("JobStartSurvey: in progress survey exists in database and is still running")
+		a.api.LogDebug("JobManageSurveyStatus: in progress survey exists in database and is still running")
 		checkForNewSurvey = false
 	}
 
 	if checkForNewSurvey {
-		a.api.LogDebug("JobStartSurvey: checking if a new survey can start now")
+		a.api.LogDebug("JobManageSurveyStatus: checking if a new survey can start now")
 		if err := a.startNewSurveyIfNeeded(); err != nil {
-			a.api.LogError("JobStartSurvey: failed to start ne survey if needed", "error", err.Error())
+			a.api.LogError("JobManageSurveyStatus: failed to start ne survey if needed", "error", err.Error())
 			return
 		}
 	}
 }
 
 func (a *UserSurveyApp) startNewSurveyIfNeeded() error {
-	a.api.LogDebug("JobStartSurvey: checking if new survey should start")
+	a.api.LogDebug("JobManageSurveyStatus: checking if new survey should start")
 	config := a.getConfig()
 	shouldStartSurvey, err := config.ShouldSurveyStart()
 	if err != nil {
-		return errors.Wrap(err, "JobStartSurvey: failed to check if survey should be started")
+		return errors.Wrap(err, "JobManageSurveyStatus: failed to check if survey should be started")
 	}
 
 	if shouldStartSurvey {
-		a.api.LogDebug("JobStartSurvey: determined that the new survey should start")
+		a.api.LogDebug("JobManageSurveyStatus: determined that the new survey should start")
 		now := mmModal.GetMillis()
 		startTime, err := config.ParsedTime()
 		if err != nil {
-			return errors.Wrap(err, "JobStartSurvey: failed to read survey parsed time")
+			return errors.Wrap(err, "JobManageSurveyStatus: failed to read survey parsed time")
 		}
 
 		survey := &model.Survey{
@@ -78,15 +80,15 @@ func (a *UserSurveyApp) startNewSurveyIfNeeded() error {
 			Status:          model.SurveyStatusInProgress,
 		}
 
-		a.api.LogDebug("JobStartSurvey: saving new survey")
+		a.api.LogDebug("JobManageSurveyStatus: saving new survey")
 		err = a.SaveSurvey(survey)
 		if err != nil {
-			return errors.Wrap(err, "JobStartSurvey: failed to save survey in database")
+			return errors.Wrap(err, "JobManageSurveyStatus: failed to save survey in database")
 		}
 
-		a.api.LogDebug("JobStartSurvey: saved new survey")
+		a.api.LogDebug("JobManageSurveyStatus: saved new survey")
 	} else {
-		a.api.LogDebug("JobStartSurvey: determined that the new survey should NOT start")
+		a.api.LogDebug("JobManageSurveyStatus: determined that the new survey should NOT start")
 	}
 
 	return nil

@@ -11,6 +11,9 @@ import (
 
 const (
 	jobKeyStartSurveyJob = "job_start_survey"
+
+	// TODO - update this to 15 minutes once ready for production
+	startSurveyJonInterval = 15 * time.Second
 )
 
 func (p *Plugin) startScheduledJobs() error {
@@ -25,8 +28,8 @@ func (p *Plugin) startSurveyStartJob() error {
 	job, err := cluster.Schedule(
 		p.API,
 		jobKeyStartSurveyJob,
-		cluster.MakeWaitForInterval(15*time.Second),
-		p.app.JobStartSurvey,
+		cluster.MakeWaitForInterval(startSurveyJonInterval),
+		p.app.JobManageSurveyStatus,
 	)
 
 	if err != nil {
