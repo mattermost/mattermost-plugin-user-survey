@@ -56,7 +56,7 @@ func (a *UserSurveyApp) startNewSurveyIfNeeded() error {
 	config := a.getConfig()
 	shouldStartSurvey, err := config.ShouldSurveyStart()
 	if err != nil {
-		return errors.Wrap(err, "startNewSurveyIfNeeded: failed to check if survey should be started")
+		return errors.Wrap(err, "JobStartSurvey: failed to check if survey should be started")
 	}
 
 	if shouldStartSurvey {
@@ -64,7 +64,7 @@ func (a *UserSurveyApp) startNewSurveyIfNeeded() error {
 		now := mmModal.GetMillis()
 		startTime, err := config.ParsedTime()
 		if err != nil {
-			return errors.Wrap(err, "startNewSurveyIfNeeded: failed to read survey parsed time")
+			return errors.Wrap(err, "JobStartSurvey: failed to read survey parsed time")
 		}
 
 		survey := &model.Survey{
@@ -81,10 +81,12 @@ func (a *UserSurveyApp) startNewSurveyIfNeeded() error {
 		a.api.LogDebug("JobStartSurvey: saving new survey")
 		err = a.SaveSurvey(survey)
 		if err != nil {
-			return errors.Wrap(err, "startNewSurveyIfNeeded: failed to save survey in database")
+			return errors.Wrap(err, "JobStartSurvey: failed to save survey in database")
 		}
 
 		a.api.LogDebug("JobStartSurvey: saved new survey")
+	} else {
+		a.api.LogDebug("JobStartSurvey: determined that the new survey should NOT start")
 	}
 
 	return nil
