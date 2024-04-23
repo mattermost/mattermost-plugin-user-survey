@@ -6,6 +6,9 @@ import (
 	"database/sql"
 	"embed"
 	"fmt"
+	"path"
+	"text/template"
+
 	"github.com/mattermost/mattermost/server/public/shared/mlog"
 	sqlUtils "github.com/mattermost/mattermost/server/public/utils/sql"
 	"github.com/mattermost/morph"
@@ -13,8 +16,6 @@ import (
 	"github.com/mattermost/morph/drivers/mysql"
 	"github.com/mattermost/morph/drivers/postgres"
 	"github.com/mattermost/morph/sources/embedded"
-	"html/template"
-	"path"
 
 	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 )

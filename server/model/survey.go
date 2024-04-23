@@ -4,10 +4,12 @@
 package model
 
 import (
-	"github.com/mattermost/mattermost-plugin-user-survey/server/utils"
+	"time"
+
 	mmModel "github.com/mattermost/mattermost/server/public/model"
 	"github.com/pkg/errors"
-	"time"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/utils"
 )
 
 const (
@@ -23,7 +25,7 @@ var (
 )
 
 type Survey struct {
-	Id              string          `json:"id"`
+	ID              string          `json:"id"`
 	ExcludedTeamIDs []string        `json:"excludedTeamIDs"`
 	CreateAt        int64           `json:"createAt"`
 	UpdateAt        int64           `json:"updateAt"`
@@ -36,8 +38,8 @@ type Survey struct {
 func (s *Survey) SetDefaults() {
 	now := mmModel.GetMillis()
 
-	if s.Id == "" {
-		s.Id = utils.NewID()
+	if s.ID == "" {
+		s.ID = utils.NewID()
 	}
 
 	if s.CreateAt == 0 {
@@ -50,7 +52,7 @@ func (s *Survey) SetDefaults() {
 }
 
 func (s *Survey) IsValid() error {
-	if s.Id == "" {
+	if s.ID == "" {
 		return errors.New("survey ID cannot be empty")
 	}
 
@@ -88,11 +90,10 @@ func (s *Survey) ShouldSurveyStop() bool {
 	utcDateTime := time.Now().UTC()
 
 	return utcDateTime.After(endTime) || utcDateTime.Equal(endTime)
-
 }
 
 type Question struct {
-	Id        string `json:"id"`
+	ID        string `json:"id"`
 	Text      string `json:"text"`
 	Type      string `json:"type"`
 	System    bool   `json:"system"`

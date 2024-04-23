@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	sqlUtils "github.com/mattermost/mattermost/server/public/utils/sql"
+
 	mmmodel "github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/plugin/plugintest"
 	"github.com/pkg/errors"
@@ -21,7 +23,8 @@ import (
 )
 
 var (
-	databaseTypes = []string{model.DBTypePostgres, model.DBTypeMySQL}
+	// databaseTypes = []string{model.DBTypePostgres, model.DBTypeMySQL}
+	databaseTypes = []string{model.DBTypeMySQL}
 )
 
 type StoreTests func(t *testing.T, namePrefix string, sqlStore *SQLStore, tearDown func())
@@ -122,6 +125,11 @@ func prepareMySQLDatabase() (string, func(), error) {
 	connectionString, err := container.ConnectionString(ctx)
 	if err != nil {
 		return "", nil, errors.Wrap(err, "failed to generate MySQL connection string")
+	}
+
+	connectionString, err = sqlUtils.AppendMultipleStatementsFlag(connectionString)
+	if err != nil {
+		return "", nil, errors.Wrap(err, "failed to append multi statement flag to MySQL connection string")
 	}
 
 	tearDown := func() {

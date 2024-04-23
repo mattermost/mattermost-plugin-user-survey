@@ -4,20 +4,22 @@
 package api
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/mattermost/mattermost-plugin-user-survey/server/app"
-	"github.com/mattermost/mattermost/server/public/plugin"
 	"net/http"
+
+	"github.com/gorilla/mux"
+	"github.com/mattermost/mattermost/server/public/plugin"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/app"
 )
 
-type APIHandlers struct {
+type Handlers struct {
 	app       *app.UserSurveyApp
 	pluginAPI plugin.API
 	Router    *mux.Router
 }
 
-func New(app *app.UserSurveyApp, pluginAPI plugin.API) *APIHandlers {
-	api := &APIHandlers{
+func New(app *app.UserSurveyApp, pluginAPI plugin.API) *Handlers {
+	api := &Handlers{
 		app:       app,
 		pluginAPI: pluginAPI,
 	}
@@ -26,7 +28,7 @@ func New(app *app.UserSurveyApp, pluginAPI plugin.API) *APIHandlers {
 	return api
 }
 
-func (api *APIHandlers) initRoutes() {
+func (api *Handlers) initRoutes() {
 	api.Router = mux.NewRouter()
 	root := api.Router.PathPrefix("/api/v1").Subrouter()
 

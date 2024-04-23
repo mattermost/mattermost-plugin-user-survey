@@ -4,10 +4,11 @@
 package app
 
 import (
-	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
-	"github.com/mattermost/mattermost-plugin-user-survey/server/utils"
 	mmModal "github.com/mattermost/mattermost/server/public/model"
 	"github.com/pkg/errors"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
+	"github.com/mattermost/mattermost-plugin-user-survey/server/utils"
 )
 
 // JobManageSurveyStatus is a scheduled job that ends a running survey if needed,
@@ -29,19 +30,21 @@ func (a *UserSurveyApp) JobManageSurveyStatus() {
 		// do check for new survey
 		a.api.LogDebug("JobManageSurveyStatus: no in progress survey found in the database")
 		checkForNewSurvey = true
-	} else if inProgressSurvey.ShouldSurveyStop() {
-		// if the survey ends now, do check for new survey
-		a.api.LogDebug("JobManageSurveyStatus: in progress survey exists in database but it ended")
-		checkForNewSurvey = true
-
-		if err := a.StopSurvey(inProgressSurvey.Id); err != nil {
-			a.api.LogError("JobManageSurveyStatus: failed to stop survey", "error", err.Error())
-			return
-		}
 	} else {
-		// if the survey hasn't ended, don't check for new survey
-		a.api.LogDebug("JobManageSurveyStatus: in progress survey exists in database and is still running")
-		checkForNewSurvey = false
+		if inProgressSurvey.ShouldSurveyStop() {
+			// if the survey ends now, do check for new survey
+			a.api.LogDebug("JobManageSurveyStatus: in progress survey exists in database but it ended")
+			checkForNewSurvey = true
+
+			if err := a.StopSurvey(inProgressSurvey.ID); err != nil {
+				a.api.LogError("JobManageSurveyStatus: failed to stop survey", "error", err.Error())
+				return
+			}
+		} else {
+			// if the survey hasn't ended, don't check for new survey
+			a.api.LogDebug("JobManageSurveyStatus: in progress survey exists in database and is still running")
+			checkForNewSurvey = false
+		}
 	}
 
 	if checkForNewSurvey {
@@ -70,7 +73,7 @@ func (a *UserSurveyApp) startNewSurveyIfNeeded() error {
 		}
 
 		survey := &model.Survey{
-			Id:              utils.NewID(),
+			ID:              utils.NewID(),
 			ExcludedTeamIDs: config.TeamFilter.FilteredTeamIDs,
 			CreateAt:        now,
 			UpdateAt:        now,

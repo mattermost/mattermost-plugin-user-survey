@@ -5,8 +5,9 @@ package store
 
 import (
 	"fmt"
-	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 	"strings"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 )
 
 func (s *SQLStore) genAddColumnIfNeeded(tableName, columnName, dataType, constraint string) (string, error) {
@@ -24,7 +25,7 @@ func (s *SQLStore) genAddColumnIfNeeded(tableName, columnName, dataType, constra
 			"constraint":      constraint,
 		}
 
-		return replaceVars(`
+		x := replaceVars(`
 			SET @stmt = (SELECT IF(
 				(
 				  SELECT COUNT(column_name) FROM INFORMATION_SCHEMA.COLUMNS
@@ -38,7 +39,13 @@ func (s *SQLStore) genAddColumnIfNeeded(tableName, columnName, dataType, constra
 			PREPARE addColumnIfNeeded FROM @stmt;
 			EXECUTE addColumnIfNeeded;
 			DEALLOCATE PREPARE addColumnIfNeeded;
-		`, vars), nil
+		`, vars)
+
+		s.pluginAPI.LogInfo("************************************************************")
+		s.pluginAPI.LogInfo(x)
+		s.pluginAPI.LogInfo("************************************************************")
+
+		return x, nil
 
 	case model.DBTypePostgres:
 		return fmt.Sprintf("\nALTER TABLE %s ADD COLUMN IF NOT EXISTS %s %s %s;\n", normalizedTableName, columnName, dataType, constraint), nil

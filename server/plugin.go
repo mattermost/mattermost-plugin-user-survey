@@ -2,11 +2,13 @@ package main
 
 import (
 	"database/sql"
-	"github.com/mattermost/mattermost-plugin-user-survey/server/api"
-	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
-	"github.com/mattermost/mattermost/server/public/pluginapi/cluster"
 	"net/http"
 	"sync"
+
+	"github.com/mattermost/mattermost/server/public/pluginapi/cluster"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/api"
+	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 
 	"github.com/mattermost/mattermost/server/public/pluginapi"
 
@@ -29,7 +31,7 @@ type Plugin struct {
 
 	store       *store.SQLStore
 	app         *app.UserSurveyApp
-	apiHandlers *api.APIHandlers
+	apiHandlers *api.Handlers
 
 	jobs []*cluster.Job
 }
@@ -116,6 +118,6 @@ func (p *Plugin) initApp(sqlStore *store.SQLStore) (*app.UserSurveyApp, error) {
 	return app.New(p.API, sqlStore, getConfigFunc)
 }
 
-func (p *Plugin) initAPI(app *app.UserSurveyApp) *api.APIHandlers {
+func (p *Plugin) initAPI(app *app.UserSurveyApp) *api.Handlers {
 	return api.New(app, p.API)
 }

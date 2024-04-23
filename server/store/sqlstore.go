@@ -2,9 +2,10 @@ package store
 
 import (
 	"database/sql"
+	"net/url"
+
 	"github.com/mattermost/squirrel"
 	"github.com/pkg/errors"
-	"net/url"
 
 	"github.com/mattermost/mattermost/server/public/plugin"
 	"github.com/mattermost/mattermost/server/public/pluginapi/cluster"
@@ -50,9 +51,9 @@ func New(params Params) (*SQLStore, error) {
 	}
 
 	if !store.skipMigrations {
-		if err := store.Migrate(); err != nil {
-			params.PluginAPI.LogError(`Table creation / migration failed`, "error", err.Error())
-			return nil, err
+		if migrationErr := store.Migrate(); migrationErr != nil {
+			params.PluginAPI.LogError(`Table creation / migration failed`, "error", migrationErr.Error())
+			return nil, migrationErr
 		}
 	}
 

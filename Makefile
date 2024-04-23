@@ -73,6 +73,25 @@ ifneq ($(HAS_SERVER),)
 	$(GOBIN)/golangci-lint run ./...
 endif
 
+## Runs eslint and golangci-lint auto style fixes
+.PHONY: check-style
+fix-style: apply webapp/node_modules install-go-tools
+	@echo Fixing for style guide compliance
+
+ifneq ($(HAS_WEBAPP),)
+	cd webapp && npm run fix
+	cd webapp && npm run check-types
+endif
+
+# It's highly recommended to run go-vet first
+# to find potential compile errors that could introduce
+# weird reports at golangci-lint step
+ifneq ($(HAS_SERVER),)
+	@echo Running golangci-lint
+	$(GO) vet ./...
+	$(GOBIN)/golangci-lint run ./... --fix
+endif
+
 ## Builds the server, if it exists, for all supported architectures, unless MM_SERVICESETTINGS_ENABLEDEVELOPER is set.
 .PHONY: server
 server:

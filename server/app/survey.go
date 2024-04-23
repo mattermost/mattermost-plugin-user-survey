@@ -5,21 +5,23 @@ package app
 
 import (
 	"fmt"
-	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
+
 	"github.com/pkg/errors"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 )
 
-func (app *UserSurveyApp) SaveSurvey(survey *model.Survey) error {
+func (a *UserSurveyApp) SaveSurvey(survey *model.Survey) error {
 	survey.SetDefaults()
 	if err := survey.IsValid(); err != nil {
 		return errors.Wrap(err, "SaveSurvey: survey is not valid")
 	}
 
-	return app.store.SaveSurvey(survey)
+	return a.store.SaveSurvey(survey)
 }
 
-func (app *UserSurveyApp) GetInProgressSurvey() (*model.Survey, error) {
-	surveys, err := app.store.GetSurveysByStatus(model.SurveyStatusInProgress)
+func (a *UserSurveyApp) GetInProgressSurvey() (*model.Survey, error) {
+	surveys, err := a.store.GetSurveysByStatus(model.SurveyStatusInProgress)
 	if err != nil {
 		return nil, errors.Wrap(err, "GetInProgressSurvey: failed to get in progress surveys from database")
 	}
@@ -35,8 +37,8 @@ func (app *UserSurveyApp) GetInProgressSurvey() (*model.Survey, error) {
 	return surveys[0], nil
 }
 
-func (app *UserSurveyApp) StopSurvey(surveyID string) error {
-	err := app.store.UpdateSurveyStatus(surveyID, model.SurveyStatusEnded)
+func (a *UserSurveyApp) StopSurvey(surveyID string) error {
+	err := a.store.UpdateSurveyStatus(surveyID, model.SurveyStatusEnded)
 	if err != nil {
 		return errors.Wrap(err, "StopSurvey: failed to stop survey")
 	}

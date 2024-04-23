@@ -4,9 +4,10 @@
 package main
 
 import (
+	"time"
+
 	"github.com/mattermost/mattermost/server/public/pluginapi/cluster"
 	"github.com/pkg/errors"
-	"time"
 )
 
 const (

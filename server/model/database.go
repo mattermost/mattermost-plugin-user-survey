@@ -2,10 +2,11 @@ package model
 
 import (
 	"database/sql"
+	"net/http"
+
 	mmModel "github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/pluginapi"
 	"github.com/pkg/errors"
-	"net/http"
 )
 
 const (

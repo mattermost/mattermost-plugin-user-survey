@@ -7,10 +7,12 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
+	"slices"
+
 	sq "github.com/mattermost/squirrel"
 	"github.com/pkg/errors"
-	"slices"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 )
 
 func (s *SQLStore) GetSurveysByStatus(status string) ([]*model.Survey, error) {
@@ -44,7 +46,19 @@ func (s *SQLStore) SurveysFromRows(rows *sql.Rows) ([]*model.Survey, error) {
 		var excludedTeamIDsJSON string
 		var questionsJSON string
 
-		err := rows.Scan(&survey.Id, &excludedTeamIDsJSON, &survey.CreateAt, &survey.UpdateAt, &survey.StartTime, &survey.Duration, &questionsJSON, &survey.Status)
+		err := rows.Scan(
+			&survey.ID,
+			&excludedTeamIDsJSON,
+			&survey.CreateAt,
+			&survey.UpdateAt,
+			&survey.StartTime,
+			&survey.Duration,
+			&questionsJSON,
+			&survey.Status,
+		)
+		if err != nil {
+			return nil, errors.Wrap(err, "SurveysFromRows failed to scan survey row")
+		}
 
 		err = json.Unmarshal([]byte(excludedTeamIDsJSON), &survey.ExcludedTeamIDs)
 		if err != nil {
@@ -54,10 +68,6 @@ func (s *SQLStore) SurveysFromRows(rows *sql.Rows) ([]*model.Survey, error) {
 		err = json.Unmarshal([]byte(questionsJSON), &survey.SurveyQuestions)
 		if err != nil {
 			return nil, errors.Wrap(err, "SurveysFromRows: failed to unmarshal survey questions string to survey")
-		}
-
-		if err != nil {
-			return nil, errors.Wrap(err, "SurveysFromRows failed to scan survey row")
 		}
 
 		surveys = append(surveys, &survey)
@@ -76,7 +86,7 @@ func (s *SQLStore) SaveSurvey(survey *model.Survey) error {
 		Insert(s.tablePrefix+"survey").
 		Columns(s.surveyColumns()...).
 		Values(
-			survey.Id,
+			survey.ID,
 			excludedTeamIDs,
 			survey.CreateAt,
 			survey.UpdateAt,

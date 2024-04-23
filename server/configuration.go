@@ -1,9 +1,11 @@
 package main
 
 import (
-	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
-	"github.com/pkg/errors"
 	"reflect"
+
+	"github.com/pkg/errors"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 )
 
 // Configuration captures the plugin's external Configuration as exposed in the Mattermost server

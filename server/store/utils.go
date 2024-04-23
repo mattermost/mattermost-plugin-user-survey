@@ -4,10 +4,12 @@
 package store
 
 import (
-	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
+	"strings"
+
 	"github.com/mattermost/squirrel"
 	"github.com/pkg/errors"
-	"strings"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 )
 
 var (

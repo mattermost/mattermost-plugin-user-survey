@@ -1,9 +1,10 @@
 package app
 
 import (
+	"github.com/mattermost/mattermost/server/public/plugin"
+
 	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 	"github.com/mattermost/mattermost-plugin-user-survey/server/store"
-	"github.com/mattermost/mattermost/server/public/plugin"
 )
 
 type UserSurveyApp struct {
