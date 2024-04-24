@@ -15,7 +15,7 @@ export type Props = {
     data: DropdownOption;
 }
 function TeamIcon({data}: Props) {
-    const teamIconLastUpdated = (data.raw as Team).last_team_icon_update;
+    const teamIconLastUpdated = (data.raw as Team)?.last_team_icon_update;
     if (teamIconLastUpdated) {
         const teamURL = Client4.getTeamIconUrl(data.value, teamIconLastUpdated);
         return (

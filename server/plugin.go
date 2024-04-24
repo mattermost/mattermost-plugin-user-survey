@@ -57,7 +57,7 @@ func (p *Plugin) OnActivate() error {
 	p.app = app
 	p.apiHandlers = api
 
-	if err := p.startScheduledJobs(); err != nil {
+	if err := p.startManageSurveyJob(); err != nil {
 		return err
 	}
 

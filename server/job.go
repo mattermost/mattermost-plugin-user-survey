@@ -17,15 +17,7 @@ const (
 	startSurveyJonInterval = 15 * time.Second
 )
 
-func (p *Plugin) startScheduledJobs() error {
-	if err := p.startSurveyStartJob(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (p *Plugin) startSurveyStartJob() error {
+func (p *Plugin) startManageSurveyJob() error {
 	job, err := cluster.Schedule(
 		p.API,
 		jobKeyStartSurveyJob,

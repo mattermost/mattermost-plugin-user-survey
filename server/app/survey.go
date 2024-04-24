@@ -27,7 +27,12 @@ func (a *UserSurveyApp) GetInProgressSurvey() (*model.Survey, error) {
 	}
 
 	if len(surveys) > 1 {
-		return nil, fmt.Errorf("more than one in-progress survey found in the database. There should only be one in-progress survey, in_progress_survey_count: %d", len(surveys))
+		var surveyIDs string
+		for _, survey := range surveys {
+			surveyIDs += " " + survey.ID
+		}
+
+		return nil, fmt.Errorf("more than one in-progress survey found in the database. There should only be one in-progress survey, in_progress_survey_count: %d, surveyIDs: %s", len(surveys), surveyIDs)
 	}
 
 	if len(surveys) == 0 {

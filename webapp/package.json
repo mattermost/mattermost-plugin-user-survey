@@ -3,7 +3,7 @@
   "scripts": {
     "build": "webpack --mode=production",
     "build:watch": "webpack --mode=production --watch",
-    "debug": "webpack --mode=production",
+    "debug": "webpack --mode=development",
     "debug:watch": "webpack --mode=development --watch",
     "lint": "npm run check:eslint && npm run check:stylelint",
     "check:eslint": "eslint --ignore-pattern node_modules --ignore-pattern dist --ext .js --ext .jsx --ext tsx --ext ts ./src --quiet --cache",
