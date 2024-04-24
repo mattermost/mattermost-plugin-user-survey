@@ -9,11 +9,11 @@ import (
 
 type UserSurveyApp struct {
 	api       plugin.API
-	store     *store.SQLStore
+	store     store.Store
 	getConfig func() *model.Config
 }
 
-func New(api plugin.API, store *store.SQLStore, getConfigFunc func() *model.Config) (*UserSurveyApp, error) {
+func New(api plugin.API, store store.Store, getConfigFunc func() *model.Config) (*UserSurveyApp, error) {
 	return &UserSurveyApp{
 		api:       api,
 		store:     store,

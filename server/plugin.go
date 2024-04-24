@@ -29,7 +29,7 @@ type Plugin struct {
 	// setConfiguration for usage.
 	configuration *model.Config
 
-	store       *store.SQLStore
+	store       store.Store
 	app         *app.UserSurveyApp
 	apiHandlers *api.Handlers
 
@@ -74,7 +74,7 @@ func (p *Plugin) OnDeactivate() error {
 	return nil
 }
 
-func (p *Plugin) initStore() (*store.SQLStore, error) {
+func (p *Plugin) initStore() (store.Store, error) {
 	storeParams, err := p.createStoreParams()
 	if err != nil {
 		return nil, err
@@ -111,11 +111,11 @@ func (p *Plugin) getMasterDB() (*sql.DB, error) {
 	return db, nil
 }
 
-func (p *Plugin) initApp(sqlStore *store.SQLStore) (*app.UserSurveyApp, error) {
+func (p *Plugin) initApp(store store.Store) (*app.UserSurveyApp, error) {
 	getConfigFunc := func() *model.Config {
 		return p.getConfiguration()
 	}
-	return app.New(p.API, sqlStore, getConfigFunc)
+	return app.New(p.API, store, getConfigFunc)
 }
 
 func (p *Plugin) initAPI(app *app.UserSurveyApp) *api.Handlers {
