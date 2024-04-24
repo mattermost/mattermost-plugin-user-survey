@@ -1,3 +1,6 @@
+// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
+// See LICENSE.txt for license information.
+
 package store
 
 import (
@@ -6,6 +9,8 @@ import (
 	"log"
 	"testing"
 	"time"
+
+	testUtils "github.com/mattermost/mattermost-plugin-user-survey/server/utils/testutils"
 
 	sqlUtils "github.com/mattermost/mattermost/server/public/utils/sql"
 
@@ -143,7 +148,7 @@ func prepareMySQLDatabase() (string, func(), error) {
 
 func mockAPIWithBasicMocks(dbType string) *plugintest.API {
 	mockAPI := &plugintest.API{}
-	MockLogs(mockAPI)
+	testUtils.MockLogs(mockAPI)
 
 	// these mocks are required for database migrations to run
 	mockAPI.On("KVSetWithOptions", "mutex_user_survey_migration_db_mutex", mock.Anything, mock.Anything).Return(true, nil)
@@ -161,11 +166,4 @@ func mockAPIWithBasicMocks(dbType string) *plugintest.API {
 	mockAPI.On("GetUnsanitizedConfig").Return(mmConfig)
 
 	return mockAPI
-}
-
-func MockLogs(mockAPI *plugintest.API) {
-	mockAPI.On("LogDebug", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
-	mockAPI.On("LogInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
-	mockAPI.On("LogWarn", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
-	mockAPI.On("LogError", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
 }

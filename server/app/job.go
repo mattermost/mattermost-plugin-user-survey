@@ -13,14 +13,14 @@ import (
 
 // JobManageSurveyStatus is a scheduled job that ends a running survey if needed,
 // and starts a new survey if needed.
-func (a *UserSurveyApp) JobManageSurveyStatus() {
+func (a *UserSurveyApp) JobManageSurveyStatus() error {
 	a.api.LogDebug("JobManageSurveyStatus: running, fetching in progress survey")
 
 	// first check if there is an in progress survey in the database
 	inProgressSurvey, err := a.GetInProgressSurvey()
 	if err != nil {
 		a.api.LogError("JobManageSurveyStatus: failed to get in progress survey from database", "error", err.Error())
-		return
+		return err
 	}
 
 	var checkForNewSurvey bool
@@ -38,7 +38,7 @@ func (a *UserSurveyApp) JobManageSurveyStatus() {
 
 			if err := a.StopSurvey(inProgressSurvey.ID); err != nil {
 				a.api.LogError("JobManageSurveyStatus: failed to stop survey", "error", err.Error())
-				return
+				return err
 			}
 		} else {
 			// if the survey hasn't ended, don't check for new survey
@@ -51,9 +51,11 @@ func (a *UserSurveyApp) JobManageSurveyStatus() {
 		a.api.LogDebug("JobManageSurveyStatus: checking if a new survey can start now")
 		if err := a.startNewSurveyIfNeeded(); err != nil {
 			a.api.LogError("JobManageSurveyStatus: failed to start ne survey if needed", "error", err.Error())
-			return
+			return err
 		}
 	}
+
+	return nil
 }
 
 func (a *UserSurveyApp) startNewSurveyIfNeeded() error {

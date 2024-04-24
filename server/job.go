@@ -30,7 +30,9 @@ func (p *Plugin) startSurveyStartJob() error {
 		p.API,
 		jobKeyStartSurveyJob,
 		cluster.MakeWaitForInterval(startSurveyJonInterval),
-		p.app.JobManageSurveyStatus,
+		func() {
+			_ = p.app.JobManageSurveyStatus()
+		},
 	)
 
 	if err != nil {

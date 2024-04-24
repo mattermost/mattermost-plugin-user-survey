@@ -2,8 +2,9 @@ package store
 
 import (
 	"database/sql"
-	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 	"text/template"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 )
 
 type Store interface {
