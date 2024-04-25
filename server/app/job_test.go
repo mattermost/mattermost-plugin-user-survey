@@ -20,6 +20,15 @@ func TestJobManageSurveyStatus(t *testing.T) {
 
 		mockedStore.On("GetSurveysByStatus", "in_progress").Return(nil, nil)
 
+		app.getConfig = func() *model.Config {
+			return &model.Config{
+				SurveyDateTime: model.SurveyDateTime{
+					Date: "02/01/3000",
+					Time: "15:04",
+				},
+			}
+		}
+
 		err := app.JobManageSurveyStatus()
 		require.NoError(t, err)
 
