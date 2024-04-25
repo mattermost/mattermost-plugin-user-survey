@@ -6,12 +6,13 @@ package app
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mattermost/mattermost-plugin-user-survey/server/assets"
-	"github.com/mattermost/mattermost-plugin-user-survey/server/utils"
+
 	mmModal "github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/pluginapi"
-
 	"github.com/pkg/errors"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/assets"
+	"github.com/mattermost/mattermost-plugin-user-survey/server/utils"
 
 	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 )
@@ -96,16 +97,15 @@ func (a *UserSurveyApp) SendSurvey(userID string, survey *model.Survey) error {
 		return errors.Wrap(appErr, "SendSurvey: failed to get user from ID: "+userID)
 	}
 
-	// open a DB between the bot and the user
+	// open a DM between the bot and the user
 	botUserDM, appErr := a.api.GetDirectChannel(user.Id, a.botID)
 	if appErr != nil {
-		errMsg := fmt.Sprintf("SendSurvey: failed to create DM between survey bot and user, botID: %s, userID: %s, error: %w", a.botID, userID, appErr.Error())
+		errMsg := fmt.Sprintf("SendSurvey: failed to create DM between survey bot and user, botID: %s, userID: %s, error: %s", a.botID, userID, appErr.Error())
 		a.api.LogError(errMsg)
 		return errors.Wrap(errors.New(appErr.Error()), errMsg)
 	}
 
 	postMessage := fmt.Sprintf(":wave: Hey @%s! %s", user.Username, survey.SurveyQuestions.SurveyMessageText)
-
 	post := &mmModal.Post{
 		UserId:    a.botID,
 		Message:   postMessage,

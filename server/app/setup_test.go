@@ -19,12 +19,13 @@ func SetupTests(t *testing.T) (*UserSurveyApp, *mocks.Store) {
 	testutils.MockLogs(mockedAPI)
 
 	mockedStore := mocks.Store{}
+	mockedDriver := plugintest.Driver{}
 
 	getConfig := func() *model.Config {
 		return &model.Config{}
 	}
 
-	app, err := New(mockedAPI, &mockedStore, getConfig)
+	app, err := New(mockedAPI, &mockedStore, getConfig, &mockedDriver)
 	require.NoError(t, err)
 
 	return app, &mockedStore

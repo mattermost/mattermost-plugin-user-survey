@@ -13,6 +13,12 @@ func (api *Handlers) handleConnected(w http.ResponseWriter, r *http.Request) {
 	// check if the user is eligible for receiving the survey, if so,
 	// send the survey.
 
+	userID := r.Header.Get(headerMattermostUserID)
+	if userID == "" {
+		http.Error(w, "Unauthenticated", http.StatusUnauthorized)
+		return
+	}
+
 	inProgressSurvey, err := api.app.GetInProgressSurvey()
 	if err != nil {
 		http.Error(w, "Failed to fetch survey details", http.StatusInternalServerError)
@@ -25,7 +31,6 @@ func (api *Handlers) handleConnected(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID := r.Header.Get(headerMattermostUserID)
 	alreadySent, err := api.app.GetSurveySentToUser(userID, inProgressSurvey.ID)
 	if err != nil {
 		http.Error(w, "Failed to check survey status", http.StatusInternalServerError)

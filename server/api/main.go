@@ -5,7 +5,6 @@ package api
 
 import (
 	"fmt"
-	mmModal "github.com/mattermost/mattermost/server/public/model"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -47,7 +46,5 @@ func (api *Handlers) handlePing(w http.ResponseWriter, r *http.Request) {
 }
 
 func ReturnStatusOK(w http.ResponseWriter) {
-	m := make(map[string]string)
-	m[mmModal.STATUS] = mmModal.StatusOk
-	w.Write([]byte(mmModal.MapToJSON(m)))
+	_, _ = w.Write([]byte("{\"status\":\"OK\"}"))
 }
