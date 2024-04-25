@@ -26,7 +26,7 @@ func (api *Handlers) handleConnected(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userID := r.Header.Get(headerMattermostUserID)
-	alreadySent, err := api.app.SurveySentToUser(userID, inProgressSurvey.ID)
+	alreadySent, err := api.app.GetSurveySentToUser(userID, inProgressSurvey.ID)
 	if err != nil {
 		http.Error(w, "Failed to check survey status", http.StatusInternalServerError)
 		return
@@ -37,7 +37,7 @@ func (api *Handlers) handleConnected(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := api.app.SendUserSurvey(userID, inProgressSurvey); err != nil {
+	if err := api.app.SendSurvey(userID, inProgressSurvey); err != nil {
 		http.Error(w, "Failed to send survey", http.StatusInternalServerError)
 		return
 	}

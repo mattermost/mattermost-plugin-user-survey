@@ -17,7 +17,8 @@ import (
 )
 
 const (
-	surveyPostType = "custom_user_survey"
+	surveyPostType  = "custom_user_survey"
+	surveySentValue = "survey_sent"
 )
 
 func (a *UserSurveyApp) SaveSurvey(survey *model.Survey) error {
@@ -60,35 +61,45 @@ func (a *UserSurveyApp) StopSurvey(surveyID string) error {
 	return nil
 }
 
-func (a *UserSurveyApp) SurveySentToUser(userID, surveyID string) (bool, error) {
-	data, err := a.api.KVGet(utils.KeyUserSurveySentStatus(userID, surveyID))
-	if err != nil {
-		a.api.LogError("Failed to get user survey sent status key from KV store", "userID", userID, "surveyID", surveyID, "error", err.Error())
-		return false, errors.Wrap(err, "SurveySentToUser: Failed to get user survey sent status key from KV store")
+func (a *UserSurveyApp) GetSurveySentToUser(userID, surveyID string) (bool, error) {
+	data, appErr := a.api.KVGet(utils.KeyUserSurveySentStatus(userID, surveyID))
+	if appErr != nil {
+		a.api.LogError("GetSurveySentToUser: Failed to get user survey sent status key from KV store", "userID", userID, "surveyID", surveyID, "error", appErr.Error())
+		return false, errors.Wrap(appErr, "GetSurveySentToUser: Failed to get user survey sent status key from KV store")
 	}
 
 	if data == nil {
 		return false, nil
 	}
 
-	return string(data) == "survey_sent", nil
+	return string(data) == surveySentValue, nil
 }
 
-func (a *UserSurveyApp) SendUserSurvey(userID string, survey *model.Survey) error {
+func (a *UserSurveyApp) SetSurveySentToUser(userID, surveyID string) error {
+	appErr := a.api.KVSet(utils.KeyUserSurveySentStatus(userID, surveyID), []byte(surveySentValue))
+	if appErr != nil {
+		a.api.LogError("SetSurveySentToUser: Failed to set user survey sent status in KV store", "userID", userID, "surveyID", surveyID, "error", appErr.Error())
+		return errors.Wrap(appErr, "SetSurveySentToUser: Failed to set user survey sent status in KV store")
+	}
+
+	return nil
+}
+
+func (a *UserSurveyApp) SendSurvey(userID string, survey *model.Survey) error {
 	if err := a.ensureSurveyBot(); err != nil {
 		return err
 	}
 
 	user, appErr := a.api.GetUser(userID)
 	if appErr != nil {
-		a.api.LogError("SendUserSurvey: failed to get user from ID", "userID", user, "error", appErr.Error())
-		return errors.Wrap(appErr, "SendUserSurvey: failed to get user from ID: "+userID)
+		a.api.LogError("SendSurvey: failed to get user from ID", "userID", user, "error", appErr.Error())
+		return errors.Wrap(appErr, "SendSurvey: failed to get user from ID: "+userID)
 	}
 
 	// open a DB between the bot and the user
 	botUserDM, appErr := a.api.GetDirectChannel(user.Id, a.botID)
 	if appErr != nil {
-		errMsg := fmt.Sprintf("SendUserSurvey: failed to create DM between survey bot and user, botID: %s, userID: %s, error: %w", a.botID, userID, appErr.Error())
+		errMsg := fmt.Sprintf("SendSurvey: failed to create DM between survey bot and user, botID: %s, userID: %s, error: %w", a.botID, userID, appErr.Error())
 		a.api.LogError(errMsg)
 		return errors.Wrap(errors.New(appErr.Error()), errMsg)
 	}
@@ -104,16 +115,20 @@ func (a *UserSurveyApp) SendUserSurvey(userID string, survey *model.Survey) erro
 
 	questionsJSON, err := json.Marshal(survey.SurveyQuestions)
 	if err != nil {
-		a.api.LogError("SendUserSurvey: failed to marshal survey questions for inserting into post", "error", err.Error())
-		return errors.Wrap(err, "SendUserSurvey: failed to marshal survey questions for inserting into post")
+		a.api.LogError("SendSurvey: failed to marshal survey questions for inserting into post", "error", err.Error())
+		return errors.Wrap(err, "SendSurvey: failed to marshal survey questions for inserting into post")
 	}
 
 	post.AddProp("survey_questions", questionsJSON)
 
 	_, appErr = a.api.CreatePost(post)
 	if appErr != nil {
-		a.api.LogError("SendUserSurvey: failed to create survey post for user", "userID", userID, "error", appErr.Error())
-		return errors.Wrap(appErr, "SendUserSurvey: failed to create survey post for user")
+		a.api.LogError("SendSurvey: failed to create survey post for user", "userID", userID, "error", appErr.Error())
+		return errors.Wrap(appErr, "SendSurvey: failed to create survey post for user")
+	}
+
+	if err := a.SetSurveySentToUser(userID, survey.ID); err != nil {
+		return errors.Wrap(err, "SendSurvey: failed to mark survey set to user")
 	}
 
 	return nil
