@@ -20,6 +20,8 @@ import (
 const (
 	surveyPostType  = "custom_user_survey"
 	surveySentValue = "survey_sent"
+
+	cacheValidityUserTeamFilter = 15
 )
 
 func (a *UserSurveyApp) SaveSurvey(survey *model.Survey) error {
@@ -62,7 +64,21 @@ func (a *UserSurveyApp) StopSurvey(surveyID string) error {
 	return nil
 }
 
-func (a *UserSurveyApp) GetSurveySentToUser(userID, surveyID string) (bool, error) {
+func (a *UserSurveyApp) ShouldSendSurvey(userID string, survey *model.Survey) (bool, error) {
+	alreadySent, err := a.getSurveySentToUser(userID, survey.ID)
+	if err != nil {
+		return false, errors.Wrap(err, "ShouldSendSurvey")
+	}
+
+	if alreadySent {
+		return false, nil
+	}
+
+	// check if user meets the team filtering criteria
+	filterCriteriaMet, err := a.userMeetsTeamFilterCriteria(userID)
+}
+
+func (a *UserSurveyApp) getSurveySentToUser(userID, surveyID string) (bool, error) {
 	data, appErr := a.api.KVGet(utils.KeyUserSurveySentStatus(userID, surveyID))
 	if appErr != nil {
 		a.api.LogError("GetSurveySentToUser: Failed to get user survey sent status key from KV store", "userID", userID, "surveyID", surveyID, "error", appErr.Error())
@@ -76,11 +92,11 @@ func (a *UserSurveyApp) GetSurveySentToUser(userID, surveyID string) (bool, erro
 	return string(data) == surveySentValue, nil
 }
 
-func (a *UserSurveyApp) SetSurveySentToUser(userID, surveyID string) error {
+func (a *UserSurveyApp) setSurveySentToUser(userID, surveyID string) error {
 	appErr := a.api.KVSet(utils.KeyUserSurveySentStatus(userID, surveyID), []byte(surveySentValue))
 	if appErr != nil {
-		a.api.LogError("SetSurveySentToUser: Failed to set user survey sent status in KV store", "userID", userID, "surveyID", surveyID, "error", appErr.Error())
-		return errors.Wrap(appErr, "SetSurveySentToUser: Failed to set user survey sent status in KV store")
+		a.api.LogError("setSurveySentToUser: Failed to set user survey sent status in KV store", "userID", userID, "surveyID", surveyID, "error", appErr.Error())
+		return errors.Wrap(appErr, "setSurveySentToUser: Failed to set user survey sent status in KV store")
 	}
 
 	return nil
@@ -127,7 +143,7 @@ func (a *UserSurveyApp) SendSurvey(userID string, survey *model.Survey) error {
 		return errors.Wrap(appErr, "SendSurvey: failed to create survey post for user")
 	}
 
-	if err := a.SetSurveySentToUser(userID, survey.ID); err != nil {
+	if err := a.setSurveySentToUser(userID, survey.ID); err != nil {
 		return errors.Wrap(err, "SendSurvey: failed to mark survey set to user")
 	}
 
@@ -153,4 +169,37 @@ func (a *UserSurveyApp) ensureSurveyBot() error {
 
 	a.botID = botID
 	return nil
+}
+
+func (a *UserSurveyApp) userMeetsTeamFilterCriteria(userID string, survey *model.Survey) (bool, error) {
+	teams, err := a.api.GetTeamsForUser(userID)
+	if err != nil {
+		a.api.LogError("userMeetsTeamFilterCriteria: failed to get user teams", "userID", userID, "error", err.Error())
+		return false, errors.Wrap(err, "userMeetsTeamFilterCriteria: failed to get user teams")
+	}
+
+	filteredTeamMap := map[string]bool{}
+	for _, teamID := range survey.ExcludedTeamIDs {
+		filteredTeamMap[teamID] = true
+	}
+
+	userMemberOfFilteredTeam := false
+
+	for _, team := range teams {
+		if _, ok := filteredTeamMap[team.Id]; ok {
+			userMemberOfFilteredTeam = true
+			break
+		}
+	}
+
+	return userMemberOfFilteredTeam, nil
+}
+
+func (a *UserSurveyApp) getCachedUserMeetsTeamFilterCriteria(userID string, survey *model.Survey) (bool, error) {
+	return false, nil
+}
+
+func (a *UserSurveyApp) setCachedUserMeetsTeamFilterCriteria(userID, surveyID string, meetsCriteria bool) (bool, error) {
+	key := utils.KeyUserTeamMembershipFilterCache(userID, surveyID)
+	a.api.KVSetWithExpiry(key, []byte(fmt.Sprintf("%t", meetsCriteria)), 100)
 }

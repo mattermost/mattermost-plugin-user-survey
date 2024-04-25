@@ -15,6 +15,8 @@ type Config struct {
 	SurveyExpiry    SurveyExpiry    `json:"SurveyExpiry"`
 	SurveyQuestions SurveyQuestions `json:"SurveyQuestions"`
 	TeamFilter      TeamFilter      `json:"TeamFilter"`
+
+	metadataFilteredTeamMap map[string]bool
 }
 
 type SurveyDateTime struct {
@@ -59,4 +61,16 @@ func (c *Config) ParsedTime() (time.Time, error) {
 	}
 
 	return parsedTime, nil
+}
+
+func (c *Config) InitMetadata() {
+	c.metadataFilteredTeamMap = map[string]bool{}
+
+	for _, teamID := range c.TeamFilter.FilteredTeamIDs {
+		c.metadataFilteredTeamMap[teamID] = true
+	}
+}
+
+func (c *Config) GetFilterTeamMetadata() map[string]bool {
+	return c.metadataFilteredTeamMap
 }

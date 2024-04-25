@@ -31,7 +31,7 @@ func (api *Handlers) handleConnected(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	alreadySent, err := api.app.GetSurveySentToUser(userID, inProgressSurvey.ID)
+	alreadySent, err := api.app.ShouldSendSurvey(userID, inProgressSurvey)
 	if err != nil {
 		http.Error(w, "Failed to check survey status", http.StatusInternalServerError)
 		return
