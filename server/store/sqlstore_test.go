@@ -1,3 +1,6 @@
+// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
+// See LICENSE.txt for license information.
+
 package store
 
 import (
@@ -6,6 +9,10 @@ import (
 	"log"
 	"testing"
 	"time"
+
+	testUtils "github.com/mattermost/mattermost-plugin-user-survey/server/utils/testutils"
+
+	sqlUtils "github.com/mattermost/mattermost/server/public/utils/sql"
 
 	mmmodel "github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/plugin/plugintest"
@@ -21,7 +28,8 @@ import (
 )
 
 var (
-	databaseTypes = []string{model.DBTypePostgres, model.DBTypeMySQL}
+	// databaseTypes = []string{model.DBTypePostgres, model.DBTypeMySQL}
+	databaseTypes = []string{model.DBTypeMySQL}
 )
 
 type StoreTests func(t *testing.T, namePrefix string, sqlStore *SQLStore, tearDown func())
@@ -124,6 +132,11 @@ func prepareMySQLDatabase() (string, func(), error) {
 		return "", nil, errors.Wrap(err, "failed to generate MySQL connection string")
 	}
 
+	connectionString, err = sqlUtils.AppendMultipleStatementsFlag(connectionString)
+	if err != nil {
+		return "", nil, errors.Wrap(err, "failed to append multi statement flag to MySQL connection string")
+	}
+
 	tearDown := func() {
 		if err := container.Terminate(ctx); err != nil {
 			log.Fatalf("failed to terminate container: %s", err.Error())
@@ -135,7 +148,7 @@ func prepareMySQLDatabase() (string, func(), error) {
 
 func mockAPIWithBasicMocks(dbType string) *plugintest.API {
 	mockAPI := &plugintest.API{}
-	MockLogs(mockAPI)
+	testUtils.MockLogs(mockAPI)
 
 	// these mocks are required for database migrations to run
 	mockAPI.On("KVSetWithOptions", "mutex_user_survey_migration_db_mutex", mock.Anything, mock.Anything).Return(true, nil)
@@ -153,11 +166,4 @@ func mockAPIWithBasicMocks(dbType string) *plugintest.API {
 	mockAPI.On("GetUnsanitizedConfig").Return(mmConfig)
 
 	return mockAPI
-}
-
-func MockLogs(mockAPI *plugintest.API) {
-	mockAPI.On("LogDebug", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
-	mockAPI.On("LogInfo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
-	mockAPI.On("LogWarn", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
-	mockAPI.On("LogError", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
 }

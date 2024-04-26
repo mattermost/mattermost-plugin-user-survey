@@ -73,6 +73,25 @@ ifneq ($(HAS_SERVER),)
 	$(GOBIN)/golangci-lint run ./...
 endif
 
+## Runs eslint and golangci-lint auto style fixes
+.PHONY: check-style
+fix-style: apply webapp/node_modules install-go-tools
+	@echo Fixing for style guide compliance
+
+ifneq ($(HAS_WEBAPP),)
+	cd webapp && npm run fix
+	cd webapp && npm run check-types
+endif
+
+# It's highly recommended to run go-vet first
+# to find potential compile errors that could introduce
+# weird reports at golangci-lint step
+ifneq ($(HAS_SERVER),)
+	@echo Running golangci-lint
+	$(GO) vet ./...
+	$(GOBIN)/golangci-lint run ./... --fix
+endif
+
 ## Builds the server, if it exists, for all supported architectures, unless MM_SERVICESETTINGS_ENABLEDEVELOPER is set.
 .PHONY: server
 server:
@@ -289,3 +308,8 @@ logs-watch:
 # Help documentation à la https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 help:
 	@cat Makefile build/*.mk | grep -v '\.PHONY' |  grep -v '\help:' | grep -B1 -E '^[a-zA-Z0-9_.-]+:.*' | sed -e "s/:.*//" | sed -e "s/^## //" |  grep -v '\-\-' | sed '1!G;h;$$!d' | awk 'NR%2{printf "\033[36m%-30s\033[0m",$$0;next;}1' | sort
+
+.PHONEY: mocks
+mocks:
+	$(GO) install github.com/vektra/mockery/v2/...@v2.42.3
+	$(GOBIN)/mockery --dir server/store --output server/store/mocks --all --note "Regenerate this file using make mocks"

@@ -2,9 +2,13 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 	"sync"
+
+	"github.com/mattermost/mattermost/server/public/pluginapi/cluster"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/api"
+	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 
 	"github.com/mattermost/mattermost/server/public/pluginapi"
 
@@ -23,15 +27,17 @@ type Plugin struct {
 
 	// configuration is the active plugin configuration. Consult getConfiguration and
 	// setConfiguration for usage.
-	configuration *configuration
+	configuration *model.Config
 
-	store *store.SQLStore
+	store       store.Store
+	app         *app.UserSurveyApp
+	apiHandlers *api.Handlers
 
-	app *app.UserSurveyApp
+	jobs []*cluster.Job
 }
 
 func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Hello, world!")
+	p.apiHandlers.Router.ServeHTTP(w, r)
 }
 
 func (p *Plugin) OnActivate() error {
@@ -45,8 +51,15 @@ func (p *Plugin) OnActivate() error {
 		return err
 	}
 
+	api := p.initAPI(app)
+
 	p.store = sqlStore
 	p.app = app
+	p.apiHandlers = api
+
+	if err := p.startManageSurveyJob(); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -61,7 +74,7 @@ func (p *Plugin) OnDeactivate() error {
 	return nil
 }
 
-func (p *Plugin) initStore() (*store.SQLStore, error) {
+func (p *Plugin) initStore() (store.Store, error) {
 	storeParams, err := p.createStoreParams()
 	if err != nil {
 		return nil, err
@@ -98,6 +111,13 @@ func (p *Plugin) getMasterDB() (*sql.DB, error) {
 	return db, nil
 }
 
-func (p *Plugin) initApp(sqlStore *store.SQLStore) (*app.UserSurveyApp, error) {
-	return app.New(sqlStore)
+func (p *Plugin) initApp(store store.Store) (*app.UserSurveyApp, error) {
+	getConfigFunc := func() *model.Config {
+		return p.getConfiguration()
+	}
+	return app.New(p.API, store, getConfigFunc)
+}
+
+func (p *Plugin) initAPI(app *app.UserSurveyApp) *api.Handlers {
+	return api.New(app, p.API)
 }

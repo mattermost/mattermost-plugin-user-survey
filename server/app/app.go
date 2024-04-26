@@ -1,15 +1,22 @@
 package app
 
 import (
+	"github.com/mattermost/mattermost/server/public/plugin"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 	"github.com/mattermost/mattermost-plugin-user-survey/server/store"
 )
 
 type UserSurveyApp struct {
-	store *store.SQLStore
+	api       plugin.API
+	store     store.Store
+	getConfig func() *model.Config
 }
 
-func New(store *store.SQLStore) (*UserSurveyApp, error) {
+func New(api plugin.API, store store.Store, getConfigFunc func() *model.Config) (*UserSurveyApp, error) {
 	return &UserSurveyApp{
-		store: store,
+		api:       api,
+		store:     store,
+		getConfig: getConfigFunc,
 	}, nil
 }

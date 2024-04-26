@@ -1,0 +1,1 @@
+{{ dropColumnIfNeeded "survey" "status"}}

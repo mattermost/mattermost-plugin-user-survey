@@ -4,6 +4,9 @@ import (
 	"database/sql"
 	"net/url"
 
+	"github.com/mattermost/squirrel"
+	"github.com/pkg/errors"
+
 	"github.com/mattermost/mattermost/server/public/plugin"
 	"github.com/mattermost/mattermost/server/public/pluginapi/cluster"
 
@@ -22,6 +25,7 @@ type SQLStore struct {
 	pluginAPI        plugin.API
 	isBinaryParams   bool
 	skipMigrations   bool
+	schemaName       string
 }
 
 func New(params Params) (*SQLStore, error) {
@@ -47,10 +51,15 @@ func New(params Params) (*SQLStore, error) {
 	}
 
 	if !store.skipMigrations {
-		if err := store.Migrate(); err != nil {
-			params.PluginAPI.LogError(`Table creation / migration failed`, "error", err.Error())
-			return nil, err
+		if migrationErr := store.Migrate(); migrationErr != nil {
+			params.PluginAPI.LogError(`Table creation / migration failed`, "error", migrationErr.Error())
+			return nil, migrationErr
 		}
+	}
+
+	store.schemaName, err = store.GetSchemaName()
+	if err != nil {
+		return nil, errors.Wrap(err, "SQLStore.New failed to get database schema name")
 	}
 
 	return store, nil
@@ -76,4 +85,8 @@ func (s *SQLStore) newMutex(name string) (*cluster.Mutex, error) {
 
 func (s *SQLStore) Shutdown() error {
 	return s.db.Close()
+}
+
+func (s *SQLStore) getQueryBuilder() squirrel.StatementBuilderType {
+	return squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).RunWith(s.db)
 }

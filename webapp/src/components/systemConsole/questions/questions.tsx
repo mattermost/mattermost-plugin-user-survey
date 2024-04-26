@@ -22,7 +22,7 @@ const DEFAULT_SURVEY_MESSAGE_TEXT = 'Please take a few moments to help us improv
 
 function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting}: CustomSettingChildComponentProp) {
     const [questions, setQuestions] = useState<Question[]>([]);
-    const [surveyMessageText, setSurveyMessageText] = useState<string>(DEFAULT_SURVEY_MESSAGE_TEXT);
+    const [surveyMessageText, setSurveyMessageText] = useState<string>();
 
     const generateDefaultQuestions = (): Question[] => {
         return [
@@ -81,7 +81,7 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting
             setQuestions(newQuestions);
             saveSettings({
                 questions: newQuestions,
-                surveyMessageText,
+                surveyMessageText: surveyMessageText || DEFAULT_SURVEY_MESSAGE_TEXT,
             });
         },
         200,
@@ -138,7 +138,7 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting
                     <input
                         maxLength={1000}
                         className='form-control questionInput'
-                        defaultValue={DEFAULT_SURVEY_MESSAGE_TEXT}
+                        defaultValue={surveyMessageText}
                         placeholder='Survey message text'
                         required={true}
                         onChange={surveyMessageTextChangeHandler}
