@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/gorilla/mux v1.8.1
-	github.com/mattermost/mattermost/server/public v0.1.0
+	github.com/mattermost/mattermost/server/public v0.1.1
 	github.com/mattermost/morph v1.1.0
 	github.com/mattermost/squirrel v0.4.0
 	github.com/pborman/uuid v1.2.1
