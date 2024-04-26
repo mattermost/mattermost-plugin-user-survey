@@ -80,7 +80,7 @@ func (a *UserSurveyApp) ShouldSendSurvey(userID string, survey *model.Survey) (b
 
 	inExcludedTeam, err := a.userInExcludedTeams(userID, survey)
 	if err != nil {
-		return false, errors.Wrap(err, "ShouldSendSurvey: failed to check is in filted teams or not")
+		return false, errors.Wrap(err, "ShouldSendSurvey: failed to check is in filtered teams or not")
 	}
 
 	return !inExcludedTeam, nil

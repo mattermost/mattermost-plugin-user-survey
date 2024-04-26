@@ -8,16 +8,20 @@ import (
 )
 
 func (api *Handlers) handleConnected(w http.ResponseWriter, r *http.Request) {
+	if err := api.RequireAuthentication(w, r); err != nil {
+		return
+	}
+
+	if err := api.DisallowGuestUsers(w, r); err != nil {
+		return
+	}
+
 	// check if there is an in progress survey, if so,
 	// check if the user has already been sent to the user, if not,
 	// check if the user is eligible for receiving the survey, if so,
 	// send the survey.
 
 	userID := r.Header.Get(headerMattermostUserID)
-	if userID == "" {
-		http.Error(w, "Unauthenticated", http.StatusUnauthorized)
-		return
-	}
 
 	inProgressSurvey, err := api.app.GetInProgressSurvey()
 	if err != nil {
