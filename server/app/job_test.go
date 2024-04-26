@@ -16,11 +16,11 @@ import (
 
 func TestJobManageSurveyStatus(t *testing.T) {
 	t.Run("base case - no in progress survey, no new survey to start", func(t *testing.T) {
-		app, mockedStore := SetupTests(t)
+		th := SetupAppTest(t)
 
-		mockedStore.On("GetSurveysByStatus", "in_progress").Return(nil, nil)
+		th.MockedStore.On("GetSurveysByStatus", "in_progress").Return(nil, nil)
 
-		app.getConfig = func() *model.Config {
+		th.App.getConfig = func() *model.Config {
 			return &model.Config{
 				SurveyDateTime: model.SurveyDateTime{
 					Date: "02/01/3000",
@@ -29,34 +29,34 @@ func TestJobManageSurveyStatus(t *testing.T) {
 			}
 		}
 
-		err := app.JobManageSurveyStatus()
+		err := th.App.JobManageSurveyStatus()
 		require.NoError(t, err)
 
-		mockedStore.AssertExpectations(t)
-		mockedStore.AssertNotCalled(t, "UpdateSurveyStatus", mock.Anything, "ended")
-		mockedStore.AssertNotCalled(t, "SaveSurvey", mock.Anything)
+		th.MockedStore.AssertExpectations(t)
+		th.MockedStore.AssertNotCalled(t, "UpdateSurveyStatus", mock.Anything, "ended")
+		th.MockedStore.AssertNotCalled(t, "SaveSurvey", mock.Anything)
 	})
 
 	t.Run("in progress survey in database but it doesn't end yet", func(t *testing.T) {
-		app, mockedStore := SetupTests(t)
+		th := SetupAppTest(t)
 
 		inProgressSurvey := &model.Survey{
 			Duration:  10,
 			StartTime: mmModal.GetMillis(),
 		}
 
-		mockedStore.On("GetSurveysByStatus", "in_progress").Return([]*model.Survey{inProgressSurvey}, nil)
+		th.MockedStore.On("GetSurveysByStatus", "in_progress").Return([]*model.Survey{inProgressSurvey}, nil)
 
-		err := app.JobManageSurveyStatus()
+		err := th.App.JobManageSurveyStatus()
 		require.NoError(t, err)
 
-		mockedStore.AssertExpectations(t)
-		mockedStore.AssertNotCalled(t, "UpdateSurveyStatus", mock.Anything, "ended")
-		mockedStore.AssertNotCalled(t, "SaveSurvey", mock.Anything)
+		th.MockedStore.AssertExpectations(t)
+		th.MockedStore.AssertNotCalled(t, "UpdateSurveyStatus", mock.Anything, "ended")
+		th.MockedStore.AssertNotCalled(t, "SaveSurvey", mock.Anything)
 	})
 
 	t.Run("in progress survey in database that should stop now, but new survey doesn't start yet", func(t *testing.T) {
-		app, mockedStore := SetupTests(t)
+		th := SetupAppTest(t)
 
 		tenDaysAgo := time.Now().Add(-10 * 24 * time.Hour).UnixMilli()
 		inProgressSurvey := &model.Survey{
@@ -65,10 +65,10 @@ func TestJobManageSurveyStatus(t *testing.T) {
 			StartTime: tenDaysAgo,
 		}
 
-		mockedStore.On("GetSurveysByStatus", "in_progress").Return([]*model.Survey{inProgressSurvey}, nil)
-		mockedStore.On("UpdateSurveyStatus", "survey_1", "ended").Return(nil)
+		th.MockedStore.On("GetSurveysByStatus", "in_progress").Return([]*model.Survey{inProgressSurvey}, nil)
+		th.MockedStore.On("UpdateSurveyStatus", "survey_1", "ended").Return(nil)
 
-		app.getConfig = func() *model.Config {
+		th.App.getConfig = func() *model.Config {
 			return &model.Config{
 				SurveyDateTime: model.SurveyDateTime{
 					Date: "02/01/3000",
@@ -77,15 +77,15 @@ func TestJobManageSurveyStatus(t *testing.T) {
 			}
 		}
 
-		err := app.JobManageSurveyStatus()
+		err := th.App.JobManageSurveyStatus()
 		require.NoError(t, err)
 
-		mockedStore.AssertExpectations(t)
-		mockedStore.AssertNotCalled(t, "SaveSurvey", mock.Anything)
+		th.MockedStore.AssertExpectations(t)
+		th.MockedStore.AssertNotCalled(t, "SaveSurvey", mock.Anything)
 	})
 
 	t.Run("in progress survey in database that should stop now and a new survey can be started", func(t *testing.T) {
-		app, mockedStore := SetupTests(t)
+		th := SetupAppTest(t)
 
 		tenDaysAgo := time.Now().Add(-10 * 24 * time.Hour).UnixMilli()
 		inProgressSurvey := &model.Survey{
@@ -94,11 +94,11 @@ func TestJobManageSurveyStatus(t *testing.T) {
 			StartTime: tenDaysAgo,
 		}
 
-		mockedStore.On("GetSurveysByStatus", "in_progress").Return([]*model.Survey{inProgressSurvey}, nil)
-		mockedStore.On("UpdateSurveyStatus", "survey_1", "ended").Return(nil)
-		mockedStore.On("SaveSurvey", mock.Anything).Return(nil)
+		th.MockedStore.On("GetSurveysByStatus", "in_progress").Return([]*model.Survey{inProgressSurvey}, nil)
+		th.MockedStore.On("UpdateSurveyStatus", "survey_1", "ended").Return(nil)
+		th.MockedStore.On("SaveSurvey", mock.Anything).Return(nil)
 
-		app.getConfig = func() *model.Config {
+		th.App.getConfig = func() *model.Config {
 			return &model.Config{
 				SurveyExpiry: model.SurveyExpiry{
 					Days: 10,
@@ -121,9 +121,9 @@ func TestJobManageSurveyStatus(t *testing.T) {
 			}
 		}
 
-		err := app.JobManageSurveyStatus()
+		err := th.App.JobManageSurveyStatus()
 		require.NoError(t, err)
 
-		mockedStore.AssertExpectations(t)
+		th.MockedStore.AssertExpectations(t)
 	})
 }

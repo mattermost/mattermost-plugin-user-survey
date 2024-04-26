@@ -65,6 +65,10 @@ func (a *UserSurveyApp) StopSurvey(surveyID string) error {
 }
 
 func (a *UserSurveyApp) ShouldSendSurvey(userID string, survey *model.Survey) (bool, error) {
+	if survey.Status != model.SurveyStatusInProgress {
+		return false, errors.New("ShouldSendSurvey: a survey can only be sent against an in progress survey")
+	}
+
 	alreadySent, err := a.getSurveySentToUser(userID, survey.ID)
 	if err != nil {
 		return false, errors.Wrap(err, "ShouldSendSurvey: failed to check if survey is already sent to the user")

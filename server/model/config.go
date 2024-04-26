@@ -4,7 +4,6 @@
 package model
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -43,11 +42,6 @@ func (c *Config) ShouldSurveyStart() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-
-	fmt.Println("##################################################################################################")
-	fmt.Println(utcDateTime.String())
-	fmt.Println(parsedTime.String())
-	fmt.Println("##################################################################################################")
 
 	return utcDateTime.After(parsedTime) || utcDateTime.Equal(parsedTime), nil
 }
