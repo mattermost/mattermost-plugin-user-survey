@@ -4,6 +4,7 @@
 package model
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -15,8 +16,6 @@ type Config struct {
 	SurveyExpiry    SurveyExpiry    `json:"SurveyExpiry"`
 	SurveyQuestions SurveyQuestions `json:"SurveyQuestions"`
 	TeamFilter      TeamFilter      `json:"TeamFilter"`
-
-	metadataFilteredTeamMap map[string]bool
 }
 
 type SurveyDateTime struct {
@@ -45,6 +44,11 @@ func (c *Config) ShouldSurveyStart() (bool, error) {
 		return false, err
 	}
 
+	fmt.Println("##################################################################################################")
+	fmt.Println(utcDateTime.String())
+	fmt.Println(parsedTime.String())
+	fmt.Println("##################################################################################################")
+
 	return utcDateTime.After(parsedTime) || utcDateTime.Equal(parsedTime), nil
 }
 
@@ -61,16 +65,4 @@ func (c *Config) ParsedTime() (time.Time, error) {
 	}
 
 	return parsedTime, nil
-}
-
-func (c *Config) InitMetadata() {
-	c.metadataFilteredTeamMap = map[string]bool{}
-
-	for _, teamID := range c.TeamFilter.FilteredTeamIDs {
-		c.metadataFilteredTeamMap[teamID] = true
-	}
-}
-
-func (c *Config) GetFilterTeamMetadata() map[string]bool {
-	return c.metadataFilteredTeamMap
 }

@@ -21,7 +21,7 @@ const (
 	surveyPostType  = "custom_user_survey"
 	surveySentValue = "survey_sent"
 
-	cacheValidityUserTeamFilter = 15
+	cacheValidityUserTeamFilter = 7200 // 2 hours in seconds
 )
 
 func (a *UserSurveyApp) SaveSurvey(survey *model.Survey) error {
@@ -67,15 +67,19 @@ func (a *UserSurveyApp) StopSurvey(surveyID string) error {
 func (a *UserSurveyApp) ShouldSendSurvey(userID string, survey *model.Survey) (bool, error) {
 	alreadySent, err := a.getSurveySentToUser(userID, survey.ID)
 	if err != nil {
-		return false, errors.Wrap(err, "ShouldSendSurvey")
+		return false, errors.Wrap(err, "ShouldSendSurvey: failed to check if survey is already sent to the user")
 	}
 
 	if alreadySent {
 		return false, nil
 	}
 
-	// check if user meets the team filtering criteria
-	filterCriteriaMet, err := a.userMeetsTeamFilterCriteria(userID)
+	inExcludedTeam, err := a.userInExcludedTeams(userID, survey)
+	if err != nil {
+		return false, errors.Wrap(err, "ShouldSendSurvey: failed to check is in filted teams or not")
+	}
+
+	return !inExcludedTeam, nil
 }
 
 func (a *UserSurveyApp) getSurveySentToUser(userID, surveyID string) (bool, error) {
@@ -171,11 +175,23 @@ func (a *UserSurveyApp) ensureSurveyBot() error {
 	return nil
 }
 
-func (a *UserSurveyApp) userMeetsTeamFilterCriteria(userID string, survey *model.Survey) (bool, error) {
-	teams, err := a.api.GetTeamsForUser(userID)
+func (a *UserSurveyApp) userInExcludedTeams(userID string, survey *model.Survey) (bool, error) {
+	// check in cache first
+	result, ok, err := a.getCachedUserNotInFilteredTeams(userID, survey.ID)
 	if err != nil {
-		a.api.LogError("userMeetsTeamFilterCriteria: failed to get user teams", "userID", userID, "error", err.Error())
-		return false, errors.Wrap(err, "userMeetsTeamFilterCriteria: failed to get user teams")
+		return false, err
+	}
+
+	if ok {
+		// if there was a cache hit, just return the cached result
+		return result, nil
+	}
+
+	// compute data on cache miss
+	teams, appErr := a.api.GetTeamsForUser(userID)
+	if appErr != nil {
+		a.api.LogError("userInExcludedTeams: failed to get user teams", "userID", userID, "error", appErr.Error())
+		return false, errors.Wrap(errors.New(appErr.Error()), "userInExcludedTeams: failed to get user teams")
 	}
 
 	filteredTeamMap := map[string]bool{}
@@ -192,14 +208,34 @@ func (a *UserSurveyApp) userMeetsTeamFilterCriteria(userID string, survey *model
 		}
 	}
 
+	// don't break if unable to save in cache.
+	// The function logs the error so we're fine.
+	_ = a.setCacheUserNotInFilteredTeams(userID, survey.ID, userMemberOfFilteredTeam)
 	return userMemberOfFilteredTeam, nil
 }
 
-func (a *UserSurveyApp) getCachedUserMeetsTeamFilterCriteria(userID string, survey *model.Survey) (bool, error) {
-	return false, nil
+func (a *UserSurveyApp) getCachedUserNotInFilteredTeams(userID, surveyID string) (result bool, ok bool, err error) {
+	key := utils.KeyUserTeamMembershipFilterCache(userID, surveyID)
+	item, appErr := a.api.KVGet(key)
+	if appErr != nil {
+		a.api.LogError("getCachedUserNotInFilteredTeams: failed to get cache for user team filter criteria", "error", appErr.Error())
+		return false, false, errors.New("getCachedUserNotInFilteredTeams: failed to get cache for user team filter criteria, error: " + appErr.Error())
+	}
+
+	if item == nil {
+		return false, false, nil
+	}
+
+	return string(item) == "true", true, nil
 }
 
-func (a *UserSurveyApp) setCachedUserMeetsTeamFilterCriteria(userID, surveyID string, meetsCriteria bool) (bool, error) {
+func (a *UserSurveyApp) setCacheUserNotInFilteredTeams(userID, surveyID string, meetsCriteria bool) error {
 	key := utils.KeyUserTeamMembershipFilterCache(userID, surveyID)
-	a.api.KVSetWithExpiry(key, []byte(fmt.Sprintf("%t", meetsCriteria)), 100)
+	appErr := a.api.KVSetWithExpiry(key, []byte(fmt.Sprintf("%t", meetsCriteria)), cacheValidityUserTeamFilter)
+	if appErr != nil {
+		a.api.LogError("setCacheUserNotInFilteredTeams: failed to set cache for user team filter criteria", "error", appErr.Error())
+		return errors.New("setCacheUserNotInFilteredTeams: failed to set cache for user team filter criteria, error: " + appErr.Error())
+	}
+
+	return nil
 }

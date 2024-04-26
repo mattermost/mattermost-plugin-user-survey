@@ -31,13 +31,13 @@ func (api *Handlers) handleConnected(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	alreadySent, err := api.app.ShouldSendSurvey(userID, inProgressSurvey)
+	should, err := api.app.ShouldSendSurvey(userID, inProgressSurvey)
 	if err != nil {
 		http.Error(w, "Failed to check survey status", http.StatusInternalServerError)
 		return
 	}
 
-	if alreadySent {
+	if !should {
 		ReturnStatusOK(w)
 		return
 	}

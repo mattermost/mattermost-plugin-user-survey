@@ -50,7 +50,7 @@ func (a *UserSurveyApp) JobManageSurveyStatus() error {
 	if checkForNewSurvey {
 		a.api.LogDebug("JobManageSurveyStatus: checking if a new survey can start now")
 		if err := a.startNewSurveyIfNeeded(); err != nil {
-			a.api.LogError("JobManageSurveyStatus: failed to start ne survey if needed", "error", err.Error())
+			a.api.LogError("JobManageSurveyStatus: failed to start new survey if needed", "error", err.Error())
 			return err
 		}
 	}

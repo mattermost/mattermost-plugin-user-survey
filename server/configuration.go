@@ -83,7 +83,6 @@ func (p *Plugin) OnConfigurationChange() error {
 		return errors.Wrap(err, "failed to load plugin configuration")
 	}
 
-	cfg.SystemConsoleSetting.InitMetadata()
 	p.setConfiguration(cfg.SystemConsoleSetting)
 
 	return nil
