@@ -26,6 +26,8 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
         dateCreated: format(new Date(), 'dd/MM/yyyy'),
     });
 
+    console.log(post.props);
+
     const {
         survey,
         linearScaleQuestionID,
@@ -121,8 +123,17 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
         });
     }, [disabled, questionResponseChangeHandler, survey]);
 
+    // this is to stop any click event from any of the
+    // inner buttons, input fields etc from being propagated and
+    // triggering the "click post to open thread" feature.
+    // Without this, clicking anywhere inside the survey, even on the button and input fields
+    // triggers opening of the post in RHS.
+    const stopPropagation = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+    }, []);
+
     return (
-        <div className='CustomSurveyPost vertical'>
+        <div className='CustomSurveyPost vertical' onClick={stopPropagation}>
             {renderedMessage}
 
             <div className='CustomSurveyPost_survey vertical'>
