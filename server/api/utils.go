@@ -4,8 +4,9 @@
 package api
 
 import (
-	"github.com/pkg/errors"
 	"net/http"
+
+	"github.com/pkg/errors"
 )
 
 func (api *Handlers) RequireAuthentication(w http.ResponseWriter, r *http.Request) error {
@@ -20,7 +21,7 @@ func (api *Handlers) RequireAuthentication(w http.ResponseWriter, r *http.Reques
 
 func (api *Handlers) DisallowGuestUsers(w http.ResponseWriter, r *http.Request) error {
 	userID := r.Header.Get(headerMattermostUserID)
-	user, appErr :=api.pluginAPI.GetUser(userID)
+	user, appErr := api.pluginAPI.GetUser(userID)
 	if appErr != nil {
 		api.pluginAPI.LogError("DisallowGuestUsers: failed to get user from plugin API", "error", appErr.Error())
 		return errors.New(appErr.Error())

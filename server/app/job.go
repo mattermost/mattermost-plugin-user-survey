@@ -81,8 +81,14 @@ func (a *UserSurveyApp) startNewSurveyIfNeeded() error {
 			UpdateAt:        now,
 			StartTime:       startTime.UnixMilli(),
 			Duration:        config.SurveyExpiry.Days,
-			SurveyQuestions: config.SurveyQuestions,
+			SurveyQuestions: model.SurveyQuestions{SurveyMessageText: config.SurveyQuestions.SurveyMessageText},
 			Status:          model.SurveyStatusInProgress,
+		}
+
+		for _, question := range config.SurveyQuestions.Questions {
+			if question.Text != "" {
+				survey.SurveyQuestions.Questions = append(survey.SurveyQuestions.Questions, question)
+			}
 		}
 
 		a.api.LogDebug("JobManageSurveyStatus: saving new survey")

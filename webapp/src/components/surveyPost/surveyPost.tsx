@@ -32,7 +32,7 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
         surveyExpired,
         responsesExist,
         setResponses,
-    } = useUserSurvey(post.props.surveyID);
+    } = useUserSurvey(post);
 
     const disabled = responsesExist || surveyExpired;
 

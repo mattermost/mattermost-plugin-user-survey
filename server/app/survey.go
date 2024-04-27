@@ -143,7 +143,7 @@ func (a *UserSurveyApp) SendSurvey(userID string, survey *model.Survey) error {
 		return errors.Wrap(err, "SendSurvey: failed to marshal survey questions for inserting into post")
 	}
 
-	post.AddProp("survey_questions", questionsJSON)
+	post.AddProp("survey_questions", string(questionsJSON))
 
 	_, appErr = a.api.CreatePost(post)
 	if appErr != nil {
