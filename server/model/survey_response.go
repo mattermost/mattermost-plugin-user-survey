@@ -17,7 +17,7 @@ const (
 type SurveyResponse struct {
 	ID           string            `json:"ID"`
 	UserID       string            `json:"userID"`
-	SurveyId     string            `json:"surveyId"`
+	SurveyID     string            `json:"surveyID"`
 	Response     map[string]string `json:"response"` // map of question ID to response
 	CreateAt     int64             `json:"createAt"`
 	ResponseType string            `json:"responseType"`
@@ -42,7 +42,7 @@ func (sr *SurveyResponse) IsValid() error {
 		return errors.New("survey response user ID cannot be empty")
 	}
 
-	if sr.SurveyId == "" {
+	if sr.SurveyID == "" {
 		return errors.New("survey response survey ID cannot be empty")
 	}
 

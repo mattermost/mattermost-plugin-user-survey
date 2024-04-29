@@ -36,7 +36,7 @@ func (api *Handlers) handleSubmitSurveyResponse(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	response.SurveyId = surveyID
+	response.SurveyID = surveyID
 	response.UserID = userID
 
 	// now that we have response, we'll verify that the response matches

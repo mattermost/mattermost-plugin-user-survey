@@ -5,11 +5,12 @@ import {useCallback, useEffect, useRef, useState} from 'react';
 
 import type {Post} from '@mattermost/types/posts';
 
-import type {Survey, SurveyResponse, UserSurvey} from 'types/plugin';
+import type {SurveyResponse, UserSurvey} from 'types/plugin';
 
 export function useUserSurvey(post: Post) {
     const [survey, setSurvey] = useState<UserSurvey>();
     const linearScaleQuestionID = useRef<string>();
+    const submittedAtDate = useRef<Date>();
 
     const responsesExist = survey?.response !== undefined;
     const surveyExpired = survey?.status === 'ended';
@@ -19,7 +20,13 @@ export function useUserSurvey(post: Post) {
             return;
         }
 
-        const survey = JSON.parse(post.props.survey_questions) as Survey;
+        const survey = JSON.parse(post.props.survey_questions) as UserSurvey;
+        if (post.props.survey_response) {
+            survey.response = {
+                response: JSON.parse(post.props.survey_response),
+            } as SurveyResponse;
+        }
+
         setSurvey(survey);
 
         // the first system, linear scale question is the system default rating question
@@ -28,7 +35,11 @@ export function useUserSurvey(post: Post) {
         if (linearScaleQuestion) {
             linearScaleQuestionID.current = linearScaleQuestion.id;
         }
-    }, [post.props.survey_questions]);
+
+        if (post.props.survey_response_create_at) {
+            submittedAtDate.current = new Date(parseInt(post.props.survey_response_create_at, 10));
+        }
+    }, [post.props.survey_questions, post.props.survey_response]);
 
     const setResponses = useCallback((responses: SurveyResponse) => {
         setSurvey((oldSurvey) => {
@@ -49,5 +60,6 @@ export function useUserSurvey(post: Post) {
         responsesExist,
         surveyExpired,
         setResponses,
+        submittedAtDate,
     };
 }

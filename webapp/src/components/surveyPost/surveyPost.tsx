@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import client from 'client/client';
 import React, {useCallback, useMemo, useRef, useState} from 'react';
 
 import Button from 'components/common/button/button';
@@ -12,10 +13,6 @@ import type {MattermostWindow} from 'types/mattermost-webapp';
 import type {CustomPostTypeComponentProps, SurveyResponse} from 'types/plugin';
 
 import './style.scss';
-
-import client from 'client/client';
-
-import {ClientError} from 'mattermost-redux/client/client4';
 
 const QUESTION_COMPONENTS = {
     linear_scale: LinearScaleQuestion,
@@ -34,6 +31,7 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
         surveyExpired,
         responsesExist,
         setResponses,
+        submittedAtDate,
     } = useUserSurvey(post);
 
     const disabled = responsesExist || surveyExpired;
@@ -172,8 +170,7 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
                 {
                     disabled && !surveyExpired &&
                     <div className='surveyMessage submitted'>
-                        {/*{`Response submitted on ${survey?.response?.dateCreated}.`}*/}
-                        {/*    TODO - display submission date embedded in post props */}
+                        {`Response submitted on ${submittedAtDate.current?.toLocaleDateString()}`}
                     </div>
                 }
 

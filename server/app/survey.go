@@ -69,12 +69,12 @@ func (a *UserSurveyApp) ShouldSendSurvey(userID string, survey *model.Survey) (b
 		return false, errors.New("ShouldSendSurvey: a survey can only be sent against an in progress survey")
 	}
 
-	alreadySent, err := a.getSurveySentToUser(userID, survey.ID)
+	postID, err := a.getSurveySentToUser(userID, survey.ID)
 	if err != nil {
 		return false, errors.Wrap(err, "ShouldSendSurvey: failed to check if survey is already sent to the user")
 	}
 
-	if alreadySent {
+	if postID != "" {
 		return false, nil
 	}
 
@@ -86,22 +86,22 @@ func (a *UserSurveyApp) ShouldSendSurvey(userID string, survey *model.Survey) (b
 	return !inExcludedTeam, nil
 }
 
-func (a *UserSurveyApp) getSurveySentToUser(userID, surveyID string) (bool, error) {
-	data, appErr := a.api.KVGet(utils.KeyUserSurveySentStatus(userID, surveyID))
+func (a *UserSurveyApp) getSurveySentToUser(userID, surveyID string) (string, error) {
+	postID, appErr := a.api.KVGet(utils.KeyUserSurveySentStatus(userID, surveyID))
 	if appErr != nil {
 		a.api.LogError("GetSurveySentToUser: Failed to get user survey sent status key from KV store", "userID", userID, "surveyID", surveyID, "error", appErr.Error())
-		return false, errors.Wrap(appErr, "GetSurveySentToUser: Failed to get user survey sent status key from KV store")
+		return "", errors.Wrap(appErr, "GetSurveySentToUser: Failed to get user survey sent status key from KV store")
 	}
 
-	if data == nil {
-		return false, nil
+	if postID == nil {
+		return "", nil
 	}
 
-	return string(data) == surveySentValue, nil
+	return string(postID), nil
 }
 
-func (a *UserSurveyApp) setSurveySentToUser(userID, surveyID string) error {
-	appErr := a.api.KVSet(utils.KeyUserSurveySentStatus(userID, surveyID), []byte(surveySentValue))
+func (a *UserSurveyApp) setSurveySentToUser(userID, surveyID, postID string) error {
+	appErr := a.api.KVSet(utils.KeyUserSurveySentStatus(userID, surveyID), []byte(postID))
 	if appErr != nil {
 		a.api.LogError("setSurveySentToUser: Failed to set user survey sent status in KV store", "userID", userID, "surveyID", surveyID, "error", appErr.Error())
 		return errors.Wrap(appErr, "setSurveySentToUser: Failed to set user survey sent status in KV store")
@@ -146,13 +146,13 @@ func (a *UserSurveyApp) SendSurvey(userID string, survey *model.Survey) error {
 	post.AddProp("survey_questions", string(questionsJSON))
 	post.AddProp("survey_id", survey.ID)
 
-	_, appErr = a.api.CreatePost(post)
+	createdPost, appErr := a.api.CreatePost(post)
 	if appErr != nil {
 		a.api.LogError("SendSurvey: failed to create survey post for user", "userID", userID, "error", appErr.Error())
 		return errors.Wrap(appErr, "SendSurvey: failed to create survey post for user")
 	}
 
-	if err := a.setSurveySentToUser(userID, survey.ID); err != nil {
+	if err := a.setSurveySentToUser(userID, survey.ID, createdPost.Id); err != nil {
 		return errors.Wrap(err, "SendSurvey: failed to mark survey set to user")
 	}
 

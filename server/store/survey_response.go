@@ -25,7 +25,7 @@ func (s *SQLStore) SaveSurveyResponse(response *model.SurveyResponse) error {
 		Values(
 			response.ID,
 			response.UserID,
-			response.SurveyId,
+			response.SurveyID,
 			string(questionResponseJSON),
 			response.CreateAt,
 			response.ResponseType,
@@ -115,7 +115,7 @@ func (s *SQLStore) surveyResponsesFromRows(rows *sql.Rows) ([]*model.SurveyRespo
 		err := rows.Scan(
 			&surveyResponse.ID,
 			&surveyResponse.UserID,
-			&surveyResponse.SurveyId,
+			&surveyResponse.SurveyID,
 			&responseString,
 			&surveyResponse.CreateAt,
 			&surveyResponse.ResponseType,
