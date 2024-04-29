@@ -1,7 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {format} from 'date-fns';
 import React, {useCallback, useMemo, useRef, useState} from 'react';
 
 import Button from 'components/common/button/button';
@@ -14,6 +13,8 @@ import type {CustomPostTypeComponentProps, SurveyResponse} from 'types/plugin';
 
 import './style.scss';
 
+import client from 'client/client';
+
 const QUESTION_COMPONENTS = {
     linear_scale: LinearScaleQuestion,
     text: TextQuestion,
@@ -22,11 +23,8 @@ const QUESTION_COMPONENTS = {
 function SurveyPost({post}: CustomPostTypeComponentProps) {
     const [errorMessage, setErrorMessage] = useState<string>();
     const draftResponse = useRef<SurveyResponse>({
-        responses: {},
-        dateCreated: format(new Date(), 'dd/MM/yyyy'),
+        response: {},
     });
-
-    console.log(post.props);
 
     const {
         survey,
@@ -38,9 +36,18 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
 
     const disabled = responsesExist || surveyExpired;
 
+    const submitSurveyResponse = useCallback(async () => {
+        // make API call here. Send draftResponse.current as payload...
+        console.log(draftResponse.current);
+
+        const response = await client.submitSurveyResponse(post.props.survey_id, draftResponse.current);
+        console.log(response);
+        return {success: true, error: false};
+    }, [post.props.survey_id]);
+
     const submitSurveyHandler = useCallback(async () => {
         if (!draftResponse.current ||
-            Object.keys(draftResponse.current?.responses).length === 0
+            Object.keys(draftResponse.current?.response).length === 0
         ) {
             return;
         }
@@ -52,12 +59,7 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
         } else if (response.error) {
             setErrorMessage('Failed to submit survey response. Please try again.');
         }
-    }, [setResponses]);
-
-    const submitSurveyResponse = async () => {
-        // make API call here. Send draftResponse.current as payload...
-        return {success: true, error: false};
-    };
+    }, [setResponses, submitSurveyResponse]);
 
     // this function is to submit the linear scale rating as soon as a user selects it,
     // even without pressing the submit button.
@@ -66,22 +68,21 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
             return;
         }
 
-        const ratingQuestionResponse = draftResponse.current?.responses[linearScaleQuestionID.current];
+        const ratingQuestionResponse = draftResponse.current?.response[linearScaleQuestionID.current];
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const payload: SurveyResponse = {
-            responses: {
+            response: {
                 [linearScaleQuestionID.current]: ratingQuestionResponse,
             },
-            dateCreated: draftResponse.current?.dateCreated,
         };
 
         // send payload to submit survey response API here...
     }, [linearScaleQuestionID]);
 
     const questionResponseChangeHandler = useCallback(
-        (questionID: string, response: unknown) => {
+        (questionID: string, response: string) => {
             if (draftResponse.current) {
-                draftResponse.current.responses[questionID] = response;
+                draftResponse.current.response[questionID] = response;
             }
 
             // if this is the system rating question, submit response ASAP
@@ -116,7 +117,7 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
                         question={question}
                         responseChangeHandler={questionResponseChangeHandler}
                         disabled={disabled}
-                        value={survey.response?.responses[question.id] as string}
+                        value={survey.response?.response[question.id] as string}
                     />
                 </div>
             );
@@ -133,7 +134,10 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
     }, []);
 
     return (
-        <div className='CustomSurveyPost vertical' onClick={stopPropagation}>
+        <div
+            className='CustomSurveyPost vertical'
+            onClick={stopPropagation}
+        >
             {renderedMessage}
 
             <div className='CustomSurveyPost_survey vertical'>
@@ -162,7 +166,8 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
                 {
                     disabled && !surveyExpired &&
                     <div className='surveyMessage submitted'>
-                        {`Response submitted on ${survey?.response?.dateCreated}.`}
+                        {/*{`Response submitted on ${survey?.response?.dateCreated}.`}*/}
+                        {/*    TODO - display submission date embedded in post props */}
                     </div>
                 }
 

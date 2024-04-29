@@ -92,6 +92,22 @@ func (s *Survey) ShouldSurveyStop() bool {
 	return utcDateTime.After(endTime) || utcDateTime.Equal(endTime)
 }
 
+func (s *Survey) GetSystemRatingQuestionID() (string, error) {
+	var questionID string
+	for _, question := range s.SurveyQuestions.Questions {
+		if question.System && question.Type == QuestionTypeLinearScale {
+			questionID = question.ID
+			break
+		}
+	}
+
+	if questionID == "" {
+		return "", errors.New("no Mattermost rating question found")
+	}
+
+	return questionID, nil
+}
+
 type Question struct {
 	ID        string `json:"id"`
 	Text      string `json:"text"`

@@ -144,6 +144,7 @@ func (a *UserSurveyApp) SendSurvey(userID string, survey *model.Survey) error {
 	}
 
 	post.AddProp("survey_questions", string(questionsJSON))
+	post.AddProp("survey_id", survey.ID)
 
 	_, appErr = a.api.CreatePost(post)
 	if appErr != nil {

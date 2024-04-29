@@ -16,4 +16,5 @@ type Store interface {
 	SurveysFromRows(rows *sql.Rows) ([]*model.Survey, error)
 	SaveSurvey(survey *model.Survey) error
 	UpdateSurveyStatus(surveyID, status string) error
+	SaveSurveyResponse(response *model.SurveyResponse) error
 }

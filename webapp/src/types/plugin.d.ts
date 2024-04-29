@@ -211,8 +211,7 @@ export type CustomPostTypeComponentProps = {
 }
 
 export type SurveyResponse = {
-    responses: {[key: string]: unknown};
-    dateCreated: string;
+    response: {[key: string]: string};
 }
 
 export type Survey = {

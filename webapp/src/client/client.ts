@@ -3,6 +3,8 @@
 
 import HttpClient from 'client/httpClient';
 
+import type {SurveyResponse} from 'types/plugin';
+
 import manifest from '../manifest';
 
 class SurveyClient extends HttpClient {
@@ -14,6 +16,11 @@ class SurveyClient extends HttpClient {
 
     doConnected = async () => {
         return this.doPost(`${this.url}/connected`);
+    };
+
+    submitSurveyResponse = async (surveyID: string, response: SurveyResponse) => {
+        const url = `${this.url}/survey/${surveyID}/response`;
+        return this.doPost(url, response);
     };
 }
 
