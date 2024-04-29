@@ -15,6 +15,8 @@ import './style.scss';
 
 import client from 'client/client';
 
+import {ClientError} from 'mattermost-redux/client/client4';
+
 const QUESTION_COMPONENTS = {
     linear_scale: LinearScaleQuestion,
     text: TextQuestion,
@@ -37,12 +39,16 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
     const disabled = responsesExist || surveyExpired;
 
     const submitSurveyResponse = useCallback(async () => {
-        // make API call here. Send draftResponse.current as payload...
-        console.log(draftResponse.current);
+        let success: boolean;
 
-        const response = await client.submitSurveyResponse(post.props.survey_id, draftResponse.current);
-        console.log(response);
-        return {success: true, error: false};
+        try {
+            await client.submitSurveyResponse(post.props.survey_id, draftResponse.current);
+            success = true;
+        } catch (error) {
+            success = false;
+        }
+
+        return {success, error: !success};
     }, [post.props.survey_id]);
 
     const submitSurveyHandler = useCallback(async () => {

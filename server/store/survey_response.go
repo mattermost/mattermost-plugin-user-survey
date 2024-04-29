@@ -16,7 +16,7 @@ func (s *SQLStore) SaveSurveyResponse(response *model.SurveyResponse) error {
 		return errors.Wrap(err, "SaveSurveyResponse: failed to marshal response map")
 	}
 
-	_, err = s.getQueryBuilder().
+	query := s.getQueryBuilder().
 		Insert(s.tablePrefix+"survey_responses").
 		Columns(s.surveyResponseColumns()...).
 		Values(
@@ -25,9 +25,15 @@ func (s *SQLStore) SaveSurveyResponse(response *model.SurveyResponse) error {
 			response.SurveyId,
 			string(questionResponseJSON),
 			response.CreateAt,
-		).Exec()
+		)
 
-	if err != nil {
+	if s.dbType == model.DBTypeMySQL {
+		query = query.Suffix("ON DUPLICATE KEY UPDATE id = id")
+	} else {
+		query = query.Suffix("ON CONFLICT (user_id, survey_id) DO NOTHING")
+	}
+
+	if _, err = query.Exec(); err != nil {
 		s.pluginAPI.LogError("SaveSurveyResponse: failed to save survey response in database", "error", err.Error())
 		return errors.Wrap(err, "SaveSurveyResponse: failed to save survey response in database")
 	}

@@ -21,7 +21,3 @@ func (a *UserSurveyApp) SaveSurveyResponse(response *model.SurveyResponse) error
 
 	return nil
 }
-
-func (a *UserSurveyApp) saveUserResponseSubmitted(userID, surveyID string) error {
-
-}
