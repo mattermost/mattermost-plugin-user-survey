@@ -88,6 +88,8 @@ func matchSurveyAndResponse(surveyID string, survey *model.Survey, response *mod
 		if _, ok := response.Response[linearScaleQuestionID]; !ok {
 			return errors.New("linear scale question must be answered")
 		}
+
+		response.ResponseType = model.ResponseTypePartial
 	} else {
 		// make sure answered questions belong to the survey
 		surveyQuestionIDMap := map[string]bool{}
@@ -95,11 +97,13 @@ func matchSurveyAndResponse(surveyID string, survey *model.Survey, response *mod
 			surveyQuestionIDMap[question.ID] = true
 		}
 
-		for responseQuestionID, _ := range response.Response {
+		for responseQuestionID := range response.Response {
 			if _, ok := surveyQuestionIDMap[responseQuestionID]; !ok {
 				return errors.New("invalid question ID found in submitted answer")
 			}
 		}
+
+		response.ResponseType = model.ResponseTypeComplete
 	}
 
 	return nil

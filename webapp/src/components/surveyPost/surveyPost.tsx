@@ -82,8 +82,8 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
             },
         };
 
-        // send payload to submit survey response API here...
-    }, [linearScaleQuestionID]);
+        client.submitSurveyResponse(post.props.survey_id, payload);
+    }, [linearScaleQuestionID, post.props.survey_id]);
 
     const questionResponseChangeHandler = useCallback(
         (questionID: string, response: string) => {

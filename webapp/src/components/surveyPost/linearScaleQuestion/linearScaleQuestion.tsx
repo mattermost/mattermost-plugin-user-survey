@@ -28,7 +28,7 @@ function LinearScaleQuestion({
 }: Props) {
     const [selectedValue, setSelectedValue] = useState<number | undefined>(value ? Number.parseInt(value, 10) : undefined);
 
-    const debouncedChangeHandler = useDebouncedCallback(responseChangeHandler);
+    const debouncedChangeHandler = useDebouncedCallback(responseChangeHandler, 200);
 
     const indentClickHandler = useCallback((value: number) => {
         setSelectedValue(value);

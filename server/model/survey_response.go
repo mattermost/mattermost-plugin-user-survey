@@ -9,12 +9,18 @@ import (
 	"github.com/pkg/errors"
 )
 
+const (
+	ResponseTypeComplete = "complete"
+	ResponseTypePartial  = "partial"
+)
+
 type SurveyResponse struct {
-	ID       string            `json:"ID"`
-	UserID   string            `json:"userID"`
-	SurveyId string            `json:"surveyId"`
-	Response map[string]string `json:"response"` // map of question ID to response
-	CreateAt int64             `json:"createAt"`
+	ID           string            `json:"ID"`
+	UserID       string            `json:"userID"`
+	SurveyId     string            `json:"surveyId"`
+	Response     map[string]string `json:"response"` // map of question ID to response
+	CreateAt     int64             `json:"createAt"`
+	ResponseType string            `json:"responseType"`
 }
 
 func (sr *SurveyResponse) SetDefaults() {
@@ -46,6 +52,10 @@ func (sr *SurveyResponse) IsValid() error {
 
 	if sr.CreateAt == 0 {
 		return errors.New("survey response creating time cannot be empty")
+	}
+
+	if sr.ResponseType == "" {
+		return errors.New("survey response type cannot be empty")
 	}
 
 	return nil

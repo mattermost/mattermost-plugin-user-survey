@@ -15,8 +15,22 @@ func (a *UserSurveyApp) SaveSurveyResponse(response *model.SurveyResponse) error
 		return errors.Wrap(err,"SaveSurveyResponse: survey response is invalid")
 	}
 
-	if err := a.store.SaveSurveyResponse(response); err != nil {
-		return errors.Wrap(err, "SaveSurveyResponse: failed to save response to database")
+	existingResponse, err := a.store.GetSurveyResponse(response.UserID, response.SurveyId)
+	if err != nil {
+		return errors.Wrap(err, "SaveSurveyResponse: failed to get existing user survey response")
+	}
+
+	if existingResponse == nil {
+		if err := a.store.SaveSurveyResponse(response); err != nil {
+			return errors.Wrap(err, "SaveSurveyResponse: failed to save response to database")
+		}
+	} else {
+		if existingResponse.ResponseType == model.ResponseTypePartial {
+			response.ID = existingResponse.ID
+			if err := a.store.UpdateSurveyResponse(response); err != nil {
+				return errors.Wrap(err, "SaveSurveyResponse: failed to update existing partial survey response")
+			}
+		}
 	}
 
 	return nil
