@@ -58,8 +58,11 @@ func (a *UserSurveyApp) addResponseInPost(response *model.SurveyResponse) error 
 	}
 
 	post.AddProp("survey_response", string(responseJSON))
-	post.AddProp("survey_response_create_at", response.CreateAt)
-	post.AddProp("survey_status", "submitted")
+
+	if response.ResponseType == model.ResponseTypeComplete {
+		post.AddProp("survey_response_create_at", response.CreateAt)
+		post.AddProp("survey_status", "submitted")
+	}
 
 	_, appErr = a.api.UpdatePost(post)
 	if appErr != nil {

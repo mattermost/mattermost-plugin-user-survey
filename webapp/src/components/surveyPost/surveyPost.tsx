@@ -29,12 +29,12 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
         survey,
         linearScaleQuestionID,
         surveyExpired,
-        responsesExist,
+        surveySubmitted,
         setResponses,
         submittedAtDate,
     } = useUserSurvey(post);
 
-    const disabled = responsesExist || surveyExpired;
+    const disabled = surveySubmitted || surveyExpired;
 
     const submitSurveyResponse = useCallback(async () => {
         let success: boolean;

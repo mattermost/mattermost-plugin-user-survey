@@ -12,7 +12,7 @@ export function useUserSurvey(post: Post) {
     const linearScaleQuestionID = useRef<string>();
     const submittedAtDate = useRef<Date>();
 
-    const responsesExist = survey?.response !== undefined;
+    const surveySubmitted = post.props.survey_status === 'submitted';
     const surveyExpired = survey?.status === 'ended';
 
     useEffect(() => {
@@ -57,7 +57,7 @@ export function useUserSurvey(post: Post) {
     return {
         survey,
         linearScaleQuestionID,
-        responsesExist,
+        surveySubmitted,
         surveyExpired,
         setResponses,
         submittedAtDate,
