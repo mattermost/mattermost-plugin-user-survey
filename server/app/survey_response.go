@@ -5,15 +5,17 @@ package app
 
 import (
 	"encoding/json"
-	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
+
 	"github.com/pkg/errors"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 )
 
 func (a *UserSurveyApp) SaveSurveyResponse(response *model.SurveyResponse) error {
 	response.SetDefaults()
 	if err := response.IsValid(); err != nil {
 		a.api.LogDebug("SaveSurveyResponse: survey is invalid", "error", err.Error())
-		return errors.Wrap(err,"SaveSurveyResponse: survey response is invalid")
+		return errors.Wrap(err, "SaveSurveyResponse: survey response is invalid")
 	}
 
 	existingResponse, err := a.store.GetSurveyResponse(response.UserID, response.SurveyID)

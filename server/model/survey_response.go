@@ -4,9 +4,10 @@
 package model
 
 import (
-	"github.com/mattermost/mattermost-plugin-user-survey/server/utils"
 	mmModel "github.com/mattermost/mattermost/server/public/model"
 	"github.com/pkg/errors"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/utils"
 )
 
 const (

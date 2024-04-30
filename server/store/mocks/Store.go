@@ -46,6 +46,36 @@ func (_m *Store) GetSchemaName() (string, error) {
 	return r0, r1
 }
 
+// GetSurveyResponse provides a mock function with given fields: userID, surveyID
+func (_m *Store) GetSurveyResponse(userID string, surveyID string) (*model.SurveyResponse, error) {
+	ret := _m.Called(userID, surveyID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetSurveyResponse")
+	}
+
+	var r0 *model.SurveyResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, string) (*model.SurveyResponse, error)); ok {
+		return rf(userID, surveyID)
+	}
+	if rf, ok := ret.Get(0).(func(string, string) *model.SurveyResponse); ok {
+		r0 = rf(userID, surveyID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.SurveyResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(userID, surveyID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetSurveysByStatus provides a mock function with given fields: status
 func (_m *Store) GetSurveysByStatus(status string) ([]*model.Survey, error) {
 	ret := _m.Called(status)
@@ -132,6 +162,24 @@ func (_m *Store) SaveSurvey(survey *model.Survey) error {
 	return r0
 }
 
+// SaveSurveyResponse provides a mock function with given fields: response
+func (_m *Store) SaveSurveyResponse(response *model.SurveyResponse) error {
+	ret := _m.Called(response)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SaveSurveyResponse")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.SurveyResponse) error); ok {
+		r0 = rf(response)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Shutdown provides a mock function with given fields:
 func (_m *Store) Shutdown() error {
 	ret := _m.Called()
@@ -178,6 +226,24 @@ func (_m *Store) SurveysFromRows(rows *sql.Rows) ([]*model.Survey, error) {
 	}
 
 	return r0, r1
+}
+
+// UpdateSurveyResponse provides a mock function with given fields: response
+func (_m *Store) UpdateSurveyResponse(response *model.SurveyResponse) error {
+	ret := _m.Called(response)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateSurveyResponse")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.SurveyResponse) error); ok {
+		r0 = rf(response)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // UpdateSurveyStatus provides a mock function with given fields: surveyID, status

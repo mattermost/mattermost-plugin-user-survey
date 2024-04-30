@@ -7,9 +7,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
+
 	sq "github.com/mattermost/squirrel"
 	"github.com/pkg/errors"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 )
 
 func (s *SQLStore) SaveSurveyResponse(response *model.SurveyResponse) error {
@@ -52,7 +54,7 @@ func (s *SQLStore) UpdateSurveyResponse(response *model.SurveyResponse) error {
 		Set("create_at", response.CreateAt).
 		Set("response_type", response.ResponseType).
 		Where(sq.Eq{
-			"id":   response.ID,
+			"id":            response.ID,
 			"response_type": model.ResponseTypePartial,
 		}).Exec()
 

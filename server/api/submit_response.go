@@ -5,10 +5,12 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
-	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
-	"github.com/pkg/errors"
 	"net/http"
+
+	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 )
 
 func (api *Handlers) handleSubmitSurveyResponse(w http.ResponseWriter, r *http.Request) {
