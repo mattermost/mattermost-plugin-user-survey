@@ -91,7 +91,12 @@ func matchSurveyAndResponse(surveyID string, survey *model.Survey, response *mod
 			return errors.New("linear scale question must be answered")
 		}
 
-		response.ResponseType = model.ResponseTypePartial
+		// When user selects a rating and submits via the Submit button,
+		// the client passes the response type manually, and we should only verify it,
+		// not override it.
+		if response.ResponseType == "" {
+			response.ResponseType = model.ResponseTypePartial
+		}
 	} else {
 		// make sure answered questions belong to the survey
 		surveyQuestionIDMap := map[string]bool{}

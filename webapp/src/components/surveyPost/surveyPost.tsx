@@ -56,6 +56,7 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
             return;
         }
 
+        draftResponse.current.responseType = 'complete';
         const response = await submitSurveyResponse();
         if (response.success) {
             setResponses(draftResponse.current);
