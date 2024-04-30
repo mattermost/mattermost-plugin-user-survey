@@ -26,12 +26,14 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
     });
 
     const {
-        survey,
+        questions,
+        responses,
         linearScaleQuestionID,
         surveyExpired,
         surveySubmitted,
-        setResponses,
+        saveResponses,
         submittedAtDate,
+        surveyEndDate,
     } = useUserSurvey(post);
 
     const disabled = surveySubmitted || surveyExpired;
@@ -59,12 +61,12 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
         draftResponse.current.responseType = 'complete';
         const response = await submitSurveyResponse();
         if (response.success) {
-            setResponses(draftResponse.current);
+            saveResponses(draftResponse.current);
             setErrorMessage('');
         } else if (response.error) {
             setErrorMessage('Failed to submit survey response. Please try again.');
         }
-    }, [setResponses, submitSurveyResponse]);
+    }, [saveResponses, submitSurveyResponse]);
 
     // this function is to submit the linear scale rating as soon as a user selects it,
     // even without pressing the submit button.
@@ -106,11 +108,11 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
     }, [post.message]);
 
     const renderQuestions = useMemo(() => {
-        if (!survey) {
+        if (!questions) {
             return null;
         }
 
-        return survey.questions.map((question) => {
+        return questions.questions.map((question) => {
             const Question = QUESTION_COMPONENTS[question.type];
 
             return (
@@ -122,12 +124,12 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
                         question={question}
                         responseChangeHandler={questionResponseChangeHandler}
                         disabled={disabled}
-                        value={survey.response?.response[question.id] as string}
+                        value={responses?.response[question.id] as string}
                     />
                 </div>
             );
         });
-    }, [disabled, questionResponseChangeHandler, survey]);
+    }, [disabled, questionResponseChangeHandler, questions, responses?.response]);
 
     // this is to stop any click event from any of the
     // inner buttons, input fields etc from being propagated and
@@ -178,7 +180,7 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
                 {
                     disabled && surveyExpired &&
                     <div className='surveyMessage submitted'>
-                        {`Survey expired on ${survey?.endDate}.`}
+                        {`Survey expired on ${surveyEndDate}.`}
                     </div>
                 }
             </div>
