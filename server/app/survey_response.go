@@ -31,6 +31,11 @@ func (a *UserSurveyApp) SaveSurveyResponse(response *model.SurveyResponse) error
 		if err != nil {
 			return errors.Wrap(err, "SaveSurveyResponse: failed to save response to database")
 		}
+
+		err = a.store.IncrementSurveyResponseCount(response.SurveyID)
+		if err != nil {
+			return errors.Wrap(err, "SaveSurveyResponse: failed to increment survey response count in database")
+		}
 	} else {
 		if existingResponse.ResponseType == model.ResponseTypePartial {
 			response.ID = existingResponse.ID

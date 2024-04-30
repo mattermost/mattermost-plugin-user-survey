@@ -19,4 +19,6 @@ type Store interface {
 	SaveSurveyResponse(response *model.SurveyResponse) error
 	GetSurveyResponse(userID, surveyID string) (*model.SurveyResponse, error)
 	UpdateSurveyResponse(response *model.SurveyResponse) error
+	IncrementSurveyReceiptCount(surveyID string) error
+	IncrementSurveyResponseCount(surveyID string) error
 }

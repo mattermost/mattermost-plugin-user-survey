@@ -142,3 +142,33 @@ func (s *SQLStore) surveyColumns() []string {
 		"status",
 	}
 }
+
+func (s *SQLStore) IncrementSurveyReceiptCount(surveyID string) error {
+	_, err := s.getQueryBuilder().
+		Update(s.tablePrefix+"survey").
+		Set("receipt_count", sq.Expr("receipt_count + 1")).
+		Where(sq.Eq{"id": surveyID}).
+		Exec()
+
+	if err != nil {
+		s.pluginAPI.LogError("IncrementSurveyReceiptCount: failed to update survey receipt count", "survey_id", surveyID, "error", err.Error())
+		return errors.Wrap(err, "IncrementSurveyReceiptCount: failed to update survey receipt count")
+	}
+
+	return nil
+}
+
+func (s *SQLStore) IncrementSurveyResponseCount(surveyID string) error {
+	_, err := s.getQueryBuilder().
+		Update(s.tablePrefix+"survey").
+		Set("response_count", sq.Expr("response_count + 1")).
+		Where(sq.Eq{"id": surveyID}).
+		Exec()
+
+	if err != nil {
+		s.pluginAPI.LogError("IncrementSurveyResponseCount: failed to update survey response count", "survey_id", surveyID, "error", err.Error())
+		return errors.Wrap(err, "IncrementSurveyResponseCount: failed to update survey response count")
+	}
+
+	return nil
+}
