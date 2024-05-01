@@ -107,6 +107,8 @@ func TestShouldSendSurvey(t *testing.T) {
 
 		th.MockedPluginAPI.On("KVGet", "user_survey_status_user_id_survey_id").Return(nil, nil)
 		th.MockedPluginAPI.On("KVGet", "user_team_filter_cache_user_id_survey_id").Return(nil, nil)
+		th.MockedPluginAPI.On("KVCompareAndSet", "user_lock_user_id", mock.Anything, mock.Anything).Return(true, nil)
+		th.MockedPluginAPI.On("KVDelete", "user_lock_user_id").Return(nil)
 
 		th.MockedPluginAPI.On("GetTeamsForUser", "user_id").Return([]*mmModel.Team{
 			{Id: "team_id_1"},
@@ -127,6 +129,9 @@ func TestShouldSendSurvey(t *testing.T) {
 	t.Run("shouldn't send as survey is not in progress", func(t *testing.T) {
 		th := SetupAppTest(t)
 
+		th.MockedPluginAPI.On("KVCompareAndSet", "user_lock_user_id", mock.Anything, mock.Anything).Return(true, nil)
+		th.MockedPluginAPI.On("KVDelete", "user_lock_user_id").Return(nil)
+
 		survey := &model.Survey{
 			ID:              "survey_id",
 			Status:          "ended",
@@ -142,6 +147,8 @@ func TestShouldSendSurvey(t *testing.T) {
 
 		th.MockedPluginAPI.On("KVGet", "user_survey_status_user_id_survey_id").Return(nil, nil)
 		th.MockedPluginAPI.On("KVGet", "user_team_filter_cache_user_id_survey_id").Return(nil, nil)
+		th.MockedPluginAPI.On("KVCompareAndSet", "user_lock_user_id", mock.Anything, mock.Anything).Return(true, nil)
+		th.MockedPluginAPI.On("KVDelete", "user_lock_user_id").Return(nil)
 
 		th.MockedPluginAPI.On("GetTeamsForUser", "user_id").Return([]*mmModel.Team{
 			{Id: "team_id_1"},
@@ -164,6 +171,8 @@ func TestShouldSendSurvey(t *testing.T) {
 
 		th.MockedPluginAPI.On("KVGet", "user_survey_status_user_id_survey_id").Return(nil, nil)
 		th.MockedPluginAPI.On("KVGet", "user_team_filter_cache_user_id_survey_id").Return([]byte("true"), nil)
+		th.MockedPluginAPI.On("KVCompareAndSet", "user_lock_user_id", mock.Anything, mock.Anything).Return(true, nil)
+		th.MockedPluginAPI.On("KVDelete", "user_lock_user_id").Return(nil)
 
 		survey := &model.Survey{
 			ID:              "survey_id",
@@ -180,6 +189,8 @@ func TestShouldSendSurvey(t *testing.T) {
 
 		th.MockedPluginAPI.On("KVGet", "user_survey_status_user_id_survey_id").Return(nil, nil)
 		th.MockedPluginAPI.On("KVGet", "user_team_filter_cache_user_id_survey_id").Return([]byte("false"), nil)
+		th.MockedPluginAPI.On("KVCompareAndSet", "user_lock_user_id", mock.Anything, mock.Anything).Return(true, nil)
+		th.MockedPluginAPI.On("KVDelete", "user_lock_user_id").Return(nil)
 
 		survey := &model.Survey{
 			ID:              "survey_id",
