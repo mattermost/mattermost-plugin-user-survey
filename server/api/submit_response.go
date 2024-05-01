@@ -94,7 +94,7 @@ func matchSurveyAndResponse(surveyID string, survey *model.Survey, response *mod
 		// When user selects a rating and submits via the Submit button,
 		// the client passes the response type manually, and we should only verify it,
 		// not override it.
-		if response.ResponseType == "" {
+		if response.ResponseType != model.ResponseTypeComplete {
 			response.ResponseType = model.ResponseTypePartial
 		}
 	} else {

@@ -102,7 +102,7 @@ func (s *Survey) GetSystemRatingQuestionID() (string, error) {
 	}
 
 	if questionID == "" {
-		return "", errors.New("no Mattermost rating question found")
+		return "", errors.New("no system rating question found")
 	}
 
 	return questionID, nil
