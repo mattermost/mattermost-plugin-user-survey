@@ -4,11 +4,11 @@ import (
 	"database/sql"
 	"net/url"
 
-	"github.com/mattermost/squirrel"
 	"github.com/pkg/errors"
 
 	"github.com/mattermost/mattermost/server/public/plugin"
 	"github.com/mattermost/mattermost/server/public/pluginapi/cluster"
+	"github.com/mattermost/squirrel"
 
 	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 )
@@ -50,16 +50,16 @@ func New(params Params) (*SQLStore, error) {
 		return nil, err
 	}
 
+	store.schemaName, err = store.GetSchemaName()
+	if err != nil {
+		return nil, errors.Wrap(err, "SQLStore.New failed to get database schema name")
+	}
+
 	if !store.skipMigrations {
 		if migrationErr := store.Migrate(); migrationErr != nil {
 			params.PluginAPI.LogError(`Table creation / migration failed`, "error", migrationErr.Error())
 			return nil, migrationErr
 		}
-	}
-
-	store.schemaName, err = store.GetSchemaName()
-	if err != nil {
-		return nil, errors.Wrap(err, "SQLStore.New failed to get database schema name")
 	}
 
 	return store, nil

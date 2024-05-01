@@ -1,65 +1,59 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import type {SurveyQuestionsConfig, SurveyResponse} from 'types/plugin';
+import type {Question, SurveyQuestionsConfig, SurveyResponse} from 'types/plugin';
 
-export function validateSurveyQuestionsConfig(obj: any): asserts obj is SurveyQuestionsConfig {
-    if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
-        throw new Error('Expected an object for SurveyQuestionsConfig, but received a non-object value.');
+export function validateSurveyQuestionsConfig(obj: unknown): asserts obj is SurveyQuestionsConfig {
+    if (typeof obj !== 'object' || obj === null) {
+        throw new Error('Invalid object: not an object');
     }
 
-    if (typeof obj.surveyMessageText !== 'string') {
-        throw new Error("SurveyQuestionsConfig must have a 'surveyMessageText' field which is a string.");
+    const {surveyMessageText, questions} = obj as Partial<SurveyQuestionsConfig>;
+
+    if (typeof surveyMessageText !== 'string') {
+        throw new Error('Invalid surveyMessageText: must be a string');
     }
 
-    if (!Array.isArray(obj.questions)) {
-        throw new Error("SurveyQuestionsConfig must have a 'questions' field which is an array.");
+    if (!Array.isArray(questions)) {
+        throw new Error('Invalid questions: must be an array');
     }
 
-    for (let i = 0; i < obj.questions.length; i++) {
-        const question = obj.questions[i];
-        if (typeof question !== 'object' || question === null || Array.isArray(question)) {
-            throw new Error(`Question at index ${i} in 'questions' array is invalid. Expected an object.`);
+    for (let i = 0; i < questions.length; i++) {
+        const question = questions[i] as Partial<Question>;
+        if (
+            typeof question !== 'object' ||
+            question === null ||
+            typeof question.id !== 'string'
+        ) {
+            throw new Error(`Invalid question at index ${i}: must be an object with an id as string`);
         }
 
-        if (typeof question.id !== 'string') {
-            throw new Error(`Question at index ${i} in 'questions' array has invalid 'id' field. Expected a string.`);
-        }
-
-        if (question.text !== undefined && typeof question.text !== 'string') {
-            throw new Error(`Question at index ${i} in 'questions' array has invalid 'text' field. Expected a string or undefined.`);
-        }
-
-        if (question.type !== 'linear_scale' && question.type !== 'text') {
-            throw new Error(`Question at index ${i} in 'questions' array has invalid 'type' field. Expected 'linear_scale' or 'text'.`);
+        if (!(question.type === 'linear_scale' || question.type === 'text')) {
+            throw new Error(`Invalid question type at index ${i}: must be 'linear_scale' or 'text'`);
         }
 
         if (typeof question.system !== 'boolean') {
-            throw new Error(`Question at index ${i} in 'questions' array has invalid 'system' field. Expected a boolean.`);
+            throw new Error(`Invalid 'system' field at index ${i}: must be a boolean`);
         }
 
         if (typeof question.mandatory !== 'boolean') {
-            throw new Error(`Question at index ${i} in 'questions' array has invalid 'mandatory' field. Expected a boolean.`);
+            throw new Error(`Invalid 'mandatory' field at index ${i}: must be a boolean`);
         }
     }
 }
 
-export function validateSurveyResponse(obj: any): asserts obj is SurveyResponse {
-    if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
-        throw new Error('Expected an object for SurveyResponse, but received a non-object value.');
+export function validateSurveyResponse(obj: unknown): asserts obj is SurveyResponse {
+    if (typeof obj !== 'object' || obj === null) {
+        throw new Error('Invalid object: not an object');
     }
 
-    if (typeof obj.response !== 'object' || obj.response === null || Array.isArray(obj.response)) {
-        throw new Error("SurveyResponse must have a 'response' field which is an object.");
+    const {response, responseType} = obj as Partial<SurveyResponse>;
+
+    if (typeof response !== 'object' || response === null || Object.keys(response).length === 0) {
+        throw new Error('Invalid response: must be a non-empty object');
     }
 
-    for (const key in obj.response) {
-        if (typeof obj.response[key] !== 'string') {
-            throw new Error(`The value for key '${key}' in 'response' field must be a string.`);
-        }
-    }
-
-    if (obj.responseType !== undefined && obj.responseType !== 'partial' && obj.responseType !== 'complete') {
-        throw new Error("Invalid value for 'responseType' field. Expected 'partial', 'complete', or undefined.");
+    if (responseType !== undefined && responseType !== 'partial' && responseType !== 'complete') {
+        throw new Error('Invalid responseType: must be "partial" or "complete"');
     }
 }

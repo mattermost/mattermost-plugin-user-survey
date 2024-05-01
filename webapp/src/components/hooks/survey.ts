@@ -58,7 +58,7 @@ export function useUserSurvey(post: Post) {
     }, [post.props.survey_questions, post.props.survey_response, post.props.survey_response_create_at]);
 
     const saveResponses = useCallback((responses: SurveyResponse) => {
-        saveResponses(responses);
+        setResponses(responses);
     }, []);
 
     return {
