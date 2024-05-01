@@ -12,3 +12,7 @@ func KeyUserSurveySentStatus(userID, surveyID string) string {
 func KeyUserTeamMembershipFilterCache(userID, surveyID string) string {
 	return fmt.Sprintf("user_team_filter_cache_%s_%s", userID, surveyID)
 }
+
+func KeyUserSendSurveyLock(userID string) string {
+	return "user_lock_" + userID
+}
