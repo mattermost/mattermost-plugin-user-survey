@@ -65,28 +65,39 @@ func (a *UserSurveyApp) StopSurvey(surveyID string) error {
 	return nil
 }
 
-func (a *UserSurveyApp) ShouldSendSurvey(userID string, survey *model.Survey) (bool, error) {
-	key := utils.KeyUserSendSurveyLock(userID)
-	utcNow := time.Now().UTC()
+func (a *UserSurveyApp) AcquireUserSurveyLock(key string, utcNow time.Time) (bool, error) {
 	value, err := json.Marshal(utcNow)
 	if err != nil {
-		a.api.LogError("ShouldSendSurvey: failed to marshal time value", "value", utcNow.String())
-		return false, errors.Wrap(err, "ShouldSendSurvey: failed to marshal time value")
+		a.api.LogError("AcquireUserSurveyLock: failed to marshal time value", "value", utcNow.String())
+		return false, errors.Wrap(err, "AcquireUserSurveyLock: failed to marshal time value")
 	}
 
 	locked, err := a.TryLock(key, value)
 	if err != nil {
-		return false, errors.Wrap(err, "ShouldSendSurvey: failed to acquire lock for checking if survey needs to be sent to user or not")
+		a.api.LogError("AcquireUserSurveyLock: failed to acquire user survey lock", "key", key, "value", value, "error", err.Error())
+		return false, errors.Wrap(err, "AcquireUserSurveyLock: failed to acquire user survey lock")
 	}
 
-	if !locked {
-		return false, nil
+	return locked, nil
+}
+
+func (a *UserSurveyApp) ReleaseUserSurveyLock(key string, utcNow time.Time) (bool, error) {
+	value, err := json.Marshal(utcNow)
+	if err != nil {
+		a.api.LogError("ReleaseUserSurveyLock: failed to marshal time value", "value", utcNow.String())
+		return false, errors.Wrap(err, "ReleaseUserSurveyLock: failed to marshal time value")
 	}
 
-	defer func() {
-		_, _ = a.Unlock(key, value)
-	}()
+	unlocked, err := a.Unlock(key, value)
+	if err != nil {
+		a.api.LogError("ReleaseUserSurveyLock: failed to unlock user survey lock", "key", key, "value", value, "error", err.Error())
+		return false, errors.Wrap(err, "ReleaseUserSurveyLock: failed to unlock user survey lock")
+	}
 
+	return unlocked, err
+}
+
+func (a *UserSurveyApp) ShouldSendSurvey(userID string, survey *model.Survey) (bool, error) {
 	if survey.Status != model.SurveyStatusInProgress {
 		return false, errors.New("ShouldSendSurvey: a survey can only be sent against an in progress survey")
 	}
