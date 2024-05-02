@@ -65,21 +65,39 @@ func (a *UserSurveyApp) StopSurvey(surveyID string) error {
 	return nil
 }
 
-func (a *UserSurveyApp) ShouldSendSurvey(userID string, survey *model.Survey) (bool, error) {
-	key := utils.KeyUserSendSurveyLock(userID)
-	locked, err := a.TryLock(key, time.Now().UTC())
+func (a *UserSurveyApp) AcquireUserSurveyLock(key string, utcNow time.Time) (bool, error) {
+	value, err := json.Marshal(utcNow)
 	if err != nil {
-		return false, errors.Wrap(err, "ShouldSendSurvey: failed to acquire lock for checking if survey needs to be sent to user or not")
+		a.api.LogError("AcquireUserSurveyLock: failed to marshal time value", "value", utcNow.String())
+		return false, errors.Wrap(err, "AcquireUserSurveyLock: failed to marshal time value")
 	}
 
-	defer func() {
-		_ = a.Unlock(key)
-	}()
-
-	if !locked {
-		return false, nil
+	locked, err := a.TryLock(key, value)
+	if err != nil {
+		a.api.LogError("AcquireUserSurveyLock: failed to acquire user survey lock", "key", key, "value", value, "error", err.Error())
+		return false, errors.Wrap(err, "AcquireUserSurveyLock: failed to acquire user survey lock")
 	}
 
+	return locked, nil
+}
+
+func (a *UserSurveyApp) ReleaseUserSurveyLock(key string, utcNow time.Time) (bool, error) {
+	value, err := json.Marshal(utcNow)
+	if err != nil {
+		a.api.LogError("ReleaseUserSurveyLock: failed to marshal time value", "value", utcNow.String())
+		return false, errors.Wrap(err, "ReleaseUserSurveyLock: failed to marshal time value")
+	}
+
+	unlocked, err := a.Unlock(key, value)
+	if err != nil {
+		a.api.LogError("ReleaseUserSurveyLock: failed to unlock user survey lock", "key", key, "value", value, "error", err.Error())
+		return false, errors.Wrap(err, "ReleaseUserSurveyLock: failed to unlock user survey lock")
+	}
+
+	return unlocked, err
+}
+
+func (a *UserSurveyApp) ShouldSendSurvey(userID string, survey *model.Survey) (bool, error) {
 	if survey.Status != model.SurveyStatusInProgress {
 		return false, errors.New("ShouldSendSurvey: a survey can only be sent against an in progress survey")
 	}
@@ -126,10 +144,6 @@ func (a *UserSurveyApp) setSurveySentToUser(userID, surveyID, postID string) err
 }
 
 func (a *UserSurveyApp) SendSurvey(userID string, survey *model.Survey) error {
-	if err := a.ensureSurveyBot(); err != nil {
-		return err
-	}
-
 	user, appErr := a.api.GetUser(userID)
 	if appErr != nil {
 		a.api.LogError("SendSurvey: failed to get user from ID", "userID", user, "error", appErr.Error())

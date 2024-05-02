@@ -61,6 +61,10 @@ func (p *Plugin) OnActivate() error {
 		return err
 	}
 
+	if err := p.clearStaleLocks(); err != nil {
+		return err
+	}
+
 	return nil
 }
 

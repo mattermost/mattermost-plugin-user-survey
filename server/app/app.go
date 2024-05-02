@@ -17,10 +17,13 @@ type UserSurveyApp struct {
 }
 
 func New(api plugin.API, store store.Store, getConfigFunc func() *model.Config, driver plugin.Driver) (*UserSurveyApp, error) {
-	return &UserSurveyApp{
+	app := &UserSurveyApp{
 		api:       api,
 		store:     store,
 		getConfig: getConfigFunc,
 		apiClient: pluginapi.NewClient(api, driver),
-	}, nil
+	}
+
+	err := app.ensureSurveyBot()
+	return app, err
 }

@@ -23,6 +23,7 @@ type AppTestHelper struct {
 func SetupAppTest(t *testing.T) *AppTestHelper {
 	mockedAPI := &plugintest.API{}
 	testutils.MockLogs(mockedAPI)
+	testutils.MockSetupBot(mockedAPI)
 
 	mockedStore := mocks.Store{}
 	mockedDriver := plugintest.Driver{}
