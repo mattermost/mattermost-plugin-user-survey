@@ -5,6 +5,10 @@ package utils
 
 import "fmt"
 
+const (
+	UserLockKeyPrefix = "user_lock_"
+)
+
 func KeyUserSurveySentStatus(userID, surveyID string) string {
 	return fmt.Sprintf("user_survey_status_%s_%s", userID, surveyID)
 }
@@ -14,5 +18,5 @@ func KeyUserTeamMembershipFilterCache(userID, surveyID string) string {
 }
 
 func KeyUserSendSurveyLock(userID string) string {
-	return "user_lock_" + userID
+	return UserLockKeyPrefix + userID
 }

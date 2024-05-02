@@ -15,6 +15,8 @@ const (
 
 	// TODO - update this to 15 minutes once ready for production
 	startSurveyJonInterval = 15 * time.Second
+
+	LockExpiration = time.Hour
 )
 
 func (p *Plugin) startManageSurveyJob() error {

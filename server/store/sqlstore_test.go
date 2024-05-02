@@ -149,6 +149,7 @@ func prepareMySQLDatabase() (string, func(), error) {
 func mockAPIWithBasicMocks(dbType string) *plugintest.API {
 	mockAPI := &plugintest.API{}
 	testUtils.MockLogs(mockAPI)
+	testUtils.MockSetupBot(mockAPI)
 
 	// these mocks are required for database migrations to run
 	mockAPI.On("KVSetWithOptions", "mutex_user_survey_migration_db_mutex", mock.Anything, mock.Anything).Return(true, nil)

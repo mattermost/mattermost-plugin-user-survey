@@ -5,6 +5,9 @@ package api
 
 import (
 	"net/http"
+	"time"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/utils"
 )
 
 func (api *Handlers) handleConnected(w http.ResponseWriter, r *http.Request) {
@@ -45,6 +48,23 @@ func (api *Handlers) handleConnected(w http.ResponseWriter, r *http.Request) {
 		ReturnStatusOK(w)
 		return
 	}
+
+	key := utils.KeyUserSendSurveyLock(userID)
+	utcNow := time.Now().UTC()
+	locked, err := api.app.AcquireUserSurveyLock(key, utcNow)
+	if err != nil {
+		http.Error(w, "Failed to acquire lock", http.StatusInternalServerError)
+		return
+	}
+
+	if !locked {
+		ReturnStatusOK(w)
+		return
+	}
+
+	defer func() {
+		_, _ = api.app.ReleaseUserSurveyLock(key, utcNow)
+	}()
 
 	if err := api.app.SendSurvey(userID, inProgressSurvey); err != nil {
 		http.Error(w, "Failed to send survey", http.StatusInternalServerError)
