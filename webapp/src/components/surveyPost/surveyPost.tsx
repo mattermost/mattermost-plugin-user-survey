@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import client from 'client/client';
-import React, {useCallback, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import Button from 'components/common/button/button';
 import {useUserSurvey} from 'components/hooks/survey';
@@ -21,9 +21,8 @@ const QUESTION_COMPONENTS = {
 
 function SurveyPost({post}: CustomPostTypeComponentProps) {
     const [errorMessage, setErrorMessage] = useState<string>();
-    const draftResponse = useRef<SurveyResponse>({
-        response: {},
-    });
+    const draftResponse = useRef<SurveyResponse>();
+    const [questionErrorMessages, setQuestionErrorMessages] = useState<{[key: string]: string}>({});
 
     const {
         questions,
@@ -38,7 +37,40 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
 
     const disabled = surveySubmitted || surveyExpired;
 
+    useEffect(() => {
+        if (!draftResponse.current && responses) {
+            draftResponse.current = {...responses};
+        }
+    }, [responses]);
+
+    const validateResponses = useCallback((): boolean => {
+        const errors: {[key: string]: string} = {};
+        let errorMessage: string = '';
+
+        if (!draftResponse.current) {
+            if (linearScaleQuestionID.current) {
+                errors[linearScaleQuestionID.current] = 'Please select a rating before submitting the response';
+            } else {
+                errorMessage = 'Please select a rating before submitting the response';
+            }
+        }
+
+        questions?.questions.forEach((question) => {
+            if (question.id === linearScaleQuestionID.current && !draftResponse.current?.response[question.id]) {
+                errors[question.id] = 'Please select a rating before submitting the response';
+            }
+        });
+
+        setQuestionErrorMessages(errors);
+        setErrorMessage(errorMessage);
+        return Object.keys(errors).length === 0;
+    }, [linearScaleQuestionID, questions?.questions]);
+
     const submitSurveyResponse = useCallback(async () => {
+        if (!draftResponse.current) {
+            return {success: false, error: true};
+        }
+
         let success: boolean;
 
         try {
@@ -52,9 +84,11 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
     }, [post.props.survey_id]);
 
     const submitSurveyHandler = useCallback(async () => {
-        if (!draftResponse.current ||
-            Object.keys(draftResponse.current?.response).length === 0
-        ) {
+        if (!validateResponses()) {
+            return;
+        }
+
+        if (!draftResponse.current) {
             return;
         }
 
@@ -66,7 +100,7 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
         } else if (response.error) {
             setErrorMessage('Failed to submit survey response. Please try again.');
         }
-    }, [saveResponses, submitSurveyResponse]);
+    }, [saveResponses, submitSurveyResponse, validateResponses]);
 
     // this function is to submit the linear scale rating as soon as a user selects it,
     // even without pressing the submit button.
@@ -88,9 +122,11 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
 
     const questionResponseChangeHandler = useCallback(
         (questionID: string, response: string) => {
-            if (draftResponse.current) {
-                draftResponse.current.response[questionID] = response;
+            if (!draftResponse.current) {
+                draftResponse.current = {response: {}} as SurveyResponse;
             }
+
+            draftResponse.current.response[questionID] = response;
 
             // if this is the system rating question, submit response ASAP
             if (questionID === linearScaleQuestionID.current) {
@@ -114,6 +150,7 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
 
         return questions.questions.map((question) => {
             const Question = QUESTION_COMPONENTS[question.type];
+            const questionErrorMessage = questionErrorMessages[question.id];
 
             return (
                 <div
@@ -126,10 +163,17 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
                         disabled={disabled}
                         value={responses?.response[question.id] as string}
                     />
+
+                    {
+                        questionErrorMessage &&
+                        <div className='questionErrorMessage error'>
+                            {questionErrorMessage}
+                        </div>
+                    }
                 </div>
             );
         });
-    }, [disabled, questionResponseChangeHandler, questions, responses?.response]);
+    }, [disabled, questionErrorMessages, questionResponseChangeHandler, questions, responses?.response]);
 
     // this is to stop any click event from any of the
     // inner buttons, input fields etc from being propagated and
