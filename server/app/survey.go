@@ -67,18 +67,25 @@ func (a *UserSurveyApp) StopSurvey(surveyID string) error {
 
 func (a *UserSurveyApp) ShouldSendSurvey(userID string, survey *model.Survey) (bool, error) {
 	key := utils.KeyUserSendSurveyLock(userID)
-	locked, err := a.TryLock(key, time.Now().UTC())
+	utcNow := time.Now().UTC()
+	value, err := json.Marshal(utcNow)
+	if err != nil {
+		a.api.LogError("ShouldSendSurvey: failed to marshal time value", "value", utcNow.String())
+		return false, errors.Wrap(err, "ShouldSendSurvey: failed to marshal time value")
+	}
+
+	locked, err := a.TryLock(key, value)
 	if err != nil {
 		return false, errors.Wrap(err, "ShouldSendSurvey: failed to acquire lock for checking if survey needs to be sent to user or not")
 	}
 
-	defer func() {
-		_ = a.Unlock(key)
-	}()
-
 	if !locked {
 		return false, nil
 	}
+
+	defer func() {
+		_, _ = a.Unlock(key, value)
+	}()
 
 	if survey.Status != model.SurveyStatusInProgress {
 		return false, errors.New("ShouldSendSurvey: a survey can only be sent against an in progress survey")
