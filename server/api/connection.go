@@ -4,9 +4,10 @@
 package api
 
 import (
-	"github.com/mattermost/mattermost-plugin-user-survey/server/utils"
 	"net/http"
 	"time"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/utils"
 )
 
 func (api *Handlers) handleConnected(w http.ResponseWriter, r *http.Request) {

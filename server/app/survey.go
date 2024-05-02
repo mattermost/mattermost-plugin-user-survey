@@ -144,10 +144,6 @@ func (a *UserSurveyApp) setSurveySentToUser(userID, surveyID string) error {
 }
 
 func (a *UserSurveyApp) SendSurvey(userID string, survey *model.Survey) error {
-	if err := a.ensureSurveyBot(); err != nil {
-		return err
-	}
-
 	user, appErr := a.api.GetUser(userID)
 	if appErr != nil {
 		a.api.LogError("SendSurvey: failed to get user from ID", "userID", user, "error", appErr.Error())

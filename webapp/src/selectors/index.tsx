@@ -11,7 +11,7 @@ export const getServerRoute = (state: any) => {
         basePath = new URL(config.SiteURL).pathname;
 
         if (basePath && basePath[basePath.length - 1] === '/') {
-            basePath = basePath.substr(0, basePath.length - 1);
+            basePath = basePath.substring(0, basePath.length - 1);
         }
     }
 
