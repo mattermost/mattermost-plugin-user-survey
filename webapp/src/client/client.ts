@@ -22,6 +22,10 @@ class SurveyClient extends HttpClient {
         const url = `${this.url}/survey/${surveyID}/response`;
         return this.doPost(url, response);
     };
+
+    getSurveyResults = async () => {
+        return this.doGet(`${this.url}/survey_stats`);
+    };
 }
 
 const Client = new SurveyClient();

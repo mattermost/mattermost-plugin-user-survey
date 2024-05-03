@@ -16,6 +16,7 @@ func (s *SQLStore) GetSurveyStatList() ([]*model.SurveyStat, error) {
 	rows, err := s.getQueryBuilder().
 		Select(s.surveyStatColumns()...).
 		From(s.tablePrefix + "survey").
+		OrderBy("start_time DESC").
 		Query()
 
 	if err != nil {

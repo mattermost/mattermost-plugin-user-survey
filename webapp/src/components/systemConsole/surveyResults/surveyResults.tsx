@@ -1,9 +1,9 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {parse} from 'date-fns';
-import React, {useEffect, useMemo, useState} from 'react';
-import utils from 'utils/utils';
+import client from 'client/client';
+import {format} from 'date-fns';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
 import Button from 'components/common/button/button';
 
@@ -12,74 +12,45 @@ import type {SurveyResult} from 'types/plugin';
 import './style.scss';
 
 function SurveyResults() {
-    // dummy survey response.
-    // Will be replaced by data fetched from API later on
-    const dummySurveyResults = (): SurveyResult[] => {
-        return [
-            {
-                surveyId: utils.uuid(),
-                startDate: '01/01/2024',
-                endDate: '31/01/2024',
-                npsScore: 0,
-                receiptsCount: 950,
-                responseCount: 24,
-                status: 'in_progress',
-            },
-            {
-                surveyId: utils.uuid(),
-                startDate: '01/10/2023',
-                endDate: '30/10/2023',
-                npsScore: 9.1,
-                receiptsCount: 539,
-                responseCount: 328,
-                status: 'ended',
-            },
-            {
-                surveyId: utils.uuid(),
-                startDate: '01/07/2023',
-                endDate: '5/07/2023',
-                npsScore: 8.8,
-                receiptsCount: 496,
-                responseCount: 196,
-                status: 'ended',
-            },
-            {
-                surveyId: utils.uuid(),
-                startDate: '01/01/2023',
-                endDate: '31/01/2023',
-                npsScore: 7.5,
-                receiptsCount: 950,
-                responseCount: 24,
-                status: 'ended',
-            },
-            {
-                surveyId: utils.uuid(),
-                startDate: '31/01/2023',
-                endDate: '20/02/2023',
-                npsScore: 8.9,
-                receiptsCount: 1542,
-                responseCount: 1104,
-                status: 'ended',
-            },
-        ];
-    };
-
     const [surveyResults, setSurveyResults] = useState<SurveyResult[]>([]);
 
-    useEffect(() => {
-        const results = dummySurveyResults();
-        results.sort((a, b) => {
-            const aStartDate = parse(a.startDate, 'dd/MM/yyyy', new Date()).getSeconds();
-            const bStartDate = parse(b.startDate, 'dd/MM/yyyy', new Date()).getSeconds();
-            return aStartDate - bStartDate;
+    const calculateNPS = (promoters: number, passives: number, detractors: number): number => {
+        const totalResponses = promoters + passives + detractors;
+
+        const promoterPercentage = (promoters / totalResponses) * 100;
+        const detractorPercentage = (detractors / totalResponses) * 100;
+
+        return Math.round(promoterPercentage - detractorPercentage);
+    };
+
+    const hydrateSurveyResults = useCallback((surveyResults: SurveyResult[]) => {
+        surveyResults.forEach((surveyResult) => {
+            surveyResult.startDate = new Date(surveyResult.startTime);
+
+            surveyResult.endDate = new Date(surveyResult.startTime);
+            surveyResult.endDate.setDate(surveyResult.endDate.getDate() + surveyResult.duration);
+
+            surveyResult.npsScore = calculateNPS(surveyResult.promoterCount, surveyResult.passiveCount, surveyResult.detractorCount);
         });
-        setSurveyResults(results);
     }, []);
+
+    useEffect(() => {
+        const work = async () => {
+            const results = await client.getSurveyResults() as SurveyResult[];
+            hydrateSurveyResults(results);
+            setSurveyResults(results);
+        };
+
+        work();
+    }, [hydrateSurveyResults]);
 
     const generateActions = (surveyResult: SurveyResult) => {
         if (surveyResult.status === 'ended') {
             return (
-                <div className='surveyResultActions'>
+                <div
+                    key={surveyResult.id}
+                    className='surveyResultActions'
+                >
                     <Button
                         iconClass='icon-download-outline'
                         text='Export responses'
@@ -88,7 +59,10 @@ function SurveyResults() {
             );
         }
         return (
-            <div className='surveyResultActions horizontal'>
+            <div
+                key={surveyResult.id}
+                className='surveyResultActions horizontal'
+            >
                 <Button
                     buttonType='tertiary'
                     danger={true}
@@ -103,7 +77,10 @@ function SurveyResults() {
     const renderedRows = useMemo(() => {
         if (surveyResults.length === 0) {
             return (
-                <div className='noSurveyResults surveyResultRow'>
+                <div
+                    key='no-results'
+                    className='noSurveyResults surveyResultRow'
+                >
                     <p>{'No survey results yet'}</p>
                     <p>{'Results will appear here once a survey starts'}</p>
                 </div>
@@ -113,13 +90,16 @@ function SurveyResults() {
         return surveyResults.map((result) => {
             return (
                 <div
-                    key={result.surveyId}
+                    key={result.id}
                     className='horizontal surveyResultRow'
                 >
-                    <div className='startDate'><span>{result.startDate}</span></div>
-                    <div className='endDate'><span>{result.endDate}</span></div>
+                    <div className='startDate'>
+                        <span>{format(result.startDate, 'do MMM yyyy')}</span>
+                        {result.status === 'in_progress' && <div className='badge inProgress'>{'Active'}</div> }
+                    </div>
+                    <div className='endDate'><span>{format(result.endDate, 'do MMM yyyy')}</span></div>
                     <div className='npsScore'><span>{result.npsScore || '-'}</span></div>
-                    <div className='receiptsCount'><span>{result.receiptsCount}</span></div>
+                    <div className='receiptsCount'><span>{result.receiptCount}</span></div>
                     <div className='responseCount'><span>{result.responseCount}</span></div>
                     <div className='actions'>{generateActions(result)}</div>
                 </div>
