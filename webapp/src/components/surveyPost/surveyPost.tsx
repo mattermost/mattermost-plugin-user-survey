@@ -30,7 +30,7 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
         linearScaleQuestionID,
         surveyExpired,
         surveySubmitted,
-        saveResponses,
+        setResponses,
         submittedAtDate,
         surveyEndDate,
     } = useUserSurvey(post);
@@ -95,12 +95,12 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
         draftResponse.current.responseType = 'complete';
         const response = await submitSurveyResponse();
         if (response.success) {
-            saveResponses(draftResponse.current);
+            setResponses(draftResponse.current);
             setErrorMessage('');
         } else if (response.error) {
             setErrorMessage('Failed to submit survey response. Please try again.');
         }
-    }, [saveResponses, submitSurveyResponse, validateResponses]);
+    }, [setResponses, submitSurveyResponse, validateResponses]);
 
     // this function is to submit the linear scale rating as soon as a user selects it,
     // even without pressing the submit button.

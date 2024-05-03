@@ -79,18 +79,18 @@ func matchSurveyAndResponse(surveyID string, survey *model.Survey, response *mod
 		return errors.New("incorrect number of responses submitted")
 	}
 
+	linearScaleQuestionID, err := survey.GetSystemRatingQuestionID()
+	if err != nil {
+		return err
+	}
+
+	if _, ok := response.Response[linearScaleQuestionID]; !ok {
+		return errors.New("linear scale question must be answered")
+	}
+
 	// if only one response is submitted, it needs to be
 	// the answer to the linear scale question
 	if len(response.Response) == 1 {
-		linearScaleQuestionID, err := survey.GetSystemRatingQuestionID()
-		if err != nil {
-			return err
-		}
-
-		if _, ok := response.Response[linearScaleQuestionID]; !ok {
-			return errors.New("linear scale question must be answered")
-		}
-
 		// When user selects a rating and submits via the Submit button,
 		// the client passes the response type manually, and we should only verify it,
 		// not override it.

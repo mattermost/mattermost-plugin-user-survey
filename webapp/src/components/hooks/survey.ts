@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 
 import type {Post} from '@mattermost/types/posts';
 
@@ -57,17 +57,13 @@ export function useUserSurvey(post: Post) {
         }
     }, [post.props.survey_questions, post.props.survey_response, post.props.survey_response_create_at]);
 
-    const saveResponses = useCallback((responses: SurveyResponse) => {
-        setResponses(responses);
-    }, []);
-
     return {
         questions,
         responses,
         linearScaleQuestionID,
         surveySubmitted,
         surveyExpired,
-        saveResponses,
+        setResponses,
         submittedAtDate,
         surveyEndDate,
     };
