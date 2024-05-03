@@ -4,6 +4,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -44,6 +45,7 @@ func (api *Handlers) initRoutes() {
 	root.HandleFunc("/ping", api.handlePing).Methods(http.MethodGet)
 	root.HandleFunc("/connected", api.handleConnected).Methods(http.MethodPost)
 	root.HandleFunc("/survey/{surveyID:[a-z0-9]{26}}/response", api.handleSubmitSurveyResponse).Methods(http.MethodPost)
+	root.HandleFunc("/survey_stats", api.handleGetSurveyStats).Methods(http.MethodGet)
 }
 
 func (api *Handlers) handlePing(w http.ResponseWriter, r *http.Request) {
@@ -52,4 +54,24 @@ func (api *Handlers) handlePing(w http.ResponseWriter, r *http.Request) {
 
 func ReturnStatusOK(w http.ResponseWriter) {
 	_, _ = w.Write([]byte("{\"status\":\"OK\"}"))
+}
+
+func jsonResponse(w http.ResponseWriter, r *http.Request, code int, data any) {
+	bytes, err := json.Marshal(data)
+	if err != nil {
+		http.Error(w, "error marshaling data", http.StatusInternalServerError)
+		return
+	}
+
+	setResponseHeader(w, "Content-Type", "application/json")
+	w.WriteHeader(code)
+	_, _ = w.Write(bytes)
+}
+
+func setResponseHeader(w http.ResponseWriter, key string, value string) { //nolint:unparam
+	header := w.Header()
+	if header == nil {
+		return
+	}
+	header.Set(key, value)
 }

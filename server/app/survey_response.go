@@ -6,6 +6,7 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	mmModel "github.com/mattermost/mattermost/server/public/model"
 
@@ -15,8 +16,26 @@ import (
 )
 
 func (a *UserSurveyApp) SaveSurveyResponse(response *model.SurveyResponse) error {
+	inProgressSurvey, err := a.GetInProgressSurvey()
+	if err != nil {
+		a.api.LogError("SaveSurveyResponse: failed to fetch in progress survey", "error", err.Error())
+		return errors.Wrap(err, "SaveSurveyResponse: failed to fetch in progress survey")
+	}
+
+	// the response should belong to the currently active survey
+	if inProgressSurvey.ID != response.SurveyID {
+		return errors.New("the survey you're responding to is no longer active")
+	}
+
+	err = a.matchSurveyAndResponse(inProgressSurvey, response)
+	if err != nil {
+		a.api.LogError("SaveSurveyResponse: failed to match survey and response", "error", err.Error())
+		return errors.Wrap(err, "SaveSurveyResponse: failed to match survey and response")
+	}
+
 	response.SetDefaults()
-	if err := response.IsValid(); err != nil {
+	err = response.IsValid()
+	if err != nil {
 		a.api.LogDebug("SaveSurveyResponse: survey is invalid", "error", err.Error())
 		return errors.Wrap(err, "SaveSurveyResponse: survey response is invalid")
 	}
@@ -50,11 +69,15 @@ func (a *UserSurveyApp) SaveSurveyResponse(response *model.SurveyResponse) error
 
 	postID, err := a.getSurveySentToUser(response.UserID, response.SurveyID)
 	if err != nil {
-		return errors.Wrap(err, "addResponseInPost: failed to fetch KV store entry for user survey")
+		return errors.Wrap(err, "SaveSurveyResponse: failed to fetch KV store entry for user survey")
 	}
 
 	if err := a.addResponseInPost(response, postID); err != nil {
 		return errors.Wrap(err, fmt.Sprintf("SaveSurveyResponse: failed to add submitted response in post, userID: %s, surveyID: %s responseType: %s", response.UserID, response.SurveyID, response.ResponseType))
+	}
+
+	if err := a.updateNPSScoreGroupCount(inProgressSurvey, existingResponse, response); err != nil {
+		return errors.Wrap(err, "SaveSurveyResponse: failed to update group counts")
 	}
 
 	if response.ResponseType == model.ResponseTypeComplete {
@@ -122,4 +145,140 @@ func (a *UserSurveyApp) sendAcknowledgementPost(userID, surveyPostID string) err
 	}
 
 	return nil
+}
+
+func (a *UserSurveyApp) matchSurveyAndResponse(survey *model.Survey, response *model.SurveyResponse) error {
+	// response can't have more answers than the number of questions in the survey
+	if len(response.Response) > len(survey.SurveyQuestions.Questions) {
+		return errors.New("incorrect number of responses submitted")
+	}
+
+	// if only one response is submitted, it needs to be
+	// the answer to the linear scale question
+	if len(response.Response) == 1 {
+		linearScaleQuestionID, err := survey.GetSystemRatingQuestionID()
+		if err != nil {
+			return err
+		}
+
+		if _, ok := response.Response[linearScaleQuestionID]; !ok {
+			return errors.New("linear scale question must be answered")
+		}
+
+		// When user selects a rating and submits via the Submit button,
+		// the client passes the response type manually, and we should only verify it,
+		// not override it.
+		if response.ResponseType != model.ResponseTypeComplete {
+			response.ResponseType = model.ResponseTypePartial
+		}
+	} else {
+		// make sure answered questions belong to the survey
+		surveyQuestionIDMap := map[string]bool{}
+		for _, question := range survey.SurveyQuestions.Questions {
+			surveyQuestionIDMap[question.ID] = true
+		}
+
+		for responseQuestionID := range response.Response {
+			if _, ok := surveyQuestionIDMap[responseQuestionID]; !ok {
+				return errors.New("invalid question ID found in submitted answer")
+			}
+		}
+
+		response.ResponseType = model.ResponseTypeComplete
+	}
+
+	return nil
+}
+
+func (a *UserSurveyApp) updateNPSScoreGroupCount(survey *model.Survey, oldResponse, newResponse *model.SurveyResponse) error {
+	systemRatingQuestionID, err := survey.GetSystemRatingQuestionID()
+	if err != nil {
+		return errors.Wrap(err, "updateNPSScoreGroupCount: failed to find a system rating question in survey")
+	}
+
+	var oldPromoterFactor, oldNeutralFactor, oldDetractorFactor int
+	var newPromoterFactor, newNeutralFactor, newDetractorFactor int
+
+	newRating, err := strconv.Atoi(newResponse.Response[systemRatingQuestionID])
+	if err != nil {
+		a.api.LogError("updateNPSScoreGroupCount: failed to convert new rating value from string to number")
+		return errors.Wrap(err, "updateNPSScoreGroupCount: failed to convert new rating value from string to number")
+	}
+
+	newPromoterFactor, newNeutralFactor, newDetractorFactor = a.getRatingGroupFactors(newRating)
+
+	if oldResponse != nil {
+		oldRating, err := strconv.Atoi(oldResponse.Response[systemRatingQuestionID])
+		if err != nil {
+			a.api.LogError("updateNPSScoreGroupCount: failed to convert new rating value from string to number")
+			return errors.Wrap(err, "updateNPSScoreGroupCount: failed to convert new rating value from string to number")
+		}
+
+		if !a.hasRatingGroupChanged(oldRating, newRating) {
+			// nothing to do if rating groups are unchanged
+			return nil
+		}
+
+		oldPromoterFactor, oldNeutralFactor, oldDetractorFactor = a.getRatingGroupFactors(oldRating)
+
+		oldPromoterFactor *= -1
+		oldNeutralFactor *= -1
+		oldDetractorFactor *= -1
+	}
+
+	var promoterFactor, neutralFactor, detractorFactor int
+
+	if oldPromoterFactor != 0 {
+		promoterFactor = oldNeutralFactor
+	} else {
+		promoterFactor = newPromoterFactor
+	}
+
+	if oldNeutralFactor != 0 {
+		neutralFactor = oldNeutralFactor
+	} else {
+		neutralFactor = newNeutralFactor
+	}
+
+	if oldDetractorFactor != 0 {
+		detractorFactor = oldDetractorFactor
+	} else {
+		detractorFactor = newDetractorFactor
+	}
+
+	if err := a.store.UpdateRatingGroupCount(survey.ID, promoterFactor, neutralFactor, detractorFactor); err != nil {
+		return errors.Wrap(err, "updateNPSScoreGroupCount: failed to update survey rating group count")
+	}
+
+	return nil
+}
+
+func (a *UserSurveyApp) getRatingGroupFactors(rating int) (promoterFactor, neutralFactor, detractorFactor int) {
+	switch {
+	case rating >= 1 && rating <= 6:
+		detractorFactor = 1
+	case rating <= 8:
+		neutralFactor = 1
+	case rating <= 10:
+		promoterFactor = 1
+	}
+
+	return promoterFactor, neutralFactor, detractorFactor
+}
+
+func (a *UserSurveyApp) hasRatingGroupChanged(oldRating, newRating int) bool {
+	if newRating == oldRating {
+		return false
+	}
+
+	switch {
+	case oldRating >= 1 && oldRating <= 6 && newRating >= 1 && newRating <= 6:
+		return false
+	case oldRating >= 7 && oldRating <= 8 && newRating >= 7 && newRating <= 8:
+		return false
+	case oldRating >= 9 && oldRating <= 10 && newRating >= 9 && newRating <= 10:
+		return false
+	default:
+		return true
+	}
 }

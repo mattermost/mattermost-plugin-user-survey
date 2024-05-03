@@ -21,4 +21,6 @@ type Store interface {
 	UpdateSurveyResponse(response *model.SurveyResponse) error
 	IncrementSurveyReceiptCount(surveyID string) error
 	IncrementSurveyResponseCount(surveyID string) error
+	GetSurveyStatList() ([]*model.SurveyStat, error)
+	UpdateRatingGroupCount(surveyID string, promoterFactor, neutralFactor, detractorFactor int) error
 }

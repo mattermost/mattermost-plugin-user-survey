@@ -76,6 +76,36 @@ func (_m *Store) GetSurveyResponse(userID string, surveyID string) (*model.Surve
 	return r0, r1
 }
 
+// GetSurveyStatList provides a mock function with given fields:
+func (_m *Store) GetSurveyStatList() ([]*model.SurveyStat, error) {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetSurveyStatList")
+	}
+
+	var r0 []*model.SurveyStat
+	var r1 error
+	if rf, ok := ret.Get(0).(func() ([]*model.SurveyStat, error)); ok {
+		return rf()
+	}
+	if rf, ok := ret.Get(0).(func() []*model.SurveyStat); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.SurveyStat)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetSurveysByStatus provides a mock function with given fields: status
 func (_m *Store) GetSurveysByStatus(status string) ([]*model.Survey, error) {
 	ret := _m.Called(status)
@@ -121,6 +151,42 @@ func (_m *Store) GetTemplateHelperFuncs() template.FuncMap {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(template.FuncMap)
 		}
+	}
+
+	return r0
+}
+
+// IncrementSurveyReceiptCount provides a mock function with given fields: surveyID
+func (_m *Store) IncrementSurveyReceiptCount(surveyID string) error {
+	ret := _m.Called(surveyID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IncrementSurveyReceiptCount")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(surveyID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// IncrementSurveyResponseCount provides a mock function with given fields: surveyID
+func (_m *Store) IncrementSurveyResponseCount(surveyID string) error {
+	ret := _m.Called(surveyID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IncrementSurveyResponseCount")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(surveyID)
+	} else {
+		r0 = ret.Error(0)
 	}
 
 	return r0
@@ -226,6 +292,24 @@ func (_m *Store) SurveysFromRows(rows *sql.Rows) ([]*model.Survey, error) {
 	}
 
 	return r0, r1
+}
+
+// UpdateRatingGroupCount provides a mock function with given fields: surveyID, promoterFactor, neutralFactor, detractorFactor
+func (_m *Store) UpdateRatingGroupCount(surveyID string, promoterFactor int, neutralFactor int, detractorFactor int) error {
+	ret := _m.Called(surveyID, promoterFactor, neutralFactor, detractorFactor)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateRatingGroupCount")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, int, int, int) error); ok {
+		r0 = rf(surveyID, promoterFactor, neutralFactor, detractorFactor)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // UpdateSurveyResponse provides a mock function with given fields: response

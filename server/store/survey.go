@@ -172,3 +172,20 @@ func (s *SQLStore) IncrementSurveyResponseCount(surveyID string) error {
 
 	return nil
 }
+
+func (s *SQLStore) UpdateRatingGroupCount(surveyID string, promoterFactor, neutralFactor, detractorFactor int) error {
+	_, err := s.getQueryBuilder().
+		Update(s.tablePrefix+"survey").
+		Set("promoters_count", sq.Expr("promoters_count + (1 * ?)", promoterFactor)).
+		Set("passives_count", sq.Expr("passives_count + (1 * ?)", neutralFactor)).
+		Set("detractors_count", sq.Expr("detractors_count + (1 * ?)", detractorFactor)).
+		Where(sq.Eq{"id": surveyID}).
+		Exec()
+
+	if err != nil {
+		s.pluginAPI.LogError("UpdateRatingGroupCount: failed to update rating group counts in survey", "survey_id", surveyID, "error", err.Error())
+		return errors.Wrap(err, "UpdateRatingGroupCount: failed to update rating group counts in survey")
+	}
+
+	return nil
+}

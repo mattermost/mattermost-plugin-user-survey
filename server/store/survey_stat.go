@@ -6,8 +6,10 @@ package store
 import (
 	"database/sql"
 	"encoding/json"
-	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
+
 	"github.com/pkg/errors"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 )
 
 func (s *SQLStore) GetSurveyStatList() ([]*model.SurveyStat, error) {
@@ -26,16 +28,19 @@ func (s *SQLStore) GetSurveyStatList() ([]*model.SurveyStat, error) {
 		return nil, err
 	}
 
-
+	return surveyStats, nil
 }
 
 func (s *SQLStore) surveyStatColumns() []string {
 	surveyStateColumns := []string{
 		"receipt_count",
 		"response_count",
+		"passives_count",
+		"promoters_count",
+		"detractors_count",
 	}
 
-	return append(surveyStateColumns, s.surveyColumns()...)
+	return append(s.surveyColumns(), surveyStateColumns...)
 }
 
 func (s *SQLStore) surveyStatsFromRows(rows *sql.Rows) ([]*model.SurveyStat, error) {
@@ -57,6 +62,9 @@ func (s *SQLStore) surveyStatsFromRows(rows *sql.Rows) ([]*model.SurveyStat, err
 			&surveyStat.Status,
 			&surveyStat.ReceiptCount,
 			&surveyStat.ResponseCount,
+			&surveyStat.PassiveCount,
+			&surveyStat.PromoterCount,
+			&surveyStat.DetractorCount,
 		)
 		if err != nil {
 			s.pluginAPI.LogError("surveyStatsFromRows: failed to scan survey stat row", "error", err.Error())

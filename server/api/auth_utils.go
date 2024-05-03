@@ -34,3 +34,19 @@ func (api *Handlers) DisallowGuestUsers(w http.ResponseWriter, r *http.Request) 
 
 	return nil
 }
+
+func (api *Handlers) RequireSystemAdmin(w http.ResponseWriter, r *http.Request) error {
+	userID := r.Header.Get(headerMattermostUserID)
+	user, appErr := api.pluginAPI.GetUser(userID)
+	if appErr != nil {
+		api.pluginAPI.LogError("RequireSystemAdmin: failed to get user from plugin API", "error", appErr.Error())
+		return errors.New(appErr.Error())
+	}
+
+	if isSysAdmin := user.IsSystemAdmin(); !isSysAdmin {
+		http.Error(w, "Unauthorized", http.StatusForbidden)
+		return errors.New("Only system admins are permitted to access this resource")
+	}
+
+	return nil
+}
