@@ -29,7 +29,7 @@ import (
 
 var (
 	// databaseTypes = []string{model.DBTypePostgres, model.DBTypeMySQL}
-	databaseTypes = []string{model.DBTypeMySQL}
+	databaseTypes = []string{model.DBTypeMySQL, model.DBTypePostgres}
 )
 
 type StoreTests func(t *testing.T, namePrefix string, sqlStore *SQLStore, tearDown func())
