@@ -40,10 +40,23 @@ func (api *Handlers) handleSubmitSurveyResponse(w http.ResponseWriter, r *http.R
 	response.SurveyID = surveyID
 	response.UserID = userID
 
-	// now that we have response, we'll verify that the response matches
-	// what is expected in the active survey. For example,
-	// the number of questions and answers should match, and the submission should
-	// only be against the active survey
+	survey, err := api.app.GetInProgressSurvey()
+	if err != nil {
+		api.pluginAPI.LogError("handleSubmitSurveyResponse: failed to fetch in progress survey", "error", err.Error())
+		http.Error(w, "failed to fetch survey", http.StatusInternalServerError)
+		return
+	}
+
+	// the response should belong to the currently active survey
+	if survey.ID != surveyID {
+		err = api.app.UpdatePostForExpiredSurvey(userID, response.SurveyID)
+		if err != nil {
+			http.Error(w, "failed to update post for expired survey", http.StatusInternalServerError)
+			return
+		}
+
+		return
+	}
 
 	if err := api.app.SaveSurveyResponse(response); err != nil {
 		api.pluginAPI.LogError("handleSubmitSurveyResponse: failed to save survey response", "error", err.Error())

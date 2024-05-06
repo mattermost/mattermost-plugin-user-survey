@@ -106,6 +106,36 @@ func (_m *Store) GetSurveyStatList() ([]*model.SurveyStat, error) {
 	return r0, r1
 }
 
+// GetSurveysByID provides a mock function with given fields: surveyID
+func (_m *Store) GetSurveysByID(surveyID string) (*model.Survey, error) {
+	ret := _m.Called(surveyID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetSurveysByID")
+	}
+
+	var r0 *model.Survey
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*model.Survey, error)); ok {
+		return rf(surveyID)
+	}
+	if rf, ok := ret.Get(0).(func(string) *model.Survey); ok {
+		r0 = rf(surveyID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Survey)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(surveyID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetSurveysByStatus provides a mock function with given fields: status
 func (_m *Store) GetSurveysByStatus(status string) ([]*model.Survey, error) {
 	ret := _m.Called(status)

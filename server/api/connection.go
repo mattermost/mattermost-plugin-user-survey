@@ -26,6 +26,7 @@ func (api *Handlers) handleConnected(w http.ResponseWriter, r *http.Request) {
 
 	userID := r.Header.Get(headerMattermostUserID)
 
+	// check if there is any in-progress survey
 	inProgressSurvey, err := api.app.GetInProgressSurvey()
 	if err != nil {
 		http.Error(w, "Failed to fetch survey details", http.StatusInternalServerError)
@@ -38,6 +39,28 @@ func (api *Handlers) handleConnected(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// acquire lock to prevent two API calls from each sending a duplicate survey to the same user
+	key := utils.KeyUserSendSurveyLock(userID)
+	utcNow := time.Now().UTC()
+	locked, err := api.app.AcquireUserSurveyLock(key, utcNow)
+	if err != nil {
+		http.Error(w, "Failed to acquire lock", http.StatusInternalServerError)
+		return
+	}
+
+	// if couldn't acquire the lock, and there is no error,
+	// it means some other handler is already handling this API for the same user,
+	// so we can safely exit here.
+	if !locked {
+		ReturnStatusOK(w)
+		return
+	}
+
+	// make sure to release the lock when done.
+	defer func() {
+		_, _ = api.app.ReleaseUserSurveyLock(key, utcNow)
+	}()
+
 	should, err := api.app.ShouldSendSurvey(userID, inProgressSurvey)
 	if err != nil {
 		http.Error(w, "Failed to check survey status", http.StatusInternalServerError)
@@ -48,23 +71,6 @@ func (api *Handlers) handleConnected(w http.ResponseWriter, r *http.Request) {
 		ReturnStatusOK(w)
 		return
 	}
-
-	key := utils.KeyUserSendSurveyLock(userID)
-	utcNow := time.Now().UTC()
-	locked, err := api.app.AcquireUserSurveyLock(key, utcNow)
-	if err != nil {
-		http.Error(w, "Failed to acquire lock", http.StatusInternalServerError)
-		return
-	}
-
-	if !locked {
-		ReturnStatusOK(w)
-		return
-	}
-
-	defer func() {
-		_, _ = api.app.ReleaseUserSurveyLock(key, utcNow)
-	}()
 
 	if err := api.app.SendSurvey(userID, inProgressSurvey); err != nil {
 		http.Error(w, "Failed to send survey", http.StatusInternalServerError)
