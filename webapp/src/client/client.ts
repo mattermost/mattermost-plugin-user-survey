@@ -2,13 +2,10 @@
 // See LICENSE.txt for license information.
 
 import HttpClient from 'client/httpClient';
-import {types} from 'sass';
 
 import type {SurveyResponse} from 'types/plugin';
 
 import manifest from '../manifest';
-
-import Error = types.Error;
 
 export const ID_PATH_PATTERN = /[a-z0-9]{26}/;
 
