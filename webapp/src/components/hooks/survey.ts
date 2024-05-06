@@ -11,10 +11,10 @@ import {validateSurveyQuestionsConfig, validateSurveyResponse} from 'types/valid
 export function useUserSurvey(post: Post) {
     const [questions, setQuestions] = useState<SurveyQuestionsConfig>();
     const [responses, setResponses] = useState<SurveyResponse>();
+    const [submittedAtDate, setSubmittedAtDate] = useState<Date>();
+    const [surveyExpireAtDate, setSurveyExpireAtDate] = useState<Date>();
 
     const linearScaleQuestionID = useRef<string>();
-    const submittedAtDate = useRef<Date>();
-    const surveyEndDate = useRef<Date>(); // TODO
 
     const surveySubmitted = post.props.survey_status === 'submitted';
     const surveyExpired = post.props.survey_status === 'ended';
@@ -53,9 +53,13 @@ export function useUserSurvey(post: Post) {
         }
 
         if (post.props.survey_response_create_at) {
-            submittedAtDate.current = new Date(parseInt(post.props.survey_response_create_at, 10));
+            setSubmittedAtDate(new Date(parseInt(post.props.survey_response_create_at, 10)));
         }
-    }, [post.props.survey_questions, post.props.survey_response, post.props.survey_response_create_at]);
+
+        if (post.props.survey_expire_at) {
+            setSurveyExpireAtDate(new Date(parseInt(post.props.survey_expire_at, 10)));
+        }
+    }, [post.props.survey_expire_at, post.props.survey_questions, post.props.survey_response, post.props.survey_response_create_at]);
 
     return {
         questions,
@@ -65,6 +69,6 @@ export function useUserSurvey(post: Post) {
         surveyExpired,
         setResponses,
         submittedAtDate,
-        surveyEndDate,
+        surveyExpireAtDate,
     };
 }

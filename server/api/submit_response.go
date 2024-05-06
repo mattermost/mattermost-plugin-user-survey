@@ -53,7 +53,18 @@ func (api *Handlers) handleSubmitSurveyResponse(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	if err := matchSurveyAndResponse(surveyID, survey, response); err != nil {
+	// the response should belong to the currently active survey
+	if survey.ID != surveyID {
+		err = api.app.UpdatePostForExpiredSurvey(userID, response.SurveyID)
+		if err != nil {
+			http.Error(w, "failed to update post for expired survey", http.StatusInternalServerError)
+			return
+		}
+
+		return
+	}
+
+	if err := matchSurveyAndResponse(survey, response); err != nil {
 		api.pluginAPI.LogError("handleSubmitSurveyResponse: failed to match survey and response", "error", err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -68,12 +79,7 @@ func (api *Handlers) handleSubmitSurveyResponse(w http.ResponseWriter, r *http.R
 	ReturnStatusOK(w)
 }
 
-func matchSurveyAndResponse(surveyID string, survey *model.Survey, response *model.SurveyResponse) error {
-	// the response should belong to the currently active survey
-	if survey.ID != surveyID {
-		return errors.New("the survey you're responding to is no longer active")
-	}
-
+func matchSurveyAndResponse(survey *model.Survey, response *model.SurveyResponse) error {
 	// response can't have more answers than the number of questions in the survey
 	if len(response.Response) > len(survey.SurveyQuestions.Questions) {
 		return errors.New("incorrect number of responses submitted")

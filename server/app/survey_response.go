@@ -14,6 +14,18 @@ import (
 	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
 )
 
+const (
+	postPropKeySurveyResponse   = "survey_response"
+	postPropKeyResponseCreateAt = "survey_response_create_at"
+	postPropKeySurveyStatus     = "survey_status"
+	postPropKeySurveyQuestions  = "survey_questions"
+	postPropSurveyID            = "survey_id"
+	postPropSurveyExpiryDate    = "survey_expire_at"
+
+	postPropValueSurveyStatusSubmitted = "submitted"
+	postPropValueSurveyStatusExpired   = "ended"
+)
+
 func (a *UserSurveyApp) SaveSurveyResponse(response *model.SurveyResponse) error {
 	response.SetDefaults()
 	if err := response.IsValid(); err != nil {
@@ -74,11 +86,11 @@ func (a *UserSurveyApp) addResponseInPost(response *model.SurveyResponse, postID
 		return errors.Wrap(err, "addResponseInPost: failed to marshal survey responses")
 	}
 
-	post.AddProp("survey_response", string(responseJSON))
+	post.AddProp(postPropKeySurveyResponse, string(responseJSON))
 
 	if response.ResponseType == model.ResponseTypeComplete {
-		post.AddProp("survey_response_create_at", response.CreateAt)
-		post.AddProp("survey_status", "submitted")
+		post.AddProp(postPropKeyResponseCreateAt, response.CreateAt)
+		post.AddProp(postPropKeySurveyStatus, postPropValueSurveyStatusSubmitted)
 	}
 
 	_, appErr = a.api.UpdatePost(post)
@@ -114,6 +126,36 @@ func (a *UserSurveyApp) sendAcknowledgementPost(userID, surveyPostID string) err
 	if _, appErr := a.api.CreatePost(post); appErr != nil {
 		a.api.LogError("sendAcknowledgementPost: failed to send survey submission ack post", "user_id", userID, "channelID", botUserDM, "error", appErr.Error())
 		return fmt.Errorf("sendAcknowledgementPost: failed to send survey submission ack post, err: %s", appErr.Error())
+	}
+
+	return nil
+}
+
+func (a *UserSurveyApp) UpdatePostForExpiredSurvey(userID, surveyID string) error {
+	postID, err := a.getSurveySentToUser(userID, surveyID)
+	if err != nil || postID == "" {
+		a.api.LogError("UpdatePostForExpiredSurvey: failed to fetch KV store entry for user survey", "userID", userID, "surveyID", surveyID, "error", err.Error())
+		return errors.Wrap(err, fmt.Sprintf("UpdatePostForExpiredSurvey: failed to fetch KV store entry for user survey, userID: %s, surveyID: %s", userID, surveyID))
+	}
+
+	expiredSurvey, err := a.store.GetSurveysByID(surveyID)
+	if err != nil {
+		return errors.Wrap(err, "UpdatePostForExpiredSurvey: failed to fetch expired survey from database, surveyID: "+surveyID)
+	}
+
+	post, appErr := a.api.GetPost(postID)
+	if appErr != nil {
+		a.api.LogError("UpdatePostForExpiredSurvey: failed to get post from ID", "userID", userID, "surveyID", surveyID, "error", appErr.Error())
+		return errors.Wrap(errors.New(appErr.Error()), "UpdatePostForExpiredSurvey: failed to get post from ID")
+	}
+
+	post.AddProp(postPropKeySurveyStatus, postPropValueSurveyStatusExpired)
+	post.AddProp(postPropSurveyExpiryDate, expiredSurvey.GetEndTime().Format("02 January 2006"))
+
+	_, appErr = a.api.UpdatePost(post)
+	if appErr != nil {
+		a.api.LogError("UpdatePostForExpiredSurvey: failed to update post after updating it for expired survey", "userID", userID, "surveyID", surveyID, "error", appErr.Error())
+		return errors.Wrap(errors.New(appErr.Error()), fmt.Sprintf("UpdatePostForExpiredSurvey: failed to update post after updating it for expired survey, userID: %s, surveyID: %s", userID, surveyID))
 	}
 
 	return nil

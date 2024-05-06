@@ -32,7 +32,7 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
         surveySubmitted,
         setResponses,
         submittedAtDate,
-        surveyEndDate,
+        surveyExpireAtDate,
     } = useUserSurvey(post);
 
     const disabled = surveySubmitted || surveyExpired;
@@ -80,7 +80,7 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
             success = false;
         }
 
-        return {success, error: !success};
+        return {success};
     }, [post.props.survey_id]);
 
     const submitSurveyHandler = useCallback(async () => {
@@ -97,7 +97,7 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
         if (response.success) {
             setResponses(draftResponse.current);
             setErrorMessage('');
-        } else if (response.error) {
+        } else {
             setErrorMessage('Failed to submit survey response. Please try again.');
         }
     }, [setResponses, submitSurveyResponse, validateResponses]);
@@ -165,7 +165,7 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
                     />
 
                     {
-                        questionErrorMessage &&
+                        !disabled && questionErrorMessage &&
                         <div className='questionErrorMessage error'>
                             {questionErrorMessage}
                         </div>
@@ -197,7 +197,7 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
                 </div>
 
                 {
-                    errorMessage &&
+                    !disabled && errorMessage &&
                     <div className='surveyMessage error'>
                         {errorMessage}
                     </div>
@@ -217,14 +217,14 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
                 {
                     disabled && !surveyExpired &&
                     <div className='surveyMessage submitted'>
-                        {`Response submitted on ${submittedAtDate.current?.toLocaleDateString()}`}
+                        {`Response submitted on ${submittedAtDate?.toLocaleDateString()}`}
                     </div>
                 }
 
                 {
                     disabled && surveyExpired &&
                     <div className='surveyMessage submitted'>
-                        {`Survey expired on ${surveyEndDate}.`}
+                        {`Survey expired on ${surveyExpireAtDate?.toLocaleDateString()}.`}
                     </div>
                 }
             </div>

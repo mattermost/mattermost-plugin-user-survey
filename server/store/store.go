@@ -13,6 +13,7 @@ type Store interface {
 	GetTemplateHelperFuncs() template.FuncMap
 	GetSchemaName() (string, error)
 	GetSurveysByStatus(status string) ([]*model.Survey, error)
+	GetSurveysByID(surveyID string) (*model.Survey, error)
 	SurveysFromRows(rows *sql.Rows) ([]*model.Survey, error)
 	SaveSurvey(survey *model.Survey) error
 	UpdateSurveyStatus(surveyID, status string) error

@@ -84,11 +84,8 @@ func (s *Survey) ShouldSurveyStop() bool {
 		return false
 	}
 
-	endTime := time.Unix(0, s.StartTime*int64(time.Millisecond)).
-		Add(time.Duration(s.Duration) * 24 * time.Hour)
-
+	endTime := s.GetEndTime()
 	utcDateTime := time.Now().UTC()
-
 	return utcDateTime.After(endTime) || utcDateTime.Equal(endTime)
 }
 
@@ -106,6 +103,11 @@ func (s *Survey) GetSystemRatingQuestionID() (string, error) {
 	}
 
 	return questionID, nil
+}
+
+func (s *Survey) GetEndTime() time.Time {
+	return time.Unix(0, s.StartTime*int64(time.Millisecond)).
+		Add(time.Duration(s.Duration) * 24 * time.Hour)
 }
 
 type Question struct {
