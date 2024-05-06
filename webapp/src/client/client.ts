@@ -2,10 +2,15 @@
 // See LICENSE.txt for license information.
 
 import HttpClient from 'client/httpClient';
+import {types} from 'sass';
 
 import type {SurveyResponse} from 'types/plugin';
 
 import manifest from '../manifest';
+
+import Error = types.Error;
+
+export const ID_PATH_PATTERN = /[a-z0-9]{26}/;
 
 class SurveyClient extends HttpClient {
     url = '';
@@ -19,6 +24,10 @@ class SurveyClient extends HttpClient {
     };
 
     submitSurveyResponse = async (surveyID: string, response: SurveyResponse) => {
+        if (!surveyID || !ID_PATH_PATTERN.test(surveyID)) {
+            return Promise.reject(new Error('invalid survey ID encountered. Survey ID should be a 26 character, lowercase alphanumeric string'));
+        }
+
         const url = `${this.url}/survey/${surveyID}/response`;
         return this.doPost(url, response);
     };
