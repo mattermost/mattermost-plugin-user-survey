@@ -176,9 +176,9 @@ func (s *SQLStore) IncrementSurveyResponseCount(surveyID string) error {
 func (s *SQLStore) UpdateRatingGroupCount(surveyID string, promoterFactor, neutralFactor, detractorFactor int) error {
 	_, err := s.getQueryBuilder().
 		Update(s.tablePrefix+"survey").
-		Set("promoters_count", sq.Expr("promoters_count + (1 * ?)", promoterFactor)).
-		Set("passives_count", sq.Expr("passives_count + (1 * ?)", neutralFactor)).
-		Set("detractors_count", sq.Expr("detractors_count + (1 * ?)", detractorFactor)).
+		Set("promoters_count", sq.Expr("promoters_count + (?)", promoterFactor)).
+		Set("passives_count", sq.Expr("passives_count + (?)", neutralFactor)).
+		Set("detractors_count", sq.Expr("detractors_count + (?)", detractorFactor)).
 		Where(sq.Eq{"id": surveyID}).
 		Exec()
 

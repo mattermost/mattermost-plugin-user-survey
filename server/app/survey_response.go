@@ -233,6 +233,19 @@ func (a *UserSurveyApp) UpdatePostForExpiredSurvey(userID, surveyID string) erro
 }
 
 func (a *UserSurveyApp) updateNPSScoreGroupCount(survey *model.Survey, oldResponse, newResponse *model.SurveyResponse) error {
+	// survey table has a column each for number of promoters, neutral and detractors.
+	// Depending on the new score, we need to increment the corresponding columns, and
+	// depending on the old score, decrement its corresponding column value.
+	//
+	// Since we store ratings as soon as user selects it, and then we update the whole response
+	// when user clicks the "submit" button, it is possible to have an existing response saved
+	// in the database already.
+	//
+	// This function computes three values, either 1 or -1, one for each promoter, neutral and detractors columns.
+	// We then add the computed values corresponding to each column in the database, effectively
+	// increasing the column corresponding the new score by 1 and incrementing the column
+	// corresponding to the old score by -1 (incrementing by -1 is same as decrementing by 1, incrementing by -1 here to keep SQL queries simple).
+
 	systemRatingQuestionID, err := survey.GetSystemRatingQuestionID()
 	if err != nil {
 		return errors.Wrap(err, "updateNPSScoreGroupCount: failed to find a system rating question in survey")

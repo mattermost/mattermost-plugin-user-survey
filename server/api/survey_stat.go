@@ -23,5 +23,5 @@ func (api *Handlers) handleGetSurveyStats(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	jsonResponse(w, r, http.StatusOK, surveyStats)
+	jsonResponse(w, http.StatusOK, surveyStats)
 }

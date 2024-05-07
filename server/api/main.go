@@ -56,7 +56,7 @@ func ReturnStatusOK(w http.ResponseWriter) {
 	_, _ = w.Write([]byte("{\"status\":\"OK\"}"))
 }
 
-func jsonResponse(w http.ResponseWriter, r *http.Request, code int, data any) {
+func jsonResponse(w http.ResponseWriter, code int, data any) {
 	bytes, err := json.Marshal(data)
 	if err != nil {
 		http.Error(w, "error marshaling data", http.StatusInternalServerError)
@@ -69,9 +69,5 @@ func jsonResponse(w http.ResponseWriter, r *http.Request, code int, data any) {
 }
 
 func setResponseHeader(w http.ResponseWriter, key string, value string) { //nolint:unparam
-	header := w.Header()
-	if header == nil {
-		return
-	}
-	header.Set(key, value)
+	w.Header().Set(key, value)
 }
