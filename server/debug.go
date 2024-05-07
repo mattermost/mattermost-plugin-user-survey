@@ -44,6 +44,19 @@ func (p *Plugin) ExecuteCommand(ctx *plugin.Context, args *model.CommandArgs) (*
 }
 
 func (p *Plugin) executeResetDataCommand(_ *plugin.Context, args *model.CommandArgs) (*model.CommandResponse, *model.AppError) {
+	user, appErr := p.API.GetUser(args.UserId)
+	if appErr != nil {
+		p.API.LogError("executeResetDataCommand: failed to get user by id", "userID", args.UserId, "error", appErr.Error())
+
+		return &model.CommandResponse{
+			Text: "There was an error executing the command",
+		}, nil
+	}
+
+	if !user.IsSystemAdmin() {
+		return &model.CommandResponse{}, nil
+	}
+
 	p.API.LogWarn("Processing request to reset all user survey data. Requested by user ID: " + args.UserId)
 
 	var message string
