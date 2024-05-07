@@ -50,7 +50,7 @@ func (a *UserSurveyApp) JobManageSurveyStatus() error {
 	if checkForNewSurvey {
 		a.api.LogDebug("JobManageSurveyStatus: checking if a new survey can start now")
 		if err := a.startNewSurveyIfNeeded(); err != nil {
-			a.api.LogError("JobManageSurveyStatus: failed to start ne survey if needed", "error", err.Error())
+			a.api.LogError("JobManageSurveyStatus: failed to start new survey if needed", "error", err.Error())
 			return err
 		}
 	}
@@ -81,8 +81,14 @@ func (a *UserSurveyApp) startNewSurveyIfNeeded() error {
 			UpdateAt:        now,
 			StartTime:       startTime.UnixMilli(),
 			Duration:        config.SurveyExpiry.Days,
-			SurveyQuestions: config.SurveyQuestions,
+			SurveyQuestions: model.SurveyQuestions{SurveyMessageText: config.SurveyQuestions.SurveyMessageText},
 			Status:          model.SurveyStatusInProgress,
+		}
+
+		for _, question := range config.SurveyQuestions.Questions {
+			if question.Text != "" {
+				survey.SurveyQuestions.Questions = append(survey.SurveyQuestions.Questions, question)
+			}
 		}
 
 		a.api.LogDebug("JobManageSurveyStatus: saving new survey")

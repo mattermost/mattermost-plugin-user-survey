@@ -88,5 +88,12 @@ func (s *SQLStore) Shutdown() error {
 }
 
 func (s *SQLStore) getQueryBuilder() squirrel.StatementBuilderType {
-	return squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).RunWith(s.db)
+	return squirrel.StatementBuilder.PlaceholderFormat(s.getQueryPlaceholder()).RunWith(s.db)
+}
+
+func (s *SQLStore) getQueryPlaceholder() squirrel.PlaceholderFormat {
+	if s.dbType == model.DBTypePostgres {
+		return squirrel.Dollar
+	}
+	return squirrel.Question
 }

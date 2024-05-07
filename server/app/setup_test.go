@@ -14,18 +14,30 @@ import (
 	"github.com/mattermost/mattermost-plugin-user-survey/server/utils/testutils"
 )
 
-func SetupTests(t *testing.T) (*UserSurveyApp, *mocks.Store) {
+type AppTestHelper struct {
+	App             *UserSurveyApp
+	MockedStore     *mocks.Store
+	MockedPluginAPI *plugintest.API
+}
+
+func SetupAppTest(t *testing.T) *AppTestHelper {
 	mockedAPI := &plugintest.API{}
 	testutils.MockLogs(mockedAPI)
+	testutils.MockSetupBot(mockedAPI)
 
 	mockedStore := mocks.Store{}
+	mockedDriver := plugintest.Driver{}
 
 	getConfig := func() *model.Config {
 		return &model.Config{}
 	}
 
-	app, err := New(mockedAPI, &mockedStore, getConfig)
+	app, err := New(mockedAPI, &mockedStore, getConfig, &mockedDriver)
 	require.NoError(t, err)
 
-	return app, &mockedStore
+	return &AppTestHelper{
+		App:             app,
+		MockedStore:     &mockedStore,
+		MockedPluginAPI: mockedAPI,
+	}
 }

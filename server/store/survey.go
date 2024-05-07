@@ -27,7 +27,7 @@ func (s *SQLStore) GetSurveysByStatus(status string) ([]*model.Survey, error) {
 		Query()
 
 	if err != nil {
-		return nil, errors.Wrap(err, "SQLStore.GetInProgressSurvey failed to fetch draft survey from database")
+		return nil, errors.Wrap(err, "SQLStore.GetInProgressSurvey failed to fetch survey by status from database")
 	}
 
 	surveys, err := s.SurveysFromRows(rows)

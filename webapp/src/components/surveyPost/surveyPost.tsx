@@ -32,7 +32,7 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
         surveyExpired,
         responsesExist,
         setResponses,
-    } = useUserSurvey(post.props.surveyID);
+    } = useUserSurvey(post);
 
     const disabled = responsesExist || surveyExpired;
 
@@ -93,7 +93,7 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
     const renderedMessage = useMemo(() => {
         // @ts-expect-error window is definitely MattermostWindow in plugins
         const mmWindow = window as MattermostWindow;
-        const htmlString = mmWindow.PostUtils.formatText(post.message, {markdown: true});
+        const htmlString = mmWindow.PostUtils.formatText(post.message, {markdown: true, mentionHighlight: true, atMentions: true});
         return mmWindow.PostUtils.messageHtmlToComponent(htmlString);
     }, [post.message]);
 

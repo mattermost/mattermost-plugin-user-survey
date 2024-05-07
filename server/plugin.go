@@ -61,6 +61,10 @@ func (p *Plugin) OnActivate() error {
 		return err
 	}
 
+	if err := p.clearStaleLocks(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -115,7 +119,7 @@ func (p *Plugin) initApp(store store.Store) (*app.UserSurveyApp, error) {
 	getConfigFunc := func() *model.Config {
 		return p.getConfiguration()
 	}
-	return app.New(p.API, store, getConfigFunc)
+	return app.New(p.API, store, getConfigFunc, p.Driver)
 }
 
 func (p *Plugin) initAPI(app *app.UserSurveyApp) *api.Handlers {

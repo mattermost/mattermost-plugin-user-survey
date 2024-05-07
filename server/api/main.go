@@ -13,6 +13,10 @@ import (
 	"github.com/mattermost/mattermost-plugin-user-survey/server/app"
 )
 
+const (
+	headerMattermostUserID = "Mattermost-User-ID"
+)
+
 type Handlers struct {
 	app       *app.UserSurveyApp
 	pluginAPI plugin.API
@@ -34,9 +38,13 @@ func (api *Handlers) initRoutes() {
 	root := api.Router.PathPrefix("/api/v1").Subrouter()
 
 	root.HandleFunc("/ping", api.handlePing).Methods(http.MethodGet)
-	root.HandleFunc("/handleConnected", api.handleConnected).Methods(http.MethodGet)
+	root.HandleFunc("/connected", api.handleConnected).Methods(http.MethodPost)
 }
 
 func (api *Handlers) handlePing(w http.ResponseWriter, r *http.Request) {
 	_, _ = fmt.Fprint(w, "Pong")
+}
+
+func ReturnStatusOK(w http.ResponseWriter) {
+	_, _ = w.Write([]byte("{\"status\":\"OK\"}"))
 }
