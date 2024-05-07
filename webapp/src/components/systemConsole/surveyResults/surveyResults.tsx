@@ -35,6 +35,26 @@ function SurveyResults() {
         fetchSurveyStatus();
     }, [hydrateSurveyResults]);
 
+    const handleStopSurvey = useCallback(async (surveyID: string) => {
+        // TODO: would be nice to add some sort of confirmation here
+
+        const updatedSurveyResult = [...surveyResults];
+        const surveyResultIndex = updatedSurveyResult.findIndex((surveyResult) => surveyResult.id === surveyID);
+        if (surveyResultIndex < 0) {
+            return;
+        }
+
+        try {
+            await client.endSurvey(surveyID);
+        } catch (error) {
+            console.error(error);
+            return;
+        }
+
+        updatedSurveyResult[surveyResultIndex].status = 'ended';
+        setSurveyResults(updatedSurveyResult);
+    }, [surveyResults]);
+
     const generateActions = (surveyResult: SurveyResult) => {
         if (surveyResult.status === 'ended') {
             return (
@@ -59,6 +79,7 @@ function SurveyResults() {
                     danger={true}
                     iconClass='icon-flag-checkered'
                     text='End survey'
+                    onClick={() => handleStopSurvey(surveyResult.id)}
                 />
                 <Button iconClass='icon-download-outline'/>
             </div>

@@ -4,8 +4,9 @@
 package api
 
 import (
-	"github.com/gorilla/mux"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func (api *Handlers) handleStopSurvey(w http.ResponseWriter, r *http.Request) {
