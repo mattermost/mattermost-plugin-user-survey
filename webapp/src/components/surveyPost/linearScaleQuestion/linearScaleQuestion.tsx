@@ -11,7 +11,7 @@ import './style.scss';
 
 export type Props = {
     question: Question;
-    responseChangeHandler: (questionID: string, response: number) => void;
+    responseChangeHandler: (questionID: string, response: string) => void;
     disabled?: boolean;
     value?: string;
     scaleStart?: number;
@@ -28,11 +28,11 @@ function LinearScaleQuestion({
 }: Props) {
     const [selectedValue, setSelectedValue] = useState<number | undefined>(value ? Number.parseInt(value, 10) : undefined);
 
-    const debouncedChangeHandler = useDebouncedCallback(responseChangeHandler);
+    const debouncedChangeHandler = useDebouncedCallback(responseChangeHandler, 200);
 
     const indentClickHandler = useCallback((value: number) => {
         setSelectedValue(value);
-        debouncedChangeHandler(question.id, value);
+        debouncedChangeHandler(question.id, value.toString());
     }, [debouncedChangeHandler, question.id]);
 
     const indents = useMemo(() => {

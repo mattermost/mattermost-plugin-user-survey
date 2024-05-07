@@ -1,8 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {format} from 'date-fns';
-import React, {useCallback, useMemo, useRef, useState} from 'react';
+import client from 'client/client';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import Button from 'components/common/button/button';
 import {useUserSurvey} from 'components/hooks/survey';
@@ -21,41 +21,86 @@ const QUESTION_COMPONENTS = {
 
 function SurveyPost({post}: CustomPostTypeComponentProps) {
     const [errorMessage, setErrorMessage] = useState<string>();
-    const draftResponse = useRef<SurveyResponse>({
-        responses: {},
-        dateCreated: format(new Date(), 'dd/MM/yyyy'),
-    });
+    const draftResponse = useRef<SurveyResponse>();
+    const [questionErrorMessages, setQuestionErrorMessages] = useState<{[key: string]: string}>({});
 
     const {
-        survey,
+        questions,
+        responses,
         linearScaleQuestionID,
         surveyExpired,
-        responsesExist,
+        surveySubmitted,
         setResponses,
+        submittedAtDate,
+        surveyExpireAtDate,
     } = useUserSurvey(post);
 
-    const disabled = responsesExist || surveyExpired;
+    const disabled = surveySubmitted || surveyExpired;
+
+    useEffect(() => {
+        if (!draftResponse.current && responses) {
+            draftResponse.current = {...responses};
+        }
+    }, [responses]);
+
+    const validateResponses = useCallback((): boolean => {
+        const errors: {[key: string]: string} = {};
+        let errorMessage: string = '';
+
+        if (!draftResponse.current) {
+            if (linearScaleQuestionID.current) {
+                errors[linearScaleQuestionID.current] = 'Please select a rating before submitting the response';
+            } else {
+                errorMessage = 'Please select a rating before submitting the response';
+            }
+        }
+
+        questions?.questions.forEach((question) => {
+            if (question.id === linearScaleQuestionID.current && !draftResponse.current?.response[question.id]) {
+                errors[question.id] = 'Please select a rating before submitting the response';
+            }
+        });
+
+        setQuestionErrorMessages(errors);
+        setErrorMessage(errorMessage);
+        return Object.keys(errors).length === 0;
+    }, [linearScaleQuestionID, questions?.questions]);
+
+    const submitSurveyResponse = useCallback(async () => {
+        if (!draftResponse.current) {
+            return {success: false, error: true};
+        }
+
+        let success: boolean;
+
+        try {
+            await client.submitSurveyResponse(post.props.survey_id, draftResponse.current);
+            success = true;
+        } catch (error) {
+            success = false;
+        }
+
+        return {success};
+    }, [post.props.survey_id]);
 
     const submitSurveyHandler = useCallback(async () => {
-        if (!draftResponse.current ||
-            Object.keys(draftResponse.current?.responses).length === 0
-        ) {
+        if (!validateResponses()) {
             return;
         }
 
+        if (!draftResponse.current) {
+            return;
+        }
+
+        draftResponse.current.responseType = 'complete';
         const response = await submitSurveyResponse();
         if (response.success) {
             setResponses(draftResponse.current);
             setErrorMessage('');
-        } else if (response.error) {
+        } else {
             setErrorMessage('Failed to submit survey response. Please try again.');
         }
-    }, [setResponses]);
-
-    const submitSurveyResponse = async () => {
-        // make API call here. Send draftResponse.current as payload...
-        return {success: true, error: false};
-    };
+    }, [setResponses, submitSurveyResponse, validateResponses]);
 
     // this function is to submit the linear scale rating as soon as a user selects it,
     // even without pressing the submit button.
@@ -64,23 +109,24 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
             return;
         }
 
-        const ratingQuestionResponse = draftResponse.current?.responses[linearScaleQuestionID.current];
+        const ratingQuestionResponse = draftResponse.current?.response[linearScaleQuestionID.current];
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const payload: SurveyResponse = {
-            responses: {
+            response: {
                 [linearScaleQuestionID.current]: ratingQuestionResponse,
             },
-            dateCreated: draftResponse.current?.dateCreated,
         };
 
-        // send payload to submit survey response API here...
-    }, [linearScaleQuestionID]);
+        client.submitSurveyResponse(post.props.survey_id, payload);
+    }, [linearScaleQuestionID, post.props.survey_id]);
 
     const questionResponseChangeHandler = useCallback(
-        (questionID: string, response: unknown) => {
-            if (draftResponse.current) {
-                draftResponse.current.responses[questionID] = response;
+        (questionID: string, response: string) => {
+            if (!draftResponse.current) {
+                draftResponse.current = {response: {}} as SurveyResponse;
             }
+
+            draftResponse.current.response[questionID] = response;
 
             // if this is the system rating question, submit response ASAP
             if (questionID === linearScaleQuestionID.current) {
@@ -98,12 +144,13 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
     }, [post.message]);
 
     const renderQuestions = useMemo(() => {
-        if (!survey) {
+        if (!questions) {
             return null;
         }
 
-        return survey.questions.map((question) => {
+        return questions.questions.map((question) => {
             const Question = QUESTION_COMPONENTS[question.type];
+            const questionErrorMessage = questionErrorMessages[question.id];
 
             return (
                 <div
@@ -114,15 +161,34 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
                         question={question}
                         responseChangeHandler={questionResponseChangeHandler}
                         disabled={disabled}
-                        value={survey.response?.responses[question.id] as string}
+                        value={responses?.response[question.id] as string}
                     />
+
+                    {
+                        !disabled && questionErrorMessage &&
+                        <div className='questionErrorMessage error'>
+                            {questionErrorMessage}
+                        </div>
+                    }
                 </div>
             );
         });
-    }, [disabled, questionResponseChangeHandler, survey]);
+    }, [disabled, questionErrorMessages, questionResponseChangeHandler, questions, responses?.response]);
+
+    // this is to stop any click event from any of the
+    // inner buttons, input fields etc from being propagated and
+    // triggering the "click post to open thread" feature.
+    // Without this, clicking anywhere inside the survey, even on the button and input fields
+    // triggers opening of the post in RHS.
+    const stopPropagation = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+    }, []);
 
     return (
-        <div className='CustomSurveyPost vertical'>
+        <div
+            className='CustomSurveyPost vertical'
+            onClick={stopPropagation}
+        >
             {renderedMessage}
 
             <div className='CustomSurveyPost_survey vertical'>
@@ -131,7 +197,7 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
                 </div>
 
                 {
-                    errorMessage &&
+                    !disabled && errorMessage &&
                     <div className='surveyMessage error'>
                         {errorMessage}
                     </div>
@@ -151,14 +217,14 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
                 {
                     disabled && !surveyExpired &&
                     <div className='surveyMessage submitted'>
-                        {`Response submitted on ${survey?.response?.dateCreated}.`}
+                        {`Response submitted on ${submittedAtDate?.toLocaleDateString()}`}
                     </div>
                 }
 
                 {
                     disabled && surveyExpired &&
                     <div className='surveyMessage submitted'>
-                        {`Survey expired on ${survey?.endDate}.`}
+                        {`Survey expired on ${surveyExpireAtDate?.toLocaleDateString()}.`}
                     </div>
                 }
             </div>

@@ -84,12 +84,30 @@ func (s *Survey) ShouldSurveyStop() bool {
 		return false
 	}
 
-	endTime := time.Unix(0, s.StartTime*int64(time.Millisecond)).
-		Add(time.Duration(s.Duration) * 24 * time.Hour)
-
+	endTime := s.GetEndTime()
 	utcDateTime := time.Now().UTC()
-
 	return utcDateTime.After(endTime) || utcDateTime.Equal(endTime)
+}
+
+func (s *Survey) GetSystemRatingQuestionID() (string, error) {
+	var questionID string
+	for _, question := range s.SurveyQuestions.Questions {
+		if question.System && question.Type == QuestionTypeLinearScale {
+			questionID = question.ID
+			break
+		}
+	}
+
+	if questionID == "" {
+		return "", errors.New("no system rating question found")
+	}
+
+	return questionID, nil
+}
+
+func (s *Survey) GetEndTime() time.Time {
+	return time.Unix(0, s.StartTime*int64(time.Millisecond)).
+		Add(time.Duration(s.Duration) * 24 * time.Hour)
 }
 
 type Question struct {

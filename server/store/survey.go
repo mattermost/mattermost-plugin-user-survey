@@ -142,3 +142,27 @@ func (s *SQLStore) surveyColumns() []string {
 		"status",
 	}
 }
+
+func (s *SQLStore) GetSurveysByID(surveyID string) (*model.Survey, error) {
+	rows, err := s.getQueryBuilder().
+		Select(s.surveyColumns()...).
+		From(s.tablePrefix + "survey").
+		Where(sq.Eq{"id": surveyID}).
+		Query()
+
+	if err != nil {
+		return nil, errors.Wrap(err, "GetSurveysByID failed to fetch survey by status from database")
+	}
+
+	surveys, err := s.SurveysFromRows(rows)
+	if err != nil {
+		return nil, errors.Wrap(err, "GetSurveysByID: failed to map survey rows to surveys")
+	}
+
+	if len(surveys) > 1 {
+		s.pluginAPI.LogError("GetSurveysByID: more than one survey found with the given ID", "surveyID", surveyID)
+		return nil, errors.New("GetSurveysByID: more than one survey found with the given ID, surveyID: " + surveyID)
+	}
+
+	return surveys[0], nil
+}

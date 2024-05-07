@@ -211,8 +211,8 @@ export type CustomPostTypeComponentProps = {
 }
 
 export type SurveyResponse = {
-    responses: {[key: string]: unknown};
-    dateCreated: string;
+    response: {[key: string]: string};
+    responseType?: 'partial' | 'complete';
 }
 
 export type Survey = {

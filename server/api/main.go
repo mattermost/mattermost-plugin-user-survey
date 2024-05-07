@@ -15,6 +15,10 @@ import (
 
 const (
 	headerMattermostUserID = "Mattermost-User-ID"
+
+	// TODO - potential improvement - use Mattermost's configured payload
+	//  size limit if available, else this value default
+	maxPayloadSizeBytes = 300000 // 300 Kb
 )
 
 type Handlers struct {
@@ -39,6 +43,7 @@ func (api *Handlers) initRoutes() {
 
 	root.HandleFunc("/ping", api.handlePing).Methods(http.MethodGet)
 	root.HandleFunc("/connected", api.handleConnected).Methods(http.MethodPost)
+	root.HandleFunc("/survey/{surveyID:[a-z0-9]{26}}/response", api.handleSubmitSurveyResponse).Methods(http.MethodPost)
 }
 
 func (api *Handlers) handlePing(w http.ResponseWriter, r *http.Request) {

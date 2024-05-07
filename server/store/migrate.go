@@ -194,9 +194,13 @@ func (s *SQLStore) generateMigrationAssets() (*embedded.AssetSource, error) {
 }
 
 func (s *SQLStore) GetTemplateHelperFuncs() template.FuncMap {
+	// these are all referenced from Focalboard.
+	// See source for more such utility functions here -
+	// https://github.com/mattermost/focalboard/blob/7a31925d8a7469a0568c795fc175237207e3d0c8/server/services/store/sqlstore/migrate.go#L306
 	return template.FuncMap{
-		"addColumnIfNeeded":  s.genAddColumnIfNeeded,
-		"dropColumnIfNeeded": s.genDropColumnIfNeeded,
+		"addColumnIfNeeded":     s.genAddColumnIfNeeded,
+		"dropColumnIfNeeded":    s.genDropColumnIfNeeded,
+		"addConstraintIfNeeded": s.genAddConstraintIfNeeded,
 	}
 }
 
