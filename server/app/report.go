@@ -18,8 +18,12 @@ const (
 	rawResponsePerPage = 500
 )
 
-func (a *UserSurveyApp) GenerateSurveyReport(surveyID string) {
+func (a *UserSurveyApp) GenerateSurveyReport(surveyID string) error {
+	if err := a.generateRawResponseCSV(surveyID); err != nil {
+		return err
+	}
 
+	return nil
 }
 
 func (a *UserSurveyApp) generateRawResponseCSV(surveyID string) error {
@@ -41,13 +45,18 @@ func (a *UserSurveyApp) generateRawResponseCSV(surveyID string) error {
 			return errors.Wrapf(err, "generateRawResponseCSV: surveyID: %s", surveyID)
 		}
 
-		if len(data) < rawResponsePerPage {
-			break;
-		}
-
 		part++
+
+		if len(data) < rawResponsePerPage {
+			break
+		}
 	}
 
+	if err := a.mergeParts(key, headers, part); err != nil {
+		return errors.Wrapf(err, "generateRawResponseCSV: failed to merge report parts, surveyID: %s", surveyID)
+	}
+
+	return nil
 }
 
 func (a *UserSurveyApp) saveTempCSVData(key string, part int, surveyResponses []*model.SurveyResponse) error {
