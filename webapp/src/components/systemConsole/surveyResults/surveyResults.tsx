@@ -6,11 +6,11 @@ import {format} from 'date-fns';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import Button from 'components/common/button/button';
+import {ConfirmationModal} from 'components/systemConsole/surveyResults/confirmationModal';
 
 import type {SurveyResult} from 'types/plugin';
 
 import './style.scss';
-import {ConfirmationModal} from 'components/systemConsole/surveyResults/confirmationModal';
 
 function SurveyResults() {
     const [surveyResults, setSurveyResults] = useState<SurveyResult[]>([]);

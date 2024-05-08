@@ -22,7 +22,7 @@ export function ConfirmationModal({id, onExit, title, bodyMessage, confirmButton
             modalHeaderText={title}
             confirmButtonText={confirmButtonText}
             isDeleteModal={true}
-            onExited={onExit}
+            onExited={onExit || handleCancel}
             handleConfirm={handleConfirm}
             handleCancel={handleCancel}
         >

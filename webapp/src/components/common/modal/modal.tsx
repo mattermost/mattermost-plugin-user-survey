@@ -2,13 +2,12 @@
 // See LICENSE.txt for license information.
 
 import classNames from 'classnames';
-import React, {useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import {Modal} from 'react-bootstrap';
 
 import './style.scss';
 
 type Props = {
-    id: string;
     className?: string;
     onExited?: () => void;
     modalHeaderText?: React.ReactNode;
@@ -23,6 +22,7 @@ type Props = {
     cancelButtonClassName?: string;
     isConfirmDisabled?: boolean;
     isDeleteModal?: boolean;
+    id: string;
     autoCloseOnCancelButton?: boolean;
     autoCloseOnConfirmButton?: boolean;
     enforceFocus?: boolean;
@@ -82,54 +82,66 @@ function GenericModal({
 }: Props) {
     const [showModal, setShowModal] = useState(show);
 
-    const onHide = () => {
+    const onHide = useCallback(() => {
         setShowModal(false);
-    };
+    }, []);
 
-    const handleCancelClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        event.preventDefault();
-        if (autoCloseOnCancelButton) {
-            onHide();
-        }
-        if (handleCancel) {
-            handleCancel();
-        }
-    };
-
-    const handleConfirmClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        event.preventDefault();
-        if (autoCloseOnConfirmButton) {
-            onHide();
-        }
-        if (handleConfirm) {
-            handleConfirm();
-        }
-    };
-
-    const onEnterKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-        if (event.key === 'Enter') {
-            if (event.nativeEvent.isComposing) {
-                return;
+    const handleCancelClick = useCallback(
+        (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+            event.preventDefault();
+            if (autoCloseOnCancelButton) {
+                onHide();
             }
+            if (handleCancel) {
+                handleCancel();
+            }
+        },
+        [autoCloseOnCancelButton, handleCancel, onHide],
+    );
+
+    const handleConfirmClick = useCallback(
+        (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+            event.preventDefault();
             if (autoCloseOnConfirmButton) {
                 onHide();
             }
-            if (handleEnterKeyPress) {
-                handleEnterKeyPress();
+            if (handleConfirm) {
+                handleConfirm();
             }
-        }
-        handleKeydown?.(event);
-    };
+        },
+        [autoCloseOnConfirmButton, handleConfirm, onHide],
+    );
 
-    let confirmButton;
-    if (handleConfirm) {
+    const onEnterKeyDown = useCallback(
+        (event: React.KeyboardEvent<HTMLDivElement>) => {
+            if (event.key === 'Enter') {
+                if (event.nativeEvent.isComposing) {
+                    return;
+                }
+                if (autoCloseOnConfirmButton) {
+                    onHide();
+                }
+                if (handleEnterKeyPress) {
+                    handleEnterKeyPress();
+                }
+            }
+            handleKeydown?.(event);
+        },
+        [autoCloseOnConfirmButton, handleEnterKeyPress, handleKeydown, onHide],
+    );
+
+    const confirmButton = useMemo(() => {
+        if (!handleConfirm) {
+            return null;
+        }
+
         const isConfirmOrDeleteClassName = isDeleteModal ? 'delete' : 'confirm';
-        let buttonText: React.ReactNode = (<span>{'Confirm'}</span>);
+        let buttonText: React.ReactNode = ('Confirm');
         if (confirmButtonText) {
             buttonText = confirmButtonText;
         }
 
-        confirmButton = (
+        return (
             <button
                 autoFocus={autoFocusConfirmButton}
                 type='submit'
@@ -142,16 +154,27 @@ function GenericModal({
                 {buttonText}
             </button>
         );
-    }
+    }, [
+        handleConfirm,
+        isDeleteModal,
+        confirmButtonText,
+        confirmButtonClassName,
+        isConfirmDisabled,
+        autoFocusConfirmButton,
+        handleConfirmClick,
+    ]);
 
-    let cancelButton;
-    if (handleCancel) {
-        let buttonText: React.ReactNode = (<span>{'Cancel'}</span>);
+    const cancelButton = useMemo(() => {
+        if (!handleCancel) {
+            return null;
+        }
+
+        let buttonText: React.ReactNode = ('Cancel');
         if (cancelButtonText) {
             buttonText = cancelButtonText;
         }
 
-        cancelButton = (
+        return (
             <button
                 type='button'
                 className={classNames('GenericModal__button btn btn-tertiary', cancelButtonClassName)}
@@ -160,19 +183,25 @@ function GenericModal({
                 {buttonText}
             </button>
         );
-    }
+    }, [handleCancel, cancelButtonText, cancelButtonClassName, handleCancelClick]);
 
-    const headerText = modalHeaderText && (
-        <div className='GenericModal__header'>
-            <h1
-                id='genericModalLabel'
-                className='modal-title'
-            >
-                {modalHeaderText}
-            </h1>
-            {headerButton}
-        </div>
-    );
+    const headerText = useMemo(() => {
+        if (!modalHeaderText) {
+            return null;
+        }
+
+        return (
+            <div className='GenericModal__header'>
+                <h1
+                    id='genericModalLabel'
+                    className='modal-title'
+                >
+                    {modalHeaderText}
+                </h1>
+                {headerButton}
+            </div>
+        );
+    }, [modalHeaderText, headerButton]);
 
     return (
         <Modal
@@ -203,12 +232,14 @@ function GenericModal({
                     </div>
                 </Modal.Header>
                 <Modal.Body className={classNames({divider: bodyDivider})}>
-                    {errorText && (
-                        <div className='genericModalError'>
-                            <i className='icon icon-alert-outline'/>
-                            <span>{errorText}</span>
-                        </div>
-                    )}
+                    {
+                        errorText && (
+                            <div className='genericModalError'>
+                                <i className='icon icon-alert-outline'/>
+                                <span>{errorText}</span>
+                            </div>
+                        )
+                    }
                     <div className={classNames('GenericModal__body', {padding: bodyPadding})}>{children}</div>
                 </Modal.Body>
                 {(cancelButton || confirmButton || footerContent) && (
