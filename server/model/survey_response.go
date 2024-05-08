@@ -61,3 +61,13 @@ func (sr *SurveyResponse) IsValid() error {
 
 	return nil
 }
+
+func (sr *SurveyResponse) ToReportRow() []string {
+	row := []string{sr.UserID, utils.FormatUnixTimeMillis(sr.CreateAt)}
+
+	for _, answer := range sr.Response {
+		row = append(row, answer)
+	}
+
+	return row
+}
