@@ -14,15 +14,6 @@ import './style.scss';
 function SurveyResults() {
     const [surveyResults, setSurveyResults] = useState<SurveyResult[]>([]);
 
-    const calculateNPS = (promoters: number, passives: number, detractors: number): number => {
-        const totalResponses = promoters + passives + detractors;
-
-        const promoterPercentage = (promoters / totalResponses) * 100;
-        const detractorPercentage = (detractors / totalResponses) * 100;
-
-        return Math.round(promoterPercentage - detractorPercentage);
-    };
-
     const hydrateSurveyResults = useCallback((surveyResults: SurveyResult[]) => {
         surveyResults.forEach((surveyResult) => {
             surveyResult.startDate = new Date(surveyResult.startTime);
@@ -35,13 +26,13 @@ function SurveyResults() {
     }, []);
 
     useEffect(() => {
-        const work = async () => {
+        const fetchSurveyStatus = async () => {
             const results = await client.getSurveyResults() as SurveyResult[];
             hydrateSurveyResults(results);
             setSurveyResults(results);
         };
 
-        work();
+        fetchSurveyStatus();
     }, [hydrateSurveyResults]);
 
     const generateActions = (surveyResult: SurveyResult) => {
@@ -131,5 +122,14 @@ function SurveyResults() {
         </div>
     );
 }
+
+const calculateNPS = (promoters: number, passives: number, detractors: number): number => {
+    const totalResponses = promoters + passives + detractors;
+
+    const promoterPercentage = (promoters / totalResponses) * 100;
+    const detractorPercentage = (detractors / totalResponses) * 100;
+
+    return Math.round(promoterPercentage - detractorPercentage);
+};
 
 export default SurveyResults;
