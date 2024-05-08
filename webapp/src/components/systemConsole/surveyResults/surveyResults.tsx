@@ -3,16 +3,19 @@
 
 import client from 'client/client';
 import {format} from 'date-fns';
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import Button from 'components/common/button/button';
 
 import type {SurveyResult} from 'types/plugin';
 
 import './style.scss';
+import {ConfirmationModal} from 'components/systemConsole/surveyResults/confirmationModal';
 
 function SurveyResults() {
     const [surveyResults, setSurveyResults] = useState<SurveyResult[]>([]);
+    const [showConfirmationModal, setShowConfirmationModal] = useState<boolean>(false);
+    const currentSurveyID = useRef<string>();
 
     const hydrateSurveyResults = useCallback((surveyResults: SurveyResult[]) => {
         surveyResults.forEach((surveyResult) => {
@@ -35,17 +38,19 @@ function SurveyResults() {
         fetchSurveyStatus();
     }, [hydrateSurveyResults]);
 
-    const handleStopSurvey = useCallback(async (surveyID: string) => {
-        // TODO: would be nice to add some sort of confirmation here
+    const handleStopSurvey = useCallback(async () => {
+        if (!currentSurveyID.current) {
+            return;
+        }
 
         const updatedSurveyResult = [...surveyResults];
-        const surveyResultIndex = updatedSurveyResult.findIndex((surveyResult) => surveyResult.id === surveyID);
+        const surveyResultIndex = updatedSurveyResult.findIndex((surveyResult) => surveyResult.id === currentSurveyID.current);
         if (surveyResultIndex < 0) {
             return;
         }
 
         try {
-            await client.endSurvey(surveyID);
+            await client.endSurvey(currentSurveyID.current);
         } catch (error) {
             console.error(error);
             return;
@@ -55,7 +60,17 @@ function SurveyResults() {
         setSurveyResults(updatedSurveyResult);
     }, [surveyResults]);
 
-    const generateActions = (surveyResult: SurveyResult) => {
+    const handleShowConfirmationDialog = useCallback((surveyID: string) => {
+        currentSurveyID.current = surveyID;
+        setShowConfirmationModal(true);
+    }, []);
+
+    const handleHideConfirmationDialog = useCallback(() => {
+        currentSurveyID.current = undefined;
+        setShowConfirmationModal(false);
+    }, []);
+
+    const generateActions = useCallback((surveyResult: SurveyResult) => {
         if (surveyResult.status === 'ended') {
             return (
                 <div
@@ -79,12 +94,12 @@ function SurveyResults() {
                     danger={true}
                     iconClass='icon-flag-checkered'
                     text='End survey'
-                    onClick={() => handleStopSurvey(surveyResult.id)}
+                    onClick={() => handleShowConfirmationDialog(surveyResult.id)}
                 />
                 <Button iconClass='icon-download-outline'/>
             </div>
         );
-    };
+    }, [handleShowConfirmationDialog]);
 
     const renderedRows = useMemo(() => {
         if (surveyResults.length === 0) {
@@ -107,7 +122,7 @@ function SurveyResults() {
                 >
                     <div className='startDate'>
                         <span>{format(result.startDate, 'do MMM yyyy')}</span>
-                        {result.status === 'in_progress' && <div className='badge inProgress'>{'Active'}</div> }
+                        {result.status === 'in_progress' && <div className='badge inProgress'>{'Active'}</div>}
                     </div>
                     <div className='endDate'><span>{format(result.endDate, 'do MMM yyyy')}</span></div>
                     <div className='npsScore'><span>{result.npsScore || '-'}</span></div>
@@ -117,7 +132,7 @@ function SurveyResults() {
                 </div>
             );
         });
-    }, [surveyResults]);
+    }, [generateActions, surveyResults]);
 
     return (
         <div className='SurveyResults'>
@@ -139,6 +154,18 @@ function SurveyResults() {
                     {renderedRows}
                 </div>
             </div>
+
+            {
+                showConfirmationModal &&
+                <ConfirmationModal
+                    id='endSurveyConfirmationModal'
+                    title='Are you sure you want to end this survey?'
+                    bodyMessage='Reprehenderit aute laborum anim dolore magna mollit incididunt officia qui labore. Esse culpa ipsum ut esse fugiat do tempor duis mollit. Labore nisi nisi ut aliquip enim aute ex. Esse veniam proident id dolor laborum occaecat voluptate esse laborum cupidatat aliquip ut laborum id. Laborum nostrud officia excepteur. Consectetur ad nisi ullamco est cillum proident Lorem. Aliqua eu est magna deserunt est elit elit do.'
+                    confirmButtonText='End active survey'
+                    handleConfirm={handleStopSurvey}
+                    handleCancel={handleHideConfirmationDialog}
+                />
+            }
 
         </div>
     );
