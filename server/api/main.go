@@ -45,6 +45,7 @@ func (api *Handlers) initRoutes() {
 	root.HandleFunc("/ping", api.handlePing).Methods(http.MethodGet)
 	root.HandleFunc("/connected", api.handleConnected).Methods(http.MethodPost)
 	root.HandleFunc("/survey/{surveyID:[a-z0-9]{26}}/response", api.handleSubmitSurveyResponse).Methods(http.MethodPost)
+	root.HandleFunc("/survey/{surveyID:[a-z0-9]{26}}/end", api.handleStopSurvey).Methods(http.MethodPost)
 	root.HandleFunc("/survey_stats", api.handleGetSurveyStats).Methods(http.MethodGet)
 }
 
@@ -53,7 +54,7 @@ func (api *Handlers) handlePing(w http.ResponseWriter, r *http.Request) {
 }
 
 func ReturnStatusOK(w http.ResponseWriter) {
-	_, _ = w.Write([]byte("{\"status\":\"OK\"}"))
+	jsonResponse(w, http.StatusOK, map[string]string{"status": "OK"})
 }
 
 func jsonResponse(w http.ResponseWriter, code int, data any) {

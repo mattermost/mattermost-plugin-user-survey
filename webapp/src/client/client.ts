@@ -32,6 +32,14 @@ class SurveyClient extends HttpClient {
     getSurveyResults = async () => {
         return this.doGet(`${this.url}/survey_stats`);
     };
+
+    endSurvey = async (surveyID: string) => {
+        if (!surveyID || !ID_PATH_PATTERN.test(surveyID)) {
+            return Promise.reject(new Error('invalid survey ID encountered. Survey ID should be a 26 character, lowercase alphanumeric string'));
+        }
+
+        return this.doPost(`${this.url}/survey/${surveyID}/end`);
+    };
 }
 
 const Client = new SurveyClient();
