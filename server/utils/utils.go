@@ -26,3 +26,13 @@ func CoalesceInt(values ...int) int {
 	}
 	return 0
 }
+
+func CalculateNPS(promoters, detractors, passives int64) float64 {
+	totalResponses := promoters + detractors + passives
+	if totalResponses == 0 {
+		return 0.0
+	}
+
+	nps := (float64(promoters)/float64(totalResponses))*100 - (float64(detractors)/float64(totalResponses))*100
+	return nps
+}
