@@ -40,6 +40,8 @@ func (a *UserSurveyApp) generateRawResponseCSV(surveyID string) error {
 			return err
 		}
 
+		lastResponseID = data[len(data)-1].ID
+
 		// save them in a temp CSV
 		if err := a.saveTempCSVData(key, part, data); err != nil {
 			return errors.Wrapf(err, "generateRawResponseCSV: surveyID: %s", surveyID)
