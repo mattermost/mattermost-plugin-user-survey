@@ -240,24 +240,6 @@ func (_m *Store) Migrate() error {
 	return r0
 }
 
-// ResetData provides a mock function with given fields:
-func (_m *Store) ResetData() error {
-	ret := _m.Called()
-
-	if len(ret) == 0 {
-		panic("no return value specified for ResetData")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func() error); ok {
-		r0 = rf()
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // SaveSurvey provides a mock function with given fields: survey
 func (_m *Store) SaveSurvey(survey *model.Survey) error {
 	ret := _m.Called(survey)
