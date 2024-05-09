@@ -147,7 +147,7 @@ func (s *SQLStore) GetAllResponses(surveyID, lastResponseID string, perPage uint
 		Select(s.surveyResponseColumns()...).
 		From(s.tablePrefix + "survey_responses").
 		Where(sq.Eq{"survey_id": surveyID}).
-		OrderBy("id DESC").
+		OrderBy("id").
 		Limit(perPage)
 
 	if lastResponseID != "" {

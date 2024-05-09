@@ -4,7 +4,12 @@
 package utils
 
 import (
+	"archive/zip"
 	"encoding/base32"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
 
 	"github.com/pborman/uuid"
 )
@@ -36,3 +41,58 @@ func CalculateNPS(promoters, detractors, passives int64) float64 {
 	nps := (float64(promoters)/float64(totalResponses))*100 - (float64(detractors)/float64(totalResponses))*100
 	return nps
 }
+
+// CreateZip creates a zip file at the specified `zipFilePath` containing the files listed in `files`.
+func CreateZip(zipFilePath string, files []string) error {
+	// Create a new zip file
+	newZipFile, err := os.Create(zipFilePath)
+	if err != nil {
+		return err
+	}
+	defer newZipFile.Close()
+
+	// Create a new zip writer
+	zipWriter := zip.NewWriter(newZipFile)
+	defer zipWriter.Close()
+
+	// Iterate over the files and add them to the zip archive
+	for _, file := range files {
+		// Open the file to be zipped
+		fileToZip, err := os.Open(file)
+		if err != nil {
+			return err
+		}
+		defer fileToZip.Close()
+
+		// Get the file info
+		fileInfo, err := fileToZip.Stat()
+		if err != nil {
+			return err
+		}
+
+		// Create a new zip file header
+		header, err := zip.FileInfoHeader(fileInfo)
+		if err != nil {
+			return err
+		}
+
+		// Set the name of the file within the zip archive
+		header.Name = filepath.Base(file)
+
+		// Add the file header to the zip archive
+		fileWriter, err := zipWriter.CreateHeader(header)
+		if err != nil {
+			return err
+		}
+
+		// Copy the file contents to the zip archive
+		_, err = io.Copy(fileWriter, fileToZip)
+		if err != nil {
+			return err
+		}
+	}
+
+	fmt.Printf("Zip file created successfully: %s\n", zipFilePath)
+	return nil
+}
+
