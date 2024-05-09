@@ -14,3 +14,12 @@ var encoding = base32.NewEncoding("ybndrfg8ejkmcpqxot1uwisza345h769").WithPaddin
 func NewID() string {
 	return encoding.EncodeToString(uuid.NewRandom())
 }
+
+func CoalesceInt(values ...int) int {
+	for _, v := range values {
+		if v != 0 {
+			return v
+		}
+	}
+	return 0
+}

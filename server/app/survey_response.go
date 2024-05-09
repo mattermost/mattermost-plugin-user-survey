@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/mattermost/mattermost-plugin-user-survey/server/utils"
+
 	mmModel "github.com/mattermost/mattermost/server/public/model"
 
 	"github.com/pkg/errors"
@@ -281,25 +283,9 @@ func (a *UserSurveyApp) updateNPSScoreGroupCount(survey *model.Survey, oldRespon
 		oldDetractorFactor *= -1
 	}
 
-	var promoterFactor, neutralFactor, detractorFactor int
-
-	if oldPromoterFactor != 0 {
-		promoterFactor = oldNeutralFactor
-	} else {
-		promoterFactor = newPromoterFactor
-	}
-
-	if oldNeutralFactor != 0 {
-		neutralFactor = oldNeutralFactor
-	} else {
-		neutralFactor = newNeutralFactor
-	}
-
-	if oldDetractorFactor != 0 {
-		detractorFactor = oldDetractorFactor
-	} else {
-		detractorFactor = newDetractorFactor
-	}
+	promoterFactor := utils.CoalesceInt(oldPromoterFactor, newPromoterFactor)
+	neutralFactor := utils.CoalesceInt(oldNeutralFactor, newNeutralFactor)
+	detractorFactor := utils.CoalesceInt(oldDetractorFactor, newDetractorFactor)
 
 	if err := a.store.UpdateRatingGroupCount(survey.ID, promoterFactor, neutralFactor, detractorFactor); err != nil {
 		return errors.Wrap(err, "updateNPSScoreGroupCount: failed to update survey rating group count")
