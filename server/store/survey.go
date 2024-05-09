@@ -143,6 +143,53 @@ func (s *SQLStore) surveyColumns() []string {
 	}
 }
 
+func (s *SQLStore) IncrementSurveyReceiptCount(surveyID string) error {
+	_, err := s.getQueryBuilder().
+		Update(s.tablePrefix+"survey").
+		Set("receipt_count", sq.Expr("receipt_count + 1")).
+		Where(sq.Eq{"id": surveyID}).
+		Exec()
+
+	if err != nil {
+		s.pluginAPI.LogError("IncrementSurveyReceiptCount: failed to update survey receipt count", "survey_id", surveyID, "error", err.Error())
+		return errors.Wrap(err, "IncrementSurveyReceiptCount: failed to update survey receipt count")
+	}
+
+	return nil
+}
+
+func (s *SQLStore) IncrementSurveyResponseCount(surveyID string) error {
+	_, err := s.getQueryBuilder().
+		Update(s.tablePrefix+"survey").
+		Set("response_count", sq.Expr("response_count + 1")).
+		Where(sq.Eq{"id": surveyID}).
+		Exec()
+
+	if err != nil {
+		s.pluginAPI.LogError("IncrementSurveyResponseCount: failed to update survey response count", "survey_id", surveyID, "error", err.Error())
+		return errors.Wrap(err, "IncrementSurveyResponseCount: failed to update survey response count")
+	}
+
+	return nil
+}
+
+func (s *SQLStore) UpdateRatingGroupCount(surveyID string, promoterFactor, neutralFactor, detractorFactor int) error {
+	_, err := s.getQueryBuilder().
+		Update(s.tablePrefix+"survey").
+		Set("promoters_count", sq.Expr("promoters_count + (?)", promoterFactor)).
+		Set("passives_count", sq.Expr("passives_count + (?)", neutralFactor)).
+		Set("detractors_count", sq.Expr("detractors_count + (?)", detractorFactor)).
+		Where(sq.Eq{"id": surveyID}).
+		Exec()
+
+	if err != nil {
+		s.pluginAPI.LogError("UpdateRatingGroupCount: failed to update rating group counts in survey", "survey_id", surveyID, "error", err.Error())
+		return errors.Wrap(err, "UpdateRatingGroupCount: failed to update rating group counts in survey")
+	}
+
+	return nil
+}
+
 func (s *SQLStore) GetSurveysByID(surveyID string) (*model.Survey, error) {
 	rows, err := s.getQueryBuilder().
 		Select(s.surveyColumns()...).

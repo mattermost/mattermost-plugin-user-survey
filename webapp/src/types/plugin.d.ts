@@ -33,19 +33,15 @@ export type CombinedConfig = {
     EnableSurvey: SurveyEnabledConfig;
 };
 
-export type CustomConfigTypes = DateTimeConfig | ExpiryConfig | TeamFilterConfig | SurveyQuestionsConfig | SurveyEnabledConfig | CombinedConfig;
+export type CustomConfigTypes =
+    DateTimeConfig
+    | ExpiryConfig
+    | TeamFilterConfig
+    | SurveyQuestionsConfig
+    | SurveyEnabledConfig
+    | CombinedConfig;
 
 export type SurveyStatus = 'in_progress' | 'ended';
-
-export type SurveyResult = {
-    surveyId: string;
-    startDate: string;
-    endDate: string;
-    npsScore: number;
-    receiptsCount: number;
-    responseCount: number;
-    status: SurveyStatus;
-}
 
 // copied from TextFormattingOptionsBase interface located at
 // https://github.com/mattermost/mattermost/blob/9ecb3e20c8d7110cad38d2a5c4a60849b729cf67/webapp/channels/src/utils/text_formatting.tsx#L56
@@ -211,16 +207,29 @@ export type CustomPostTypeComponentProps = {
 }
 
 export type SurveyResponse = {
-    response: {[key: string]: string};
+    response: { [key: string]: string };
     responseType?: 'partial' | 'complete';
 }
 
 export type Survey = {
-    surveyId: string;
-    startDate: string;
-    endDate: string;
-    questions: Question[];
+    id: string;
+    startTime: number;
+    surveyQuestions: Question[];
     status: SurveyStatus;
+    excludedTeamIDs: string[];
+    duration: number;
+}
+
+export type SurveyResult = Survey & {
+    receiptCount: number;
+    responseCount: number;
+    passiveCount: number;
+    promoterCount: number;
+    detractorCount: number;
+
+    startDate: Date;
+    endDate: Date;
+    npsScore: number;
 }
 
 export type Question = {

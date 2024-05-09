@@ -33,6 +33,10 @@
 
             div {
                 flex: 1;
+
+                &.startDate {
+                    flex: 1.2;
+                }
             }
         }
 
@@ -44,8 +48,12 @@
             div {
                 flex: 1;
 
+                &.startDate {
+                    flex: 1.2;
+                }
+
                 span {
-                    display: block;
+                    display: inline-block;
                     margin-top: 7px;
                 }
             }
@@ -72,5 +80,14 @@
                 text-align: center;
             }
         }
+    }
+
+    .badge.inProgress {
+        display: inline;
+        border-radius: 4px;
+        margin-left: 8px;
+        background-color: #5D89EA;
+        font-size: 12px;
+        text-transform: uppercase;
     }
 }

@@ -6,6 +6,9 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/utils"
 
 	mmModel "github.com/mattermost/mattermost/server/public/model"
 
@@ -27,8 +30,26 @@ const (
 )
 
 func (a *UserSurveyApp) SaveSurveyResponse(response *model.SurveyResponse) error {
+	inProgressSurvey, err := a.GetInProgressSurvey()
+	if err != nil {
+		a.api.LogError("SaveSurveyResponse: failed to fetch in progress survey", "error", err.Error())
+		return errors.Wrap(err, "SaveSurveyResponse: failed to fetch in progress survey")
+	}
+
+	// the response should belong to the currently active survey
+	if inProgressSurvey.ID != response.SurveyID {
+		return errors.New("the survey you're responding to is no longer active")
+	}
+
+	err = a.matchSurveyAndResponse(inProgressSurvey, response)
+	if err != nil {
+		a.api.LogError("SaveSurveyResponse: failed to match survey and response", "error", err.Error())
+		return errors.Wrap(err, "SaveSurveyResponse: failed to match survey and response")
+	}
+
 	response.SetDefaults()
-	if err := response.IsValid(); err != nil {
+	err = response.IsValid()
+	if err != nil {
 		a.api.LogDebug("SaveSurveyResponse: survey is invalid", "error", err.Error())
 		return errors.Wrap(err, "SaveSurveyResponse: survey response is invalid")
 	}
@@ -42,6 +63,11 @@ func (a *UserSurveyApp) SaveSurveyResponse(response *model.SurveyResponse) error
 		err = a.store.SaveSurveyResponse(response)
 		if err != nil {
 			return errors.Wrap(err, "SaveSurveyResponse: failed to save response to database")
+		}
+
+		err = a.store.IncrementSurveyResponseCount(response.SurveyID)
+		if err != nil {
+			return errors.Wrap(err, "SaveSurveyResponse: failed to increment survey response count in database")
 		}
 	} else {
 		if existingResponse.ResponseType == model.ResponseTypePartial {
@@ -57,11 +83,15 @@ func (a *UserSurveyApp) SaveSurveyResponse(response *model.SurveyResponse) error
 
 	postID, err := a.getSurveySentToUser(response.UserID, response.SurveyID)
 	if err != nil {
-		return errors.Wrap(err, "addResponseInPost: failed to fetch KV store entry for user survey")
+		return errors.Wrap(err, "SaveSurveyResponse: failed to fetch KV store entry for user survey")
 	}
 
 	if err := a.addResponseInPost(response, postID); err != nil {
 		return errors.Wrap(err, fmt.Sprintf("SaveSurveyResponse: failed to add submitted response in post, userID: %s, surveyID: %s responseType: %s", response.UserID, response.SurveyID, response.ResponseType))
+	}
+
+	if err := a.updateNPSScoreGroupCount(inProgressSurvey, existingResponse, response); err != nil {
+		return errors.Wrap(err, "SaveSurveyResponse: failed to update group counts")
 	}
 
 	if response.ResponseType == model.ResponseTypeComplete {
@@ -131,6 +161,49 @@ func (a *UserSurveyApp) sendAcknowledgementPost(userID, surveyPostID string) err
 	return nil
 }
 
+func (a *UserSurveyApp) matchSurveyAndResponse(survey *model.Survey, response *model.SurveyResponse) error {
+	// response can't have more answers than the number of questions in the survey
+	if len(response.Response) > len(survey.SurveyQuestions.Questions) {
+		return errors.New("incorrect number of responses submitted")
+	}
+
+	// if only one response is submitted, it needs to be
+	// the answer to the linear scale question
+	if len(response.Response) == 1 {
+		linearScaleQuestionID, err := survey.GetSystemRatingQuestionID()
+		if err != nil {
+			return err
+		}
+
+		if _, ok := response.Response[linearScaleQuestionID]; !ok {
+			return errors.New("linear scale question must be answered")
+		}
+
+		// When user selects a rating and submits via the Submit button,
+		// the client passes the response type manually, and we should only verify it,
+		// not override it.
+		if response.ResponseType != model.ResponseTypeComplete {
+			response.ResponseType = model.ResponseTypePartial
+		}
+	} else {
+		// make sure answered questions belong to the survey
+		surveyQuestionIDMap := map[string]bool{}
+		for _, question := range survey.SurveyQuestions.Questions {
+			surveyQuestionIDMap[question.ID] = true
+		}
+
+		for responseQuestionID := range response.Response {
+			if _, ok := surveyQuestionIDMap[responseQuestionID]; !ok {
+				return errors.New("invalid question ID found in submitted answer")
+			}
+		}
+
+		response.ResponseType = model.ResponseTypeComplete
+	}
+
+	return nil
+}
+
 func (a *UserSurveyApp) UpdatePostForExpiredSurvey(userID, surveyID string) error {
 	postID, err := a.getSurveySentToUser(userID, surveyID)
 	if err != nil || postID == "" {
@@ -159,4 +232,94 @@ func (a *UserSurveyApp) UpdatePostForExpiredSurvey(userID, surveyID string) erro
 	}
 
 	return nil
+}
+
+func (a *UserSurveyApp) updateNPSScoreGroupCount(survey *model.Survey, oldResponse, newResponse *model.SurveyResponse) error {
+	// survey table has a column each for number of promoters, neutral and detractors.
+	// Depending on the new score, we need to increment the corresponding columns, and
+	// depending on the old score, decrement its corresponding column value.
+	//
+	// Since we store ratings as soon as user selects it, and then we update the whole response
+	// when user clicks the "submit" button, it is possible to have an existing response saved
+	// in the database already.
+	//
+	// This function computes three values, either 1 or -1, one for each promoter, neutral and detractors columns.
+	// We then add the computed values corresponding to each column in the database, effectively
+	// increasing the column corresponding the new score by 1 and incrementing the column
+	// corresponding to the old score by -1 (incrementing by -1 is same as decrementing by 1, incrementing by -1 here to keep SQL queries simple).
+
+	systemRatingQuestionID, err := survey.GetSystemRatingQuestionID()
+	if err != nil {
+		return errors.Wrap(err, "updateNPSScoreGroupCount: failed to find a system rating question in survey")
+	}
+
+	var oldPromoterFactor, oldNeutralFactor, oldDetractorFactor int
+	var newPromoterFactor, newNeutralFactor, newDetractorFactor int
+
+	newRating, err := strconv.Atoi(newResponse.Response[systemRatingQuestionID])
+	if err != nil {
+		a.api.LogError("updateNPSScoreGroupCount: failed to convert new rating value from string to number")
+		return errors.Wrap(err, "updateNPSScoreGroupCount: failed to convert new rating value from string to number")
+	}
+
+	newPromoterFactor, newNeutralFactor, newDetractorFactor = a.getRatingGroupFactors(newRating)
+
+	if oldResponse != nil {
+		oldRating, err := strconv.Atoi(oldResponse.Response[systemRatingQuestionID])
+		if err != nil {
+			a.api.LogError("updateNPSScoreGroupCount: failed to convert new rating value from string to number")
+			return errors.Wrap(err, "updateNPSScoreGroupCount: failed to convert new rating value from string to number")
+		}
+
+		if !a.hasRatingGroupChanged(oldRating, newRating) {
+			// nothing to do if rating groups are unchanged
+			return nil
+		}
+
+		oldPromoterFactor, oldNeutralFactor, oldDetractorFactor = a.getRatingGroupFactors(oldRating)
+
+		oldPromoterFactor *= -1
+		oldNeutralFactor *= -1
+		oldDetractorFactor *= -1
+	}
+
+	promoterFactor := utils.CoalesceInt(oldPromoterFactor, newPromoterFactor)
+	neutralFactor := utils.CoalesceInt(oldNeutralFactor, newNeutralFactor)
+	detractorFactor := utils.CoalesceInt(oldDetractorFactor, newDetractorFactor)
+
+	if err := a.store.UpdateRatingGroupCount(survey.ID, promoterFactor, neutralFactor, detractorFactor); err != nil {
+		return errors.Wrap(err, "updateNPSScoreGroupCount: failed to update survey rating group count")
+	}
+
+	return nil
+}
+
+func (a *UserSurveyApp) getRatingGroupFactors(rating int) (promoterFactor, neutralFactor, detractorFactor int) {
+	switch {
+	case rating >= 1 && rating <= 6:
+		detractorFactor = 1
+	case rating <= 8:
+		neutralFactor = 1
+	case rating <= 10:
+		promoterFactor = 1
+	}
+
+	return promoterFactor, neutralFactor, detractorFactor
+}
+
+func (a *UserSurveyApp) hasRatingGroupChanged(oldRating, newRating int) bool {
+	if newRating == oldRating {
+		return false
+	}
+
+	switch {
+	case oldRating >= 1 && oldRating <= 6 && newRating >= 1 && newRating <= 6:
+		return false
+	case oldRating >= 7 && oldRating <= 8 && newRating >= 7 && newRating <= 8:
+		return false
+	case oldRating >= 9 && oldRating <= 10 && newRating >= 9 && newRating <= 10:
+		return false
+	default:
+		return true
+	}
 }

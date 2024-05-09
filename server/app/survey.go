@@ -185,6 +185,10 @@ func (a *UserSurveyApp) SendSurvey(userID string, survey *model.Survey) error {
 		return errors.Wrap(err, "SendSurvey: failed to mark survey set to user")
 	}
 
+	if err := a.store.IncrementSurveyReceiptCount(survey.ID); err != nil {
+		return errors.Wrap(err, "SendSurvey: failed to increment survey receipt count")
+	}
+
 	return nil
 }
 
