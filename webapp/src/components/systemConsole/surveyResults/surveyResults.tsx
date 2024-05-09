@@ -43,16 +43,16 @@ function SurveyResults() {
             return;
         }
 
-        const updatedSurveyResult = [...surveyResults];
-        const surveyResultIndex = updatedSurveyResult.findIndex((surveyResult) => surveyResult.id === currentSurveyID.current);
-        if (surveyResultIndex < 0) {
-            return;
-        }
-
         try {
             await client.endSurvey(currentSurveyID.current);
         } catch (error) {
             console.error(error);
+            return;
+        }
+
+        const updatedSurveyResult = [...surveyResults];
+        const surveyResultIndex = updatedSurveyResult.findIndex((surveyResult) => surveyResult.id === currentSurveyID.current);
+        if (surveyResultIndex < 0) {
             return;
         }
 
