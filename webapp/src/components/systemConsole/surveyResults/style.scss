@@ -1,3 +1,5 @@
+@import "style/global";
+
 .SurveyResults {
     border-radius: 4px;
     background: white;
@@ -68,6 +70,10 @@
                     .btn {
                         height: 32px;
                         font-size: 12px;
+                    }
+
+                    span.icon.icon-refresh {
+                        animation: spin 1s linear infinite;
                     }
                 }
             }

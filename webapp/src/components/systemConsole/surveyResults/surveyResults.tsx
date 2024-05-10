@@ -15,6 +15,7 @@ import './style.scss';
 function SurveyResults() {
     const [surveyResults, setSurveyResults] = useState<SurveyResult[]>([]);
     const [showConfirmationModal, setShowConfirmationModal] = useState<boolean>(false);
+    const [surveyReportDownloadingID, setSurveyReportDownloadingID] = useState<string>();
     const currentSurveyID = useRef<string>();
 
     const hydrateSurveyResults = useCallback((surveyResults: SurveyResult[]) => {
@@ -71,7 +72,9 @@ function SurveyResults() {
     }, []);
 
     const handleDownloadSurveyReport = useCallback(async (surveyID: string) => {
+        setSurveyReportDownloadingID(surveyID);
         await client.downloadSurveyReport(surveyID);
+        setSurveyReportDownloadingID('');
     }, []);
 
     const generateActions = useCallback((surveyResult: SurveyResult) => {
@@ -102,12 +105,12 @@ function SurveyResults() {
                     onClick={() => handleShowConfirmationDialog(surveyResult.id)}
                 />
                 <Button
-                    iconClass='icon-download-outline'
+                    iconClass={surveyReportDownloadingID === surveyResult.id ? 'icon-refresh' : 'icon-download-outline'}
                     onClick={() => handleDownloadSurveyReport(surveyResult.id)}
                 />
             </div>
         );
-    }, [handleShowConfirmationDialog]);
+    }, [handleDownloadSurveyReport, handleShowConfirmationDialog, surveyReportDownloadingID]);
 
     const renderedRows = useMemo(() => {
         if (surveyResults.length === 0) {
