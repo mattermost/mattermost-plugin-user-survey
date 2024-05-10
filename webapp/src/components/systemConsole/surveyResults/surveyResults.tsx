@@ -85,7 +85,7 @@ function SurveyResults() {
                     className='surveyResultActions'
                 >
                     <Button
-                        iconClass='icon-download-outline'
+                        iconClass={surveyReportDownloadingID === surveyResult.id ? 'icon-refresh' : 'icon-download-outline'}
                         text='Export responses'
                         onClick={() => handleDownloadSurveyReport(surveyResult.id)}
                     />
