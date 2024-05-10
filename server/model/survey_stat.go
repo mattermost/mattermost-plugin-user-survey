@@ -4,8 +4,9 @@
 package model
 
 import (
-	"github.com/mattermost/mattermost-plugin-user-survey/server/utils"
 	"strconv"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/utils"
 )
 
 type SurveyStat struct {

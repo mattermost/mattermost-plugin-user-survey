@@ -8,63 +8,38 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
-	"github.com/mattermost/mattermost-plugin-user-survey/server/utils"
-	mmModal "github.com/mattermost/mattermost/server/public/model"
-	"github.com/pkg/errors"
 	"os"
 	"path"
+
+	"github.com/pkg/errors"
+
+	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
+	"github.com/mattermost/mattermost-plugin-user-survey/server/utils"
 )
 
 const (
 	rawResponsePerPage = 500
 )
 
-func (a *UserSurveyApp) SendSurveyReport(userID, surveyID string) (*mmModal.FileInfo, error) {
-	reportFilePath, err := a.GenerateSurveyReport(surveyID)
+func (a *UserSurveyApp) GenerateSurveyReport(userID, surveyID string) (*os.File, error) {
+	reportFilePath, err := a.generateSurveyReport(surveyID)
 	if err != nil {
-		return nil, errors.Wrapf(err, "SendSurveyReport: userID: %s, surveyID: %s", userID, surveyID)
-	}
-
-	botUserDM, appErr := a.api.GetDirectChannel(a.botID, userID)
-	if appErr != nil {
-		a.api.LogError("SendSurveyReport: failed to create DM between feedback bot and user", "userID", userID, "error", err.Error())
-		return nil, errors.Wrapf(err, "SendSurveyReport: failed to create DM between feedback bot and user, userID: %s", userID)
+		return nil, errors.Wrapf(err, "GenerateSurveyReport: userID: %s, surveyID: %s", userID, surveyID)
 	}
 
 	file, err := os.Open(reportFilePath)
 	if err != nil {
-		a.api.LogError("SendSurveyReport: failed to open survey report zip file for reading", "filePath", reportFilePath, "error", err.Error())
-		return nil, errors.Wrapf(err, "SendSurveyReport: failed to open survey report zip file for reading, filePath: %s", reportFilePath)
+		a.api.LogError("GenerateSurveyReport: failed to open survey report zip file for reading", "filePath", reportFilePath, "error", err.Error())
+		return nil, errors.Wrapf(err, "GenerateSurveyReport: failed to open survey report zip file for reading, filePath: %s", reportFilePath)
 	}
 
-	fileInfo, err := a.apiClient.File.Upload(file, "survey_report.zip", botUserDM.Id)
-	if err != nil {
-		a.api.LogError("SendSurveyReport: failed to upload survey report", "userID", userID, "surveyID", surveyID, "error", err.Error())
-		return nil, errors.Wrapf(err, "SendSurveyReport: failed to upload survey report, userID: %s, surveyID: %s, filePath: %s", userID, surveyID, reportFilePath)
-	}
-
-	fileURL := fmt.Sprintf("%s/api/v4/files/%s?download=1", *(a.api.GetConfig().ServiceSettings.SiteURL), fileInfo.Id)
-
-	//post := &mmModal.Post{
-	//	UserId: a.botID,
-	//	ChannelId: botUserDM.Id,
-	//	Message: "here you go!",
-	//	FileIds: []string{fileInfo.Id},
-	//}
-	//
-	//if _, appErr = a.api.CreatePost(post); appErr != nil {
-	//	a.api.LogError("SendSurveyReport: failed to create post for sending survey report to user", "userID", userID, "surveyID", surveyID, "error", err.Error())
-	//	return errors.Wrapf(err, "SendSurveyReport: failed to create post for sending survey report to user, userID: %s, surveyID: %s", userID, surveyID)
-	//}
-
-	return fileInfo, nil
+	return file, nil
 }
 
-func (a *UserSurveyApp) GenerateSurveyReport(surveyID string) (string, error) {
+func (a *UserSurveyApp) generateSurveyReport(surveyID string) (string, error) {
 	survey, err := a.store.GetSurveysByID(surveyID)
 	if err != nil {
-		return "", errors.Wrapf(err, "GenerateSurveyReport: failed to get survey by ID, surveyID: %s", surveyID)
+		return "", errors.Wrapf(err, "generateSurveyReport: failed to get survey by ID, surveyID: %s", surveyID)
 	}
 
 	key := utils.NewID()
@@ -83,17 +58,17 @@ func (a *UserSurveyApp) GenerateSurveyReport(surveyID string) (string, error) {
 	files := []string{rawResponseCSVFilePath, surveyMetadataFilePath}
 	err = utils.CreateZip(zipPath, files)
 	if err != nil {
-		a.api.LogError("GenerateSurveyReport: failed to generate report zip file", "surveyID", surveyID, "error", err.Error())
-		return "", errors.Wrapf(err, "GenerateSurveyReport: failed to generate report zip file, surveyID: %s", surveyID)
+		a.api.LogError("generateSurveyReport: failed to generate report zip file", "surveyID", surveyID, "error", err.Error())
+		return "", errors.Wrapf(err, "generateSurveyReport: failed to generate report zip file, surveyID: %s", surveyID)
 	}
 
 	// delete the unneeded files now
 	for _, filePath := range files {
-		a.api.LogDebug("GenerateSurveyReport: deleting file", "filePath", filePath)
+		a.api.LogDebug("generateSurveyReport: deleting file", "filePath", filePath)
 		err = os.Remove(filePath)
 		if err != nil {
 			// not a critical error, no need to break
-			a.api.LogWarn("GenerateSurveyReport: failed to delete file path", "filePath", filePath, "error", err.Error())
+			a.api.LogWarn("generateSurveyReport: failed to delete file path", "filePath", filePath, "error", err.Error())
 		}
 	}
 
@@ -116,8 +91,8 @@ func (a *UserSurveyApp) generateRawResponseCSV(survey *model.Survey, key string)
 			return "", err
 		}
 
-		if data == nil || len(data) == 0 {
-			break;
+		if len(data) == 0 {
+			break
 		}
 
 		lastResponseID = data[len(data)-1].ID
@@ -173,7 +148,7 @@ func (a *UserSurveyApp) saveTempCSVData(key string, part int, surveyResponses []
 
 	filePath := a.generateChunkFilePath(key, part)
 	if _, err := a.writeFileLocally(&buf, filePath); err != nil {
-		return errors.Wrapf(err, "saveTempCSVData: failed to save report part key: %s, part: %s, filePath: %s", key, part, filePath)
+		return errors.Wrapf(err, "saveTempCSVData: failed to save report part key: %s, part: %d, filePath: %s", key, part, filePath)
 	}
 
 	return nil

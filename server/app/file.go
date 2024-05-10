@@ -4,10 +4,11 @@
 package app
 
 import (
-	"github.com/pkg/errors"
 	"io"
 	"os"
 	"path/filepath"
+
+	"github.com/pkg/errors"
 )
 
 func (a *UserSurveyApp) writeFileLocally(fr io.Reader, path string) (int64, error) {

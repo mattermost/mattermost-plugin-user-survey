@@ -70,6 +70,10 @@ function SurveyResults() {
         setShowConfirmationModal(false);
     }, []);
 
+    const handleDownloadSurveyReport = useCallback(async (surveyID: string) => {
+        await client.downloadSurveyReport(surveyID);
+    }, []);
+
     const generateActions = useCallback((surveyResult: SurveyResult) => {
         if (surveyResult.status === 'ended') {
             return (
@@ -80,6 +84,7 @@ function SurveyResults() {
                     <Button
                         iconClass='icon-download-outline'
                         text='Export responses'
+                        onClick={() => handleDownloadSurveyReport(surveyResult.id)}
                     />
                 </div>
             );
@@ -96,7 +101,10 @@ function SurveyResults() {
                     text='End survey'
                     onClick={() => handleShowConfirmationDialog(surveyResult.id)}
                 />
-                <Button iconClass='icon-download-outline'/>
+                <Button
+                    iconClass='icon-download-outline'
+                    onClick={() => handleDownloadSurveyReport(surveyResult.id)}
+                />
             </div>
         );
     }, [handleShowConfirmationDialog]);

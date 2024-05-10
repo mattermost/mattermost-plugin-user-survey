@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+
 	sq "github.com/mattermost/squirrel"
 
 	"github.com/pkg/errors"

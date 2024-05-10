@@ -95,4 +95,3 @@ func CreateZip(zipFilePath string, files []string) error {
 	fmt.Printf("Zip file created successfully: %s\n", zipFilePath)
 	return nil
 }
-
