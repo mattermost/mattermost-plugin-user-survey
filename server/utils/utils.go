@@ -11,7 +11,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/pborman/uuid"
+	"github.com/google/uuid"
 )
 
 var encoding = base32.NewEncoding("ybndrfg8ejkmcpqxot1uwisza345h769").WithPadding(base32.NoPadding)
@@ -20,7 +20,7 @@ var encoding = base32.NewEncoding("ybndrfg8ejkmcpqxot1uwisza345h769").WithPaddin
 // characters long.  It is a UUID version 4 Guid that is zbased32 encoded
 // without the padding.
 func NewID() string {
-	return encoding.EncodeToString(uuid.NewRandom())
+	return encoding.EncodeToString([]byte(uuid.NewString()))
 }
 
 func CoalesceInt(values ...int) int {

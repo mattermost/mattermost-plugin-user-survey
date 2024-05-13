@@ -20,7 +20,7 @@ func (api *Handlers) handleConnected(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check if there is an in progress survey, if so,
-	// check if the user has already been sent to the user, if not,
+	// check if the survey has already been sent to the user, if not,
 	// check if the user is eligible for receiving the survey, if so,
 	// send the survey.
 
