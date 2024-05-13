@@ -5,6 +5,7 @@ package api
 
 import (
 	"net/http"
+	"path/filepath"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -54,5 +55,5 @@ func (api *Handlers) handleGenerateSurveyReport(w http.ResponseWriter, r *http.R
 	}
 
 	webServerMode := api.pluginAPI.GetConfig().ServiceSettings.WebserverMode
-	WriteFileResponse(file.Name(), "application/zip", 0, time.Now(), *webServerMode, file, true, w, r)
+	WriteFileResponse(filepath.Base(file.Name()), "application/zip", 0, time.Now(), *webServerMode, file, true, w, r)
 }

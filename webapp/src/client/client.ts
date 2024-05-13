@@ -74,7 +74,7 @@ class SurveyClient extends HttpClient {
 
         // construct the expected filename in case of an error in the header
         const formattedDate = format(new Date(), 'yyyy-MMM-dd_hh-mm');
-        return `${originalFileName}_${formattedDate}.zip`;
+        return `${formattedDate}_${originalFileName}`;
     };
 }
 
