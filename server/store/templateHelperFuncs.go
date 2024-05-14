@@ -162,3 +162,61 @@ func (s *SQLStore) genAddConstraintIfNeeded(tableName, constraintName, constrain
 
 	return query, nil
 }
+
+func (s *SQLStore) genCreateIndexIfNeeded(tableName, columns string) (string, error) {
+	indexName := getIndexName(tableName, columns)
+	tableName = addPrefixIfNeeded(tableName, s.tablePrefix)
+	normTableName := s.normalizeTablename(tableName)
+
+	switch s.dbType {
+	case model.DBTypeMySQL:
+		vars := map[string]string{
+			"schema":          s.schemaName,
+			"table_name":      tableName,
+			"norm_table_name": normTableName,
+			"index_name":      indexName,
+			"columns":         columns,
+		}
+		return replaceVars(`
+			SET @stmt = (SELECT IF(
+				(
+				  SELECT COUNT(index_name) FROM INFORMATION_SCHEMA.STATISTICS
+				  WHERE table_name = '[[table_name]]'
+				  AND table_schema = '[[schema]]'
+				  AND index_name = '[[index_name]]'
+				) > 0,
+				'SELECT 1;',
+				'CREATE INDEX [[index_name]] ON [[norm_table_name]] ([[columns]]);'
+			));
+			PREPARE createIndexIfNeeded FROM @stmt;
+			EXECUTE createIndexIfNeeded;
+			DEALLOCATE PREPARE createIndexIfNeeded;
+		`, vars), nil
+	case model.DBTypePostgres:
+		return fmt.Sprintf("\nCREATE INDEX IF NOT EXISTS %s ON %s (%s);\n", indexName, normTableName, columns), nil
+	default:
+		return "", ErrUnsupportedDatabaseType
+	}
+}
+
+func getIndexName(tableName string, columns string) string {
+	var sb strings.Builder
+
+	_, _ = sb.WriteString("idx_")
+	_, _ = sb.WriteString(tableName)
+
+	// allow developers to separate column names with spaces and/or commas
+	columns = strings.ReplaceAll(columns, ",", " ")
+	cols := strings.Split(columns, " ")
+
+	for _, s := range cols {
+		sub := strings.TrimSpace(s)
+		if sub == "" {
+			continue
+		}
+
+		_, _ = sb.WriteString("_")
+		_, _ = sb.WriteString(s)
+	}
+	return sb.String()
+}
