@@ -128,8 +128,6 @@ func (a *UserSurveyApp) generateRawResponseCSV(survey *model.Survey, key string)
 
 func (a *UserSurveyApp) saveTempCSVData(key string, part int, surveyResponses []*model.SurveyResponse, survey *model.Survey) error {
 	var buf bytes.Buffer
-
-	// TODO set important CSV attributes here
 	csvWriter := csv.NewWriter(&buf)
 
 	for _, response := range surveyResponses {

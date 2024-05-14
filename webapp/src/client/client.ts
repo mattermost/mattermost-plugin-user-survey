@@ -66,6 +66,7 @@ class SurveyClient extends HttpClient {
         return Promise.resolve();
     };
 
+    // copied from extractFilename function from CommercialSupportModal component in Mattermost webapp
     extractFilename = (input: string | null, defaultName?: string): string => {
         const regex = /filename\*?=["']?((?:\\.|[^"'\s])+)(?=["']?)/g;
         const matches = regex.exec(input!);

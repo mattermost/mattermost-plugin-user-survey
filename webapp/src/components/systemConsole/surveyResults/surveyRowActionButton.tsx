@@ -32,6 +32,10 @@ export default function SurveyRowActionButton({surveyResult, onStopSurvey}: Prop
         setShowConfirmationModal(false);
     }, []);
 
+    const handleDownloadReportButtonCLick = useCallback(() => {
+        handleDownloadSurveyReport(surveyResult.id);
+    }, [handleDownloadSurveyReport, surveyResult.id]);
+
     const handleStopSurvey = useCallback(() => {
         onStopSurvey(surveyResult.id);
     }, [onStopSurvey, surveyResult.id]);
@@ -45,7 +49,7 @@ export default function SurveyRowActionButton({surveyResult, onStopSurvey}: Prop
                 <Button
                     iconClass={isDownloadingReport ? 'icon-refresh' : 'icon-download-outline'}
                     text='Export responses'
-                    onClick={() => handleDownloadSurveyReport(surveyResult.id)}
+                    onClick={handleDownloadReportButtonCLick}
                 />
             </div>
         );
@@ -65,7 +69,7 @@ export default function SurveyRowActionButton({surveyResult, onStopSurvey}: Prop
             />
             <Button
                 iconClass={isDownloadingReport ? 'icon-refresh' : 'icon-download-outline'}
-                onClick={() => handleDownloadSurveyReport(surveyResult.id)}
+                onClick={handleDownloadReportButtonCLick}
             />
 
             {
