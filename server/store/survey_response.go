@@ -15,7 +15,7 @@ import (
 )
 
 func (s *SQLStore) SaveSurveyResponse(response *model.SurveyResponse) error {
-	questionResponseJSON, err := json.Marshal(response.Response)
+	questionResponseJSON, err := s.MarshalJSONB(response.Response)
 	if err != nil {
 		s.pluginAPI.LogError("SaveSurveyResponse: failed to marshal response map", "error", err.Error())
 		return errors.Wrap(err, "SaveSurveyResponse: failed to marshal response map")
@@ -28,7 +28,7 @@ func (s *SQLStore) SaveSurveyResponse(response *model.SurveyResponse) error {
 			response.ID,
 			response.UserID,
 			response.SurveyID,
-			string(questionResponseJSON),
+			questionResponseJSON,
 			response.CreateAt,
 			response.ResponseType,
 		).Exec()
@@ -42,7 +42,7 @@ func (s *SQLStore) SaveSurveyResponse(response *model.SurveyResponse) error {
 }
 
 func (s *SQLStore) UpdateSurveyResponse(response *model.SurveyResponse) error {
-	questionResponseJSON, err := json.Marshal(response.Response)
+	questionResponseJSON, err := s.MarshalJSONB(response.Response)
 	if err != nil {
 		s.pluginAPI.LogError("UpdateSurveyResponse: failed to marshal response map", "error", err.Error())
 		return errors.Wrap(err, "UpdateSurveyResponse: failed to marshal response map")
