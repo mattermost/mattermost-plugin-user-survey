@@ -141,6 +141,7 @@ function SurveyResults() {
                 className='SurveyResults'
                 title='Previous surveys'
                 subTitle='Surveys sent out in the past'
+                collapsible={false}
             >
                 <div className='horizontal resultHeader'>
                     <div className='startDate'>{'Start date (UTC)'}</div>
