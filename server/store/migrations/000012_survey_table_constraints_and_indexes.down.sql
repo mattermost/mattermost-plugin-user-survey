@@ -1,1 +1,2 @@
-SELECT 1;
+{{ dropIndexIfNeeded "survey_responses" "survey_id" }}
+{{ dropIndexIfNeeded "survey" "status" }}

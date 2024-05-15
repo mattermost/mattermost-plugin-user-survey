@@ -202,6 +202,7 @@ func (s *SQLStore) GetTemplateHelperFuncs() template.FuncMap {
 		"dropColumnIfNeeded":    s.genDropColumnIfNeeded,
 		"addConstraintIfNeeded": s.genAddConstraintIfNeeded,
 		"createIndexIfNeeded":   s.genCreateIndexIfNeeded,
+		"dropIndexIfNeeded":     s.genDropIndexIfNeeded,
 	}
 }
 

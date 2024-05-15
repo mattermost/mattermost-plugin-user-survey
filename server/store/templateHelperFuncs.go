@@ -199,6 +199,42 @@ func (s *SQLStore) genCreateIndexIfNeeded(tableName, columns string) (string, er
 	}
 }
 
+func (s *SQLStore) genDropIndexIfNeeded(tableName, columns string) (string, error) {
+	indexName := getIndexName(tableName, columns)
+	tableName = addPrefixIfNeeded(tableName, s.tablePrefix)
+	normTableName := s.normalizeTablename(tableName)
+
+	switch s.dbType {
+	case model.DBTypeMySQL:
+		vars := map[string]string{
+			"schema":          s.schemaName,
+			"table_name":      tableName,
+			"norm_table_name": normTableName,
+			"index_name":      indexName,
+			"columns":         columns,
+		}
+		return replaceVars(`
+			SET @stmt = (SELECT IF(
+				(
+				  SELECT COUNT(index_name) FROM INFORMATION_SCHEMA.STATISTICS
+				  WHERE table_name = '[[table_name]]'
+				  AND table_schema = '[[schema]]'
+				  AND index_name = '[[index_name]]'
+				) > 0,
+				'DROP INDEX [[index_name]] ON [[norm_table_name]];',
+				'SELECT 1;'
+			));
+			PREPARE dropIndexIfNeeded FROM @stmt;
+			EXECUTE dropIndexIfNeeded;
+			DEALLOCATE PREPARE dropIndexIfNeeded;
+		`, vars), nil
+	case model.DBTypePostgres:
+		return fmt.Sprintf("\nDROP INDEX IF EXISTS %s;\n", indexName), nil
+	default:
+		return "", ErrUnsupportedDatabaseType
+	}
+}
+
 func getIndexName(tableName string, columns string) string {
 	var sb strings.Builder
 
