@@ -93,11 +93,11 @@ function SurveyResults() {
                 <Button
                     buttonType='tertiary'
                     danger={true}
-                    iconClass='icon-flag-checkered'
+                    iconClass='flag-checkered'
                     text='End survey'
                     onClick={() => handleShowConfirmationDialog(surveyResult.id)}
                 />
-                <Button iconClass='icon-download-outline'/>
+                <Button iconClass='download-outline'/>
             </div>
         );
     }, [handleShowConfirmationDialog]);

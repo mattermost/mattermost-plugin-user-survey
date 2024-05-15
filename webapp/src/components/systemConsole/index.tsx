@@ -116,6 +116,7 @@ function SystemConsoleSetting(props: CustomComponentProps) {
             <Panel
                 title='Survey setup'
                 subTitle='Select the date, time, and details for the next survey.'
+                collapsible={true}
             >
                 {body}
             </Panel>
