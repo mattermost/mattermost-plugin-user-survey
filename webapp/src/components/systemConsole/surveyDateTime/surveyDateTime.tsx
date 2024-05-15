@@ -82,7 +82,7 @@ function SurveyDateTime({id, setSaveNeeded, onChange, config, setInitialSetting}
 
             <div className='horizontal'>
                 <p>
-                    {`A bot message with the survey will be sent to all users at ${surveyTime} UTC on ${format(surveyDate, 'do MMM yyyy')}.`}
+                    {'A bot message containing the survey will start being sent to all users at the selected date and time. Delivery will occur gradually, so the exact timing may vary.'}
                 </p>
             </div>
         </div>

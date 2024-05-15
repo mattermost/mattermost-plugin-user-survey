@@ -37,7 +37,7 @@ function EnableSurvey({id, setSaveNeeded, onChange, config, setInitialSetting}: 
                     checked={enabled}
                     onChange={optionOnChangeHandler}
                 />
-                <label htmlFor='enableSurvey_enabled'>{'Enabled'}</label>
+                <label htmlFor='enableSurvey_enabled'>{'true'}</label>
             </div>
 
             <div className='option horizontal'>
@@ -48,7 +48,7 @@ function EnableSurvey({id, setSaveNeeded, onChange, config, setInitialSetting}: 
                     checked={!enabled}
                     onChange={optionOnChangeHandler}
                 />
-                <label htmlFor='enableSurvey_disabled'>{'Disabled'}</label>
+                <label htmlFor='enableSurvey_disabled'>{'false'}</label>
             </div>
         </div>
     );

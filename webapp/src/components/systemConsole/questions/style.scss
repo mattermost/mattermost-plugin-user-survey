@@ -1,11 +1,11 @@
 .SurveyQuestions {
     border-radius: 4px;
-    background: white;
     border-top: 1px solid rgba(63, 67, 80, 0.12);
+    background: white;
 
     &.vertical {
-        gap: 24px;
         padding-top: 24px;
+        gap: 24px;
     }
 
     .header {

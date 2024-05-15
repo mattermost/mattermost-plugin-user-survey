@@ -88,7 +88,7 @@ function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: Cu
             />
             <div className='horizontal'>
                 <p>
-                    {'Select the teams that the next survey should NOT be sent to. The survey will be sent to all teams if nothing is selected in this field.'}
+                    {'Select the teams that the next survey should NOT be sent to. The survey will be sent to all teams if this field is left blank.'}
                 </p>
             </div>
         </div>

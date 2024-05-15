@@ -69,7 +69,7 @@ const Expiry = ({id, setSaveNeeded, onChange, config, setInitialSetting}: Custom
                     </p>
                 }
                 <p>
-                    {'Select the number of days for which the survey will stay active and users will be able to respond to it. No more responses for this survey will be accepted after the set number of days have passed. '}
+                    {'Specify the number of days the survey will be open to responses. Responses to the survey won\'t be accepted after the configured number of days have passed.'}
                 </p>
             </div>
         </div>

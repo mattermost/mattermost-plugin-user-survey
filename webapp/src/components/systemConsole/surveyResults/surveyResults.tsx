@@ -139,8 +139,8 @@ function SurveyResults() {
         <React.Fragment>
             <Panel
                 className='SurveyResults'
-                title='Previous surveys'
-                subTitle='Surveys sent out in the past'
+                title='Active and past surveys'
+                subTitle='Track and download responses for active and previously conducted surveys'
                 collapsible={false}
             >
                 <div className='horizontal resultHeader'>

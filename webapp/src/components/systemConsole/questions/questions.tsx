@@ -28,14 +28,14 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting
         return [
             {
                 id: utils.uuid(),
-                text: 'How likely are you to recommend Mattermost?',
+                text: 'How likely are you to suggest this app to someone else?',
                 type: 'linear_scale',
                 system: true,
                 mandatory: true,
             },
             {
                 id: utils.uuid(),
-                text: 'How can we make your experience better?',
+                text: 'How can we make this app better for you?',
                 type: 'text',
                 system: true,
                 mandatory: true,
@@ -142,7 +142,7 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting
                     />
 
                     <span className='questionHelpText'>
-                        {'This text will be sent in the bot message preceding the survey.'}
+                        {'This text will be visible in the bot message presenting the survey.'}
                     </span>
                 </div>
             </div>
