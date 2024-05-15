@@ -4,9 +4,9 @@
 import React, {useMemo} from 'react';
 
 import DatePicker from 'components/common/datePicker';
+import Icon from 'components/common/icon/icon';
 
 import './style.scss';
-import Icon from 'components/common/icon/icon';
 
 const dateFormattingOptions: Intl.DateTimeFormatOptions = {
     year: 'numeric',
