@@ -1,0 +1,64 @@
+.Panel {
+    border-radius: 4px;
+    background: white;
+    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.08);
+
+    .pointer {
+        cursor: pointer;
+    }
+
+    .panelHeader {
+        padding: 24px 32px;
+        border-bottom: 1px solid rgba(63, 67, 80, 0.12);
+
+        h5 {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .right {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            .toggleCollapseButton {
+                width: 24px;
+                height: 24px;
+                color: #3F43508F;
+                font-size: 24px;
+
+                .icon {
+                    font-size: 24px;
+                }
+            }
+        }
+    }
+
+    .panelBody {
+        overflow: hidden;
+        gap: 28px;
+        transition: height 0.4s ease-in-out;
+
+        &.isCollapsed {
+            height: 0;
+            padding: 0;
+        }
+
+        >* {
+            margin: 0 32px;
+
+            &:first-child {
+                margin-top: 24px;
+            }
+
+            &:last-child {
+                margin-bottom: 24px;
+            }
+        }
+    }
+}
+
+
+//.SystemConsoleSetting > .Panel > .panelBody {
+//  height: 765px;
+//}
