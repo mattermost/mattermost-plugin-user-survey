@@ -3,6 +3,7 @@
 
 import React, {useCallback, useMemo, useState} from 'react';
 
+import Panel from 'components/common/panel/panel';
 import EnableSurvey from 'components/systemConsole/enableSurvey';
 import Expiry from 'components/systemConsole/expiry/expiry';
 import Questions from 'components/systemConsole/questions/questions';
@@ -83,10 +84,6 @@ function SystemConsoleSetting(props: CustomComponentProps) {
                 id: 'SurveyQuestions',
                 Component: Questions,
             },
-            {
-                id: 'SurveyResults',
-                Component: SurveyResults,
-            },
         ];
     }, []);
 
@@ -116,7 +113,21 @@ function SystemConsoleSetting(props: CustomComponentProps) {
 
     return (
         <div className='SystemConsoleSetting vertical'>
-            {body}
+            <Panel
+                title='Survey setup'
+                subTitle='Select the date, time, and details for the next survey.'
+            >
+                {body}
+            </Panel>
+
+            <div
+                key='SurveyResults'
+                className='horizontal'
+            >
+                <div className='customSettingComponent'>
+                    <SurveyResults/>
+                </div>
+            </div>
         </div>
     );
 }

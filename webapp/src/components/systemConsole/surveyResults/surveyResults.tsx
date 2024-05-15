@@ -6,6 +6,7 @@ import {format} from 'date-fns';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import Button from 'components/common/button/button';
+import Panel from 'components/common/panel/panel';
 import {ConfirmationModal} from 'components/systemConsole/surveyResults/confirmationModal';
 
 import type {SurveyResult} from 'types/plugin';
@@ -135,13 +136,12 @@ function SurveyResults() {
     }, [generateActions, surveyResults]);
 
     return (
-        <div className='SurveyResults'>
-            <div className='panelHeader'>
-                <h5>{'Previous surveys'}</h5>
-                <p>{'Surveys sent out in the past'}</p>
-            </div>
-
-            <div className='panelBody vertical'>
+        <React.Fragment>
+            <Panel
+                className='SurveyResults'
+                title='Previous surveys'
+                subTitle='Surveys sent out in the past'
+            >
                 <div className='horizontal resultHeader'>
                     <div className='startDate'>{'Start date (UTC)'}</div>
                     <div className='endDate'>{'End date (UTC)'}</div>
@@ -153,7 +153,7 @@ function SurveyResults() {
                 <div className='resultBody'>
                     {renderedRows}
                 </div>
-            </div>
+            </Panel>
 
             {
                 showConfirmationModal &&
@@ -166,8 +166,7 @@ function SurveyResults() {
                     handleCancel={handleHideConfirmationDialog}
                 />
             }
-
-        </div>
+        </React.Fragment>
     );
 }
 

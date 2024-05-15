@@ -103,38 +103,35 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting
             return (
                 <div
                     key={question.id}
-                    className='vertical question'
+                    className='horizontal question'
                 >
-                    <span className='questionTitle'>
+                    <span className='questionTitle settingLabel'>
                         {`${questionTypeDisplayName.get(question.type)} ${question.mandatory ? '' : '(Optional)'}`}
                     </span>
 
-                    <input
-                        maxLength={1000}
-                        className={`form-control questionInput ${question.system && 'disabled'}`}
-                        defaultValue={question.text}
-                        onChange={(e) => questionOnChangeHandler(e, question.id)}
-                        disabled={question.system}
-                        placeholder='Question'
-                    />
+                    <div className='customSettingComponent'>
+                        <input
+                            maxLength={1000}
+                            className={`form-control questionInput ${question.system && 'disabled'}`}
+                            defaultValue={question.text}
+                            onChange={(e) => questionOnChangeHandler(e, question.id)}
+                            disabled={question.system}
+                            placeholder='Question'
+                        />
+                    </div>
                 </div>
             );
         });
     }, [questionOnChangeHandler, questions]);
 
     return (
-        <div className='SurveyQuestions'>
-            <div className='header'>
-                <h5>{'Survey Questions'}</h5>
-                <p>{'View and customise the contents of the next survey'}</p>
-            </div>
+        <div className='SurveyQuestions vertical'>
+            <div className='horizontal question'>
+                <span className='questionTitle settingLabel'>
+                    {'Survey message text'}
+                </span>
 
-            <div className='body'>
-                <div className='vertical question'>
-                    <span className='questionTitle'>
-                        {'Survey message text'}
-                    </span>
-
+                <div className='vertical customSettingComponent'>
                     <input
                         maxLength={1000}
                         className='form-control questionInput'
@@ -148,10 +145,9 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting
                         {'This text will be sent in the bot message preceding the survey.'}
                     </span>
                 </div>
-
-                {renderedQuestions}
             </div>
 
+            {renderedQuestions}
         </div>
     );
 }

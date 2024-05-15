@@ -1,7 +1,12 @@
 .SurveyQuestions {
     border-radius: 4px;
     background: white;
-    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.08);
+    border-top: 1px solid rgba(63, 67, 80, 0.12);
+
+    &.vertical {
+        gap: 24px;
+        padding-top: 24px;
+    }
 
     .header {
         padding: 24px 32px;
@@ -29,7 +34,7 @@
             }
 
             .questionHelpText {
-                color: rgba(61, 60, 64, 0.72);
+                color: #3D3C40B8;
                 font-size: 12px;
                 font-style: normal;
                 font-weight: 400;
