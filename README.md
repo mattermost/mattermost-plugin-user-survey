@@ -1,19 +1,19 @@
-# Mattermost Plugin User Survey
+# Mattermost User Survey Plugin
 
-### An on-prem plugin for managing surveys withing a Mattermost installation
+### A self-hosted plugin for managing surveys withing a Mattermost installation
 
-This plugin allows admins to configure, customise, schedule and manage surveys for Mattermost users.
-The responses are stored on the Mattermost installation itself, completely on-premise. A CSV report can be generated
+This plugin allows admins to configure, customize, schedule, and manage surveys for their Mattermost users.
+All responses are stored within your Mattermost deployment. You can generate a CSV report
 for a survey to review the feedback received and analyze trends in NPS scores.
 
 ## Features
 
-* Admins can schedule surveys to start after a specific date and time
-* Admins can configure how long does a survey last
-* Members of specific teams can be excluded from a survey
-* Welcome message of the survey can be customised
-* Currently only one question can be customised with ability to add more questions of different kinds soon to follow.
-* A report can generated for each survey that includes the NPS score of the survey and all the responses which the users submitted.
+* Admins can schedule surveys to begin on a specific date and a specific time.
+* Admins can configure how long each survey lasts.
+* Members of specific teams can be excluded from a survey.
+* Admins can customize the Welcome message for each survey.
+* Admins can customize one question. Additional question customization is planned in a future iteration. 
+* Admins can generate a report for each survey that includes NPS scores and user responses.
 
 <img src="docs/readme/demo_image.png?raw=true" alt="user survey demo screenshot"/>
 
@@ -31,17 +31,17 @@ Make sure you have the following components installed:
 
 - Make
 
-You also want to have the environment variable `MM_SERVICESETTINGS_ENABLEDEVELOPER="true"` set as otherwise the plugin
-will be compiled for Linux, Windows and Darwin ARM64 and x64 architecture every single time. Setting
+You also want to have the environment variable `MM_SERVICESETTINGS_ENABLEDEVELOPER="true"` set, otherwise the plugin
+will be compiled for Linux, Windows, and Darwin ARM64 and x64 architecture every single time. Setting
 the `MM_SERVICESETTINGS_ENABLEDEVELOPER` to `true` makes the plugin compile and build only for the OS and architecture
 you are building on.
 
-In your mattermost config, make sure that `PluginSettings.EnableUploads` is `true`, and `FileSettings.MaxFileSize` is
-large enough to accept the plugin bundle (eg `256000000`)
+In your Mattermost configuration file, ensure that `PluginSettings.EnableUploads` is set to `true`, and `FileSettings.MaxFileSize` is
+set to a large enough value to accept the plugin bundle (eg `256000000`).
 
 ### Building the plugin
 
-Run the following command in the plugin repo to prepare a compiled, distributable plugin zip:
+Run the following command in the plugin repository to prepare a compiled, distributable plugin ZIP file:
 
 ```bash
 make dist
