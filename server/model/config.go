@@ -31,6 +31,20 @@ type SurveyQuestions struct {
 	SurveyMessageText string     `json:"surveyMessageText"`
 }
 
+func (sq *SurveyQuestions) GetMetadata() []interface{} {
+	metadata := []interface{}{}
+
+	for _, question := range sq.Questions {
+		metadata = append(metadata, map[string]string{
+			"id":   question.ID,
+			"text": question.Text,
+			"type": question.Type,
+		})
+	}
+
+	return metadata
+}
+
 type TeamFilter struct {
 	FilteredTeamIDs []string `json:"filteredTeamIDs"`
 }

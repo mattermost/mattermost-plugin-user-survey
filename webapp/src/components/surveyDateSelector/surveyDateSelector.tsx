@@ -6,6 +6,7 @@ import React, {useMemo} from 'react';
 import DatePicker from 'components/common/datePicker';
 
 import './style.scss';
+import Icon from 'components/common/icon/icon';
 
 const dateFormattingOptions: Intl.DateTimeFormatOptions = {
     year: 'numeric',
@@ -30,7 +31,7 @@ const SurveyDateSelector = ({value, onChange}: Props) => {
             value={value}
         >
             <div className='SurveyDateSelector form-control'>
-                <i className='icon-calendar-outline'/>
+                <Icon icon='calendar-outline'/>
                 <input
                     className='input'
                     disabled={true}

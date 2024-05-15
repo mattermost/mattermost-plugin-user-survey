@@ -209,6 +209,8 @@ func (s *SQLStore) GetSurveysByID(surveyID string) (*model.Survey, error) {
 	if len(surveys) > 1 {
 		s.pluginAPI.LogError("GetSurveysByID: more than one survey found with the given ID", "surveyID", surveyID)
 		return nil, errors.New("GetSurveysByID: more than one survey found with the given ID, surveyID: " + surveyID)
+	} else if len(surveys) == 0 {
+		return nil, nil
 	}
 
 	return surveys[0], nil

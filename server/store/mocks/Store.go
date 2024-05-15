@@ -18,6 +18,36 @@ type Store struct {
 	mock.Mock
 }
 
+// GetAllResponses provides a mock function with given fields: surveyID, lastResponseID, perPage
+func (_m *Store) GetAllResponses(surveyID string, lastResponseID string, perPage uint64) ([]*model.SurveyResponse, error) {
+	ret := _m.Called(surveyID, lastResponseID, perPage)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetAllResponses")
+	}
+
+	var r0 []*model.SurveyResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, string, uint64) ([]*model.SurveyResponse, error)); ok {
+		return rf(surveyID, lastResponseID, perPage)
+	}
+	if rf, ok := ret.Get(0).(func(string, string, uint64) []*model.SurveyResponse); ok {
+		r0 = rf(surveyID, lastResponseID, perPage)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.SurveyResponse)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string, uint64) error); ok {
+		r1 = rf(surveyID, lastResponseID, perPage)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetSchemaName provides a mock function with given fields:
 func (_m *Store) GetSchemaName() (string, error) {
 	ret := _m.Called()
@@ -69,6 +99,36 @@ func (_m *Store) GetSurveyResponse(userID string, surveyID string) (*model.Surve
 
 	if rf, ok := ret.Get(1).(func(string, string) error); ok {
 		r1 = rf(userID, surveyID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetSurveyStat provides a mock function with given fields: surveyID
+func (_m *Store) GetSurveyStat(surveyID string) (*model.SurveyStat, error) {
+	ret := _m.Called(surveyID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetSurveyStat")
+	}
+
+	var r0 *model.SurveyStat
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*model.SurveyStat, error)); ok {
+		return rf(surveyID)
+	}
+	if rf, ok := ret.Get(0).(func(string) *model.SurveyStat); ok {
+		r0 = rf(surveyID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.SurveyStat)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(surveyID)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -23,6 +23,8 @@ type Store interface {
 	IncrementSurveyReceiptCount(surveyID string) error
 	IncrementSurveyResponseCount(surveyID string) error
 	GetSurveyStatList() ([]*model.SurveyStat, error)
+	GetSurveyStat(surveyID string) (*model.SurveyStat, error)
 	UpdateRatingGroupCount(surveyID string, promoterFactor, neutralFactor, detractorFactor int) error
 	ResetData() error
+	GetAllResponses(surveyID, lastResponseID string, perPage uint64) ([]*model.SurveyResponse, error)
 }

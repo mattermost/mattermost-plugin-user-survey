@@ -139,3 +139,31 @@ func (s *SQLStore) surveyResponsesFromRows(rows *sql.Rows) ([]*model.SurveyRespo
 
 	return surveyResponses, nil
 }
+
+func (s *SQLStore) GetAllResponses(surveyID, lastResponseID string, perPage uint64) ([]*model.SurveyResponse, error) {
+	// TODO: add index on id and survey_id column
+
+	query := s.getQueryBuilder().
+		Select(s.surveyResponseColumns()...).
+		From(s.tablePrefix + "survey_responses").
+		Where(sq.Eq{"survey_id": surveyID}).
+		OrderBy("id").
+		Limit(perPage)
+
+	if lastResponseID != "" {
+		query = query.Where(sq.Gt{"id": lastResponseID})
+	}
+
+	rows, err := query.Query()
+	if err != nil {
+		s.pluginAPI.LogError("GetAllResponses: failed to query a page", "surveyID", surveyID, "lastResponseID", lastResponseID, "perPage", perPage, "error", err.Error())
+		return nil, errors.Wrap(err, "GetAllResponses: failed to query a page")
+	}
+
+	surveyResponses, err := s.surveyResponsesFromRows(rows)
+	if err != nil {
+		return nil, errors.Wrap(err, "GetAllResponses: failed to convert rows to survey responses")
+	}
+
+	return surveyResponses, nil
+}
