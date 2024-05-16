@@ -117,12 +117,12 @@ func (s *SQLStore) UpdateSurveyStatus(surveyID, status string) error {
 }
 
 func (s *SQLStore) surveyExtractJSONFields(survey *model.Survey) (excludedTeamIDs, surveyQuestions []byte, err error) {
-	excludedTeamIDs, err = json.Marshal(survey.ExcludedTeamIDs)
+	excludedTeamIDs, err = s.MarshalJSONB(survey.ExcludedTeamIDs)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "surveyExtractJSONFields: failed to marshal excluded team IDs")
 	}
 
-	surveyQuestions, err = json.Marshal(survey.SurveyQuestions)
+	surveyQuestions, err = s.MarshalJSONB(survey.SurveyQuestions)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "surveyExtractJSONFields: failed to marshal survey questions")
 	}
@@ -209,6 +209,8 @@ func (s *SQLStore) GetSurveysByID(surveyID string) (*model.Survey, error) {
 	if len(surveys) > 1 {
 		s.pluginAPI.LogError("GetSurveysByID: more than one survey found with the given ID", "surveyID", surveyID)
 		return nil, errors.New("GetSurveysByID: more than one survey found with the given ID, surveyID: " + surveyID)
+	} else if len(surveys) == 0 {
+		return nil, nil
 	}
 
 	return surveys[0], nil

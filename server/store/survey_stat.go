@@ -6,6 +6,9 @@ package store
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
+
+	sq "github.com/mattermost/squirrel"
 
 	"github.com/pkg/errors"
 
@@ -20,8 +23,8 @@ func (s *SQLStore) GetSurveyStatList() ([]*model.SurveyStat, error) {
 		Query()
 
 	if err != nil {
-		s.pluginAPI.LogError("GetSurveyStatList: failed to query surveys from database", "error", err.Error())
-		return nil, errors.Wrap(err, "GetSurveyStatList: failed to query surveys from database")
+		s.pluginAPI.LogError("GetSurveyStatList: failed to query survey stats from database", "error", err.Error())
+		return nil, errors.Wrap(err, "GetSurveyStatList: failed to query survey stats from database")
 	}
 
 	surveyStats, err := s.surveyStatsFromRows(rows)
@@ -30,6 +33,32 @@ func (s *SQLStore) GetSurveyStatList() ([]*model.SurveyStat, error) {
 	}
 
 	return surveyStats, nil
+}
+
+func (s *SQLStore) GetSurveyStat(surveyID string) (*model.SurveyStat, error) {
+	rows, err := s.getQueryBuilder().
+		Select(s.surveyStatColumns()...).
+		From(s.tablePrefix + "survey").
+		Where(sq.Eq{"id": surveyID}).
+		Query()
+
+	if err != nil {
+		s.pluginAPI.LogError("GetSurveyStat: failed to query survey stats from database", "error", err.Error())
+		return nil, errors.Wrap(err, "GetSurveyStat: failed to query survey stats from database")
+	}
+
+	surveyStats, err := s.surveyStatsFromRows(rows)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(surveyStats) == 0 {
+		return nil, nil
+	} else if len(surveyStats) > 1 {
+		return nil, fmt.Errorf("more than one survey survey stat found for the given surveyID: %s", surveyID)
+	}
+
+	return surveyStats[0], nil
 }
 
 func (s *SQLStore) surveyStatColumns() []string {

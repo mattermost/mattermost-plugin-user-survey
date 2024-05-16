@@ -46,6 +46,7 @@ func (api *Handlers) initRoutes() {
 	root.HandleFunc("/connected", api.handleConnected).Methods(http.MethodPost)
 	root.HandleFunc("/survey/{surveyID:[a-z0-9]{26}}/response", api.handleSubmitSurveyResponse).Methods(http.MethodPost)
 	root.HandleFunc("/survey/{surveyID:[a-z0-9]{26}}/end", api.handleStopSurvey).Methods(http.MethodPost)
+	root.HandleFunc("/survey/{surveyID:[a-z0-9]{26}}/report", api.handleGenerateSurveyReport).Methods(http.MethodGet)
 	root.HandleFunc("/survey_stats", api.handleGetSurveyStats).Methods(http.MethodGet)
 }
 
