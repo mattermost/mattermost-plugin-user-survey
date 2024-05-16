@@ -117,12 +117,12 @@ func (s *SQLStore) UpdateSurveyStatus(surveyID, status string) error {
 }
 
 func (s *SQLStore) surveyExtractJSONFields(survey *model.Survey) (excludedTeamIDs, surveyQuestions []byte, err error) {
-	excludedTeamIDs, err = json.Marshal(survey.ExcludedTeamIDs)
+	excludedTeamIDs, err = s.MarshalJSONB(survey.ExcludedTeamIDs)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "surveyExtractJSONFields: failed to marshal excluded team IDs")
 	}
 
-	surveyQuestions, err = json.Marshal(survey.SurveyQuestions)
+	surveyQuestions, err = s.MarshalJSONB(survey.SurveyQuestions)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "surveyExtractJSONFields: failed to marshal survey questions")
 	}

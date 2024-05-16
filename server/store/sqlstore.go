@@ -2,6 +2,7 @@ package store
 
 import (
 	"database/sql"
+	"encoding/json"
 	"net/url"
 
 	"github.com/pkg/errors"
@@ -96,4 +97,23 @@ func (s *SQLStore) getQueryPlaceholder() squirrel.PlaceholderFormat {
 		return squirrel.Dollar
 	}
 	return squirrel.Question
+}
+
+func (s *SQLStore) MarshalJSONB(data interface{}) ([]byte, error) {
+	b, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+
+	// in Postgres, when using binary param for connection and sending data for a JSONB column,
+	// if the code sends a byte array (As we normally do), Postgres assumes it to be already encoded and expected it
+	// to be in the right encoding. Unfortunately, the default JSON encoding is not the same as Postgres' JSONB encoding.
+	// Postgres' JSONB encoding expects the data to start with the JSON version, which currently is always `1` (or, 0x01 in hex).
+	// So, we check here if we're using binary params (which is only set if we're using Postgres), and append the JSON version number
+	// before the data byte array.
+	if s.isBinaryParams {
+		b = append([]byte{0x01}, b...)
+	}
+
+	return b, nil
 }
