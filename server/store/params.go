@@ -2,7 +2,6 @@ package store
 
 import (
 	"database/sql"
-
 	"github.com/mattermost/mattermost/server/public/plugin"
 	"github.com/pkg/errors"
 )
@@ -14,6 +13,7 @@ type Params struct {
 	DB               *sql.DB
 	PluginAPI        plugin.API
 	SkipMigrations   bool
+	Driver           plugin.Driver
 }
 
 func (p Params) IsValid() error {

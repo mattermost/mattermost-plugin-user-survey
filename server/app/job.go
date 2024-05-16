@@ -67,6 +67,15 @@ func (a *UserSurveyApp) startNewSurveyIfNeeded() error {
 	}
 
 	if shouldStartSurvey {
+		// compare with latest ended survey if it's not the same as the survey we're trying to start.
+		// When an admin ends a survey manually within its duration, not checking this can result
+		// in the job starting a duplicate survey immoderately. So, compare the config with last ended survey
+		// and only start a new survey if they both are different.
+		endedSurvey, err := a.store.GetLatestEndedSurvey()
+		if err != nil {
+			return errors.Wrap(err, "startNewSurveyIfNeeded: failed to get latest ended survey from database")
+		}
+
 		a.api.LogDebug("JobManageSurveyStatus: determined that the new survey should start")
 		now := mmModal.GetMillis()
 		startTime, err := config.ParsedTime()
@@ -74,7 +83,7 @@ func (a *UserSurveyApp) startNewSurveyIfNeeded() error {
 			return errors.Wrap(err, "JobManageSurveyStatus: failed to read survey parsed time")
 		}
 
-		survey := &model.Survey{
+		surveyFromConfig := &model.Survey{
 			ID:              utils.NewID(),
 			ExcludedTeamIDs: config.TeamFilter.FilteredTeamIDs,
 			CreateAt:        now,
@@ -87,12 +96,17 @@ func (a *UserSurveyApp) startNewSurveyIfNeeded() error {
 
 		for _, question := range config.SurveyQuestions.Questions {
 			if question.Text != "" {
-				survey.SurveyQuestions.Questions = append(survey.SurveyQuestions.Questions, question)
+				surveyFromConfig.SurveyQuestions.Questions = append(surveyFromConfig.SurveyQuestions.Questions, question)
 			}
 		}
 
+		if surveyFromConfig.IsEqual(endedSurvey) {
+			a.api.LogDebug("JobManageSurveyStatus: not starting new survey as it is the same as latest ended survey")
+			return nil
+		}
+
 		a.api.LogDebug("JobManageSurveyStatus: saving new survey")
-		err = a.SaveSurvey(survey)
+		err = a.SaveSurvey(surveyFromConfig)
 		if err != nil {
 			return errors.Wrap(err, "JobManageSurveyStatus: failed to save survey in database")
 		}

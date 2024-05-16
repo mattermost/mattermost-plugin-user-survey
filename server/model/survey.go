@@ -4,6 +4,7 @@
 package model
 
 import (
+	"slices"
 	"time"
 
 	mmModel "github.com/mattermost/mattermost/server/public/model"
@@ -108,6 +109,30 @@ func (s *Survey) GetSystemRatingQuestionID() (string, error) {
 func (s *Survey) GetEndTime() time.Time {
 	return time.Unix(0, s.StartTime*int64(time.Millisecond)).
 		Add(time.Duration(s.Duration) * 24 * time.Hour)
+}
+
+func (s *Survey) IsEqual(survey *Survey) bool {
+	if s.StartTime != survey.StartTime {
+		return false
+	}
+
+	if s.Duration != survey.Duration {
+		return false
+	}
+
+	if !slices.Equal(s.ExcludedTeamIDs, survey.ExcludedTeamIDs) {
+		return false
+	}
+
+	if s.SurveyQuestions.SurveyMessageText != survey.SurveyQuestions.SurveyMessageText {
+		return false
+	}
+
+	questionsEqual := slices.EqualFunc(s.SurveyQuestions.Questions, survey.SurveyQuestions.Questions, func(a, b Question) bool {
+		return a.Text == b.Text && a.Type == b.Type && a.System == b.System
+	})
+
+	return questionsEqual
 }
 
 type Question struct {

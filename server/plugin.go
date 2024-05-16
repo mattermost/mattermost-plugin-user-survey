@@ -109,6 +109,7 @@ func (p *Plugin) createStoreParams() (*store.Params, error) {
 		SkipMigrations:   false,
 		PluginAPI:        p.API,
 		DB:               db,
+		Driver:           p.Driver,
 	}, nil
 }
 
