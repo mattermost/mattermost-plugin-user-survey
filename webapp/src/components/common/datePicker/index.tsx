@@ -48,7 +48,7 @@ const DatePicker = ({value, children, onSelect, closeOnSelect = true, disableBef
     const {context} = useFloating({
         open: isPopupOpen,
         onOpenChange: (open) => setPopupOpen(open),
-        placement: 'bottom-end',
+        placement: 'bottom-start',
         whileElementsMounted: autoUpdate,
         middleware: [
             offset(5),
