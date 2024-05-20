@@ -9,6 +9,7 @@ import type {CustomSettingChildComponentProp} from 'components/systemConsole/ind
 import type {ExpiryConfig} from 'types/plugin';
 
 import './style.scss';
+import classNames from 'classnames';
 
 const DEFAULT_SURVEY_EXPIRY = '30';
 
@@ -42,7 +43,7 @@ const Expiry = ({id, setSaveNeeded, onChange, config, setInitialSetting}: Custom
         setSaveNeeded();
 
         const numberValue = Number.parseInt(e.target.value, 10);
-        if (isNaN(numberValue)) {
+        if (isNaN(numberValue) || numberValue < 1) {
             setError('Please enter a valid number');
         } else {
             setError('');
@@ -54,7 +55,8 @@ const Expiry = ({id, setSaveNeeded, onChange, config, setInitialSetting}: Custom
         <div className='Expiry'>
             <div className='horizontal'>
                 <input
-                    className='form-control surveyExpiry'
+                    type='number'
+                    className={classNames('form-control', 'surveyExpiry', {error})}
                     name='surveyExpiry'
                     value={expiryDays}
                     onChange={expiryDaysChangeHandler}
