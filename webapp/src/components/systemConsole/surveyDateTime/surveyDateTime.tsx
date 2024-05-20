@@ -25,6 +25,21 @@ function SurveyDateTime({id, setSaveNeeded, onChange, config, setInitialSetting}
     const [surveyTime, setSurveyTime] = useState<string>(DEFAULT_SURVEY_TIME);
     const [surveyDate, setSurveyDate] = useState<Date>(defaultSurveyDate);
 
+    const [surveyDateTime, setSurveyDateTime] = useState<Date>(new Date());
+
+    useEffect(() => {// Extract date components from the UTC Date object
+        const year = surveyDate.getFullYear();
+        const month = surveyDate.getMonth(); // getUTCMonth() returns month index (0-11)
+        const day = surveyDate.getDate();
+
+        // Parse time components from timeString
+        const [hours, minutes] = surveyTime.split(':').map(Number);
+
+        // Construct a new Date object in UTC with the combined date and time
+        // Convert the UTC Date object to the user's local time zone
+        setSurveyDateTime(new Date(Date.UTC(year, month, day, hours, minutes)));
+    }, [surveyDate, surveyTime]);
+
     // sets the date picker and time picker to the values saved in config on load
     useEffect(() => {
         const dateTimeConfig = config.PluginSettings?.Plugins?.['com.mattermost.user-survey']?.systemconsolesetting.SurveyDateTime;
@@ -82,7 +97,7 @@ function SurveyDateTime({id, setSaveNeeded, onChange, config, setInitialSetting}
 
             <div className='horizontal'>
                 <p>
-                    {'A bot message containing the survey will start being sent to all users at the selected date and time. Delivery will occur gradually, so the exact timing may vary.'}
+                    {`A bot message containing the survey will start being sent to all users at ${surveyTime} UTC on ${format(surveyDate, 'MMMM d, y')} (equivalent to ${format(surveyDateTime, 'H:mm MMMM d, y O')}). Delivery will occur gradually, so the exact time may vary.`}
                 </p>
             </div>
         </div>

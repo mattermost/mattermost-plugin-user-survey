@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import classNames from 'classnames';
 import type {ChangeEvent} from 'react';
 import React, {useCallback, useEffect, useState} from 'react';
 
@@ -9,7 +10,6 @@ import type {CustomSettingChildComponentProp} from 'components/systemConsole/ind
 import type {ExpiryConfig} from 'types/plugin';
 
 import './style.scss';
-import classNames from 'classnames';
 
 const DEFAULT_SURVEY_EXPIRY = '30';
 

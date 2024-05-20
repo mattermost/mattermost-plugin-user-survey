@@ -1,13 +1,13 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useMemo, useRef} from 'react';
+import {startOfTomorrow} from 'date-fns';
+import React, {useCallback, useMemo, useRef} from 'react';
 
 import DatePicker from 'components/common/datePicker';
 import Icon from 'components/common/icon/icon';
 
 import './style.scss';
-import {startOfTomorrow} from 'date-fns';
 
 const dateFormattingOptions: Intl.DateTimeFormatOptions = {
     year: 'numeric',
@@ -28,9 +28,19 @@ const SurveyDateSelector = ({value, onChange}: Props) => {
         [value],
     );
 
+    const handleOnChange = useCallback((date: Date) => {
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        const day = date.getDate();
+
+        const utcDate = new Date(Date.UTC(year, month, day));
+
+        onChange(utcDate);
+    }, [onChange]);
+
     return (
         <DatePicker
-            onSelect={onChange}
+            onSelect={handleOnChange}
             value={value}
             disableBefore={tomorrow.current}
         >
