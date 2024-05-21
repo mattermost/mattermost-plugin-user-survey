@@ -112,6 +112,10 @@ func (s *Survey) GetEndTime() time.Time {
 }
 
 func (s *Survey) IsEqual(survey *Survey) bool {
+	if survey == nil || s == nil {
+		return false
+	}
+
 	if s.StartTime != survey.StartTime {
 		return false
 	}

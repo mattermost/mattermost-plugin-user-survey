@@ -97,6 +97,7 @@ func TestJobManageSurveyStatus(t *testing.T) {
 		th.MockedStore.On("GetSurveysByStatus", "in_progress").Return([]*model.Survey{inProgressSurvey}, nil)
 		th.MockedStore.On("UpdateSurveyStatus", "survey_1", "ended").Return(nil)
 		th.MockedStore.On("SaveSurvey", mock.Anything).Return(nil)
+		th.MockedStore.On("GetLatestEndedSurvey").Return(nil, nil)
 
 		th.App.getConfig = func() *model.Config {
 			return &model.Config{
