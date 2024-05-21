@@ -43,6 +43,12 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 }
 
 func (p *Plugin) OnActivate() error {
+	buildMode := "Production"
+	if DebugBuild == "true" {
+		buildMode = "DEBUG"
+	}
+	p.API.LogInfo("Starting up User Survey Plugin, build mode: " + buildMode)
+
 	sqlStore, err := p.initStore()
 	if err != nil {
 		return err
