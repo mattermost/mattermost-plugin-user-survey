@@ -26,14 +26,14 @@ const SurveyTimeSelector = ({value, onChange}: Props) => {
                 const minuteString = String(minutes).padStart(2, '0');
                 const timeString = `${hourString}:${minuteString}`;
 
-                timeStrings.push({value: timeString, label: timeString});
+                timeStrings.push({value: timeString, label: `${timeString} UTC`});
             }
         }
 
         return timeStrings;
     }, []);
 
-    const dropdownValue = useMemo(() => (value ? {value, label: value} : options[18]), [options, value]);
+    const dropdownValue = useMemo(() => (value ? {value, label: `${value} UTC`} : options[18]), [options, value]);
 
     const onChangeHandler = useCallback((newValue: DropdownOption) => {
         onChange(newValue.value);
