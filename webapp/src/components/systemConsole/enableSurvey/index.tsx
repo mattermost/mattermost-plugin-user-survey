@@ -28,27 +28,29 @@ function EnableSurvey({id, setSaveNeeded, onChange, config, setInitialSetting}: 
     }, [id, onChange, setSaveNeeded]);
 
     return (
-        <div className='EnableSurvey horizontal'>
-            <div className='option horizontal'>
-                <input
-                    type='radio'
-                    name='surveyEnabled'
-                    id='enableSurvey_enabled'
-                    checked={enabled}
-                    onChange={optionOnChangeHandler}
-                />
-                <label htmlFor='enableSurvey_enabled'>{'true'}</label>
-            </div>
+        <div className='enable_survey_wrapper'>
+            <div className='EnableSurvey horizontal'>
+                <div className='option horizontal'>
+                    <input
+                        type='radio'
+                        name='surveyEnabled'
+                        id='enableSurvey_enabled'
+                        checked={enabled}
+                        onChange={optionOnChangeHandler}
+                    />
+                    <label htmlFor='enableSurvey_enabled'>{'true'}</label>
+                </div>
 
-            <div className='option horizontal'>
-                <input
-                    type='radio'
-                    name='surveyDisabled'
-                    id='enableSurvey_disabled'
-                    checked={!enabled}
-                    onChange={optionOnChangeHandler}
-                />
-                <label htmlFor='enableSurvey_disabled'>{'false'}</label>
+                <div className='option horizontal'>
+                    <input
+                        type='radio'
+                        name='surveyDisabled'
+                        id='enableSurvey_disabled'
+                        checked={!enabled}
+                        onChange={optionOnChangeHandler}
+                    />
+                    <label htmlFor='enableSurvey_disabled'>{'false'}</label>
+                </div>
             </div>
         </div>
     );

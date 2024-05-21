@@ -4,6 +4,7 @@
 import client from 'client/client';
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
+import Icon from 'components/common/icon/icon';
 import Panel from 'components/common/panel/panel';
 import ResultRow from 'components/systemConsole/surveyResults/resultRow';
 
@@ -84,7 +85,7 @@ function SurveyResults() {
                 collapsible={false}
             >
                 <div className='horizontal resultHeader'>
-                    <div className='startDate'>{'Start date (UTC)'}</div>
+                    <div className='startDate'>{'Start date (UTC)'} <Icon icon='arrow-down'/></div>
                     <div className='endDate'>{'End date (UTC)'}</div>
                     <div className='npsScore'>{'NPS Score'}</div>
                     <div className='receiptsCount'>{'Sent to'}</div>

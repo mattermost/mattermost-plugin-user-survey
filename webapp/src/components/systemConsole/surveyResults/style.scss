@@ -38,6 +38,10 @@
 
                 &.startDate {
                     flex: 1.2;
+
+                    .icon {
+                        font-size: 12px;
+                    }
                 }
             }
         }

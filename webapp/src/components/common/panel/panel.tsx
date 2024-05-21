@@ -57,7 +57,7 @@ export default function Panel({title, subTitle, children, className, collapsible
                 className={classNames('panelHeader', 'horizontal', {pointer: collapsible && toggleFromHeader !== false})}
                 onClick={handleToggleFromHeader}
             >
-                <div className='left'>
+                <div className='left verical'>
                     <h5>{title}</h5>
                     {
                         subTitle &&
