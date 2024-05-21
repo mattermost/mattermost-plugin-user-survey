@@ -55,7 +55,7 @@ func (api *Handlers) handleSubmitSurveyResponse(w http.ResponseWriter, r *http.R
 			return
 		}
 
-		return
+		ReturnStatusOK(w)
 	}
 
 	if err := api.app.SaveSurveyResponse(response); err != nil {

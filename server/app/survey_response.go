@@ -223,7 +223,7 @@ func (a *UserSurveyApp) UpdatePostForExpiredSurvey(userID, surveyID string) erro
 	}
 
 	post.AddProp(postPropKeySurveyStatus, postPropValueSurveyStatusExpired)
-	post.AddProp(postPropSurveyExpiryDate, expiredSurvey.GetEndTime().Format("02 January 2006"))
+	post.AddProp(postPropSurveyExpiryDate, expiredSurvey.GetEndTime().UnixMilli())
 
 	_, appErr = a.api.UpdatePost(post)
 	if appErr != nil {

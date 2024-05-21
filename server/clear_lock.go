@@ -26,8 +26,6 @@ func (p *Plugin) clearStaleLocks() error {
 		}
 
 		for _, key := range keys {
-			p.API.LogInfo("##### " + key)
-
 			if !strings.HasPrefix(key, utils.UserLockKeyPrefix) {
 				continue
 			}
