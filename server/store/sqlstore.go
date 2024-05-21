@@ -3,8 +3,9 @@ package store
 import (
 	"database/sql"
 	"encoding/json"
-	"github.com/mattermost/mattermost/server/public/pluginapi"
 	"net/url"
+
+	"github.com/mattermost/mattermost/server/public/pluginapi"
 
 	"github.com/pkg/errors"
 

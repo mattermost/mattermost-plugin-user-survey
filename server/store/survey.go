@@ -7,8 +7,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	mmModal "github.com/mattermost/mattermost/server/public/model"
 	"slices"
+
+	mmModal "github.com/mattermost/mattermost/server/public/model"
 
 	sq "github.com/mattermost/squirrel"
 	"github.com/pkg/errors"
@@ -252,4 +253,3 @@ func (s *SQLStore) GetLatestEndedSurvey() (*model.Survey, error) {
 
 	return surveys[0], nil
 }
-

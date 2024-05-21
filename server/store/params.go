@@ -2,6 +2,7 @@ package store
 
 import (
 	"database/sql"
+
 	"github.com/mattermost/mattermost/server/public/plugin"
 	"github.com/pkg/errors"
 )

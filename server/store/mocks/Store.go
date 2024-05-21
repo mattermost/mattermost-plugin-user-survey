@@ -48,6 +48,36 @@ func (_m *Store) GetAllResponses(surveyID string, lastResponseID string, perPage
 	return r0, r1
 }
 
+// GetLatestEndedSurvey provides a mock function with given fields:
+func (_m *Store) GetLatestEndedSurvey() (*model.Survey, error) {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetLatestEndedSurvey")
+	}
+
+	var r0 *model.Survey
+	var r1 error
+	if rf, ok := ret.Get(0).(func() (*model.Survey, error)); ok {
+		return rf()
+	}
+	if rf, ok := ret.Get(0).(func() *model.Survey); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Survey)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetSchemaName provides a mock function with given fields:
 func (_m *Store) GetSchemaName() (string, error) {
 	ret := _m.Called()
