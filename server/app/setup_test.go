@@ -32,7 +32,7 @@ func SetupAppTest(t *testing.T) *AppTestHelper {
 		return &model.Config{}
 	}
 
-	app, err := New(mockedAPI, &mockedStore, getConfig, &mockedDriver)
+	app, err := New(mockedAPI, &mockedStore, getConfig, &mockedDriver, true)
 	require.NoError(t, err)
 
 	return &AppTestHelper{

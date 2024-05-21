@@ -13,17 +13,22 @@ import (
 const (
 	jobKeyStartSurveyJob = "job_start_survey"
 
-	// TODO - update this to 15 minutes once ready for production
-	startSurveyJonInterval = 15 * time.Second
+	debugStartSurveyJobInterval = 15 * time.Second
+	startSurveyJobInterval      = 15 * time.Minute
 
 	LockExpiration = time.Hour
 )
 
 func (p *Plugin) startManageSurveyJob() error {
+	interval := startSurveyJobInterval
+	if DebugBuild == "true" {
+		interval = debugStartSurveyJobInterval
+	}
+
 	job, err := cluster.Schedule(
 		p.API,
 		jobKeyStartSurveyJob,
-		cluster.MakeWaitForInterval(startSurveyJonInterval),
+		cluster.MakeWaitForInterval(interval),
 		func() {
 			_ = p.app.JobManageSurveyStatus()
 		},

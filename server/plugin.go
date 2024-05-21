@@ -48,7 +48,8 @@ func (p *Plugin) OnActivate() error {
 		return err
 	}
 
-	app, err := p.initApp(sqlStore)
+	debugBuild := DebugBuild == "true"
+	app, err := p.initApp(sqlStore, debugBuild)
 	if err != nil {
 		return err
 	}
@@ -123,11 +124,11 @@ func (p *Plugin) getMasterDB() (*sql.DB, error) {
 	return db, nil
 }
 
-func (p *Plugin) initApp(store store.Store) (*app.UserSurveyApp, error) {
+func (p *Plugin) initApp(store store.Store, debugBuild bool) (*app.UserSurveyApp, error) {
 	getConfigFunc := func() *model.Config {
 		return p.getConfiguration()
 	}
-	return app.New(p.API, store, getConfigFunc, p.Driver)
+	return app.New(p.API, store, getConfigFunc, p.Driver, debugBuild)
 }
 
 func (p *Plugin) initAPI(app *app.UserSurveyApp) *api.Handlers {
