@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"net/url"
 
+	"github.com/mattermost/mattermost/server/public/pluginapi"
+
 	"github.com/pkg/errors"
 
 	"github.com/mattermost/mattermost/server/public/plugin"
@@ -27,6 +29,7 @@ type SQLStore struct {
 	isBinaryParams   bool
 	skipMigrations   bool
 	schemaName       string
+	apiClient        *pluginapi.Client
 }
 
 func New(params Params) (*SQLStore, error) {
@@ -42,6 +45,7 @@ func New(params Params) (*SQLStore, error) {
 		connectionString: params.ConnectionString,
 		pluginAPI:        params.PluginAPI,
 		skipMigrations:   params.SkipMigrations,
+		apiClient:        pluginapi.NewClient(params.PluginAPI, params.Driver),
 	}
 
 	var err error
@@ -90,6 +94,15 @@ func (s *SQLStore) Shutdown() error {
 
 func (s *SQLStore) getQueryBuilder() squirrel.StatementBuilderType {
 	return squirrel.StatementBuilder.PlaceholderFormat(s.getQueryPlaceholder()).RunWith(s.db)
+}
+
+func (s *SQLStore) getMasterQueryBuilder() (*squirrel.StatementBuilderType, error) {
+	masterDB, err := s.apiClient.Store.GetMasterDB()
+	if err != nil {
+		return nil, errors.Wrap(err, "getMasterQueryBuilder: failed to get master DB from plugin API client")
+	}
+	queryBuilder := squirrel.StatementBuilder.PlaceholderFormat(s.getQueryPlaceholder()).RunWith(masterDB)
+	return &queryBuilder, nil
 }
 
 func (s *SQLStore) getQueryPlaceholder() squirrel.PlaceholderFormat {
