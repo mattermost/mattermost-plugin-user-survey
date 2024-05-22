@@ -25,7 +25,7 @@ export default function SurveyScheduleBanner({dateTimeConfig, expiryConfig, surv
         const messages: string[] = [];
 
         const startDate = parse(dateTimeConfig.date, 'dd/MM/yyyy', new Date());
-        messages.push(`Next survey scheduled for ${dateTimeConfig.time} on ${format(startDate, 'MMMM d, y')}`);
+        messages.push(`Next survey scheduled for ${dateTimeConfig.time} UTC on ${format(startDate, 'MMMM d, y')}`);
 
         const endDate = new Date(startDate);
         endDate.setDate(endDate.getDate() + expiryConfig.days);

@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import {format, parse} from 'date-fns';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
 import SurveyDateSelector from 'components/surveyDateSelector/surveyDateSelector';
 import SurveyTimeSelector from 'components/surveyTimeSelector/surveyTimeSelector';
@@ -73,6 +73,15 @@ function SurveyDateTime({id, setSaveNeeded, onChange, config, setInitialSetting}
         saveSettings({date: value ? format(value, 'dd/MM/yyyy') : undefined, time: surveyTime});
     }, [saveSettings, surveyTime]);
 
+    const helpText = useMemo(() => {
+        let line1 = '';
+        if (surveyDateTime && surveyDate) {
+            line1 = `(Equivalent to ${format(surveyDateTime, 'H:mm MMMM d, y O')})\n\n`;
+        }
+
+        return line1 + 'A bot message containing the survey will start being sent to all users at the selected date and time. Delivery will occur gradually, so the exact time may vary.';
+    }, [surveyDate, surveyDateTime]);
+
     return (
         <div className='SurveyDateTime'>
             <div className='horizontal'>
@@ -87,12 +96,7 @@ function SurveyDateTime({id, setSaveNeeded, onChange, config, setInitialSetting}
             </div>
 
             <div className='horizontal'>
-                {
-                    surveyDate && surveyDateTime &&
-                    <p>
-                        {`A bot message containing the survey will start being sent to all users at ${surveyTime} UTC on ${format(surveyDate, 'MMMM d, y')} (equivalent to ${format(surveyDateTime, 'H:mm MMMM d, y O')}). Delivery will occur gradually, so the exact time may vary.`}
-                    </p>
-                }
+                <p className='multiline'>{helpText}</p>
             </div>
         </div>
     );
