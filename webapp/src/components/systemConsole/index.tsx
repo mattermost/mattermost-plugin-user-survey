@@ -4,7 +4,6 @@
 import React, {useCallback, useMemo, useState} from 'react';
 
 import Panel from 'components/common/panel/panel';
-import EnableSurvey from 'components/systemConsole/enableSurvey';
 import Expiry from 'components/systemConsole/expiry/expiry';
 import Questions from 'components/systemConsole/questions/questions';
 import SurveyDateTime from 'components/systemConsole/surveyDateTime/surveyDateTime';
@@ -60,11 +59,6 @@ function SystemConsoleSetting(props: CustomComponentProps) {
 
     const settings = useMemo(() => {
         return [
-            {
-                id: 'EnableSurvey',
-                title: 'Enable survey:',
-                Component: EnableSurvey,
-            },
             {
                 id: 'SurveyDateTime',
                 title: 'Send next survey at:',

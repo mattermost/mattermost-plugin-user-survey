@@ -12,7 +12,7 @@ export default function Icon({icon}: Props) {
     return (
         <span
             aria-hidden='true'
-            className={`icon icon-${icon}`}
+            className={`user_survey_icon icon icon-${icon}`}
         />
     );
 }

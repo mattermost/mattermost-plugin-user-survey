@@ -16,27 +16,40 @@ const dateFormattingOptions: Intl.DateTimeFormatOptions = {
 };
 
 export type Props = {
-    value: Date;
-    onChange: (value: Date) => void;
+    value?: Date;
+    onChange: (value?: Date) => void;
 };
 
 const SurveyDateSelector = ({value, onChange}: Props) => {
     const tomorrow = useRef(startOfTomorrow());
 
     const formattedDate = useMemo(
-        () => value.toLocaleDateString(undefined, dateFormattingOptions),
+        () => (value ? value.toLocaleDateString(undefined, dateFormattingOptions) : ''),
         [value],
     );
 
-    const handleOnChange = useCallback((date: Date) => {
-        const year = date.getFullYear();
-        const month = date.getMonth();
-        const day = date.getDate();
+    const handleOnChange = useCallback((date?: Date) => {
+        let dateToUse: Date | undefined;
 
-        const utcDate = new Date(Date.UTC(year, month, day));
+        if (date) {
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const day = date.getDate();
 
-        onChange(utcDate);
+            dateToUse = new Date(Date.UTC(year, month, day));
+        } else {
+            dateToUse = undefined;
+        }
+
+        onChange(dateToUse);
+        onChange(dateToUse);
     }, [onChange]);
+
+    const handleClearDate = useCallback((e: React.MouseEvent) => {
+        e.stopPropagation();
+
+        handleOnChange(undefined);
+    }, [handleOnChange]);
 
     return (
         <DatePicker
@@ -50,7 +63,17 @@ const SurveyDateSelector = ({value, onChange}: Props) => {
                     className='input'
                     disabled={true}
                     value={formattedDate}
+                    placeholder='Select a date'
                 />
+                {
+                    value &&
+                    <span
+                        className='clearDate icon'
+                        onClick={handleClearDate}
+                    >
+                        <Icon icon='close-circle'/>
+                    </span>
+                }
             </div>
         </DatePicker>
     );
