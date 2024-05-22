@@ -1,8 +1,20 @@
 .TextQuestion {
+    &.vertical {
+        gap: 8px;
+    }
+
     .questionTitle {
         color: #3D3C40;
         font-size: 14px;
         font-weight: 600;
         line-height: 16px;
+    }
+
+    .questionInput {
+        width: 100%;
+        min-width: 100%;
+        max-width: 100%;
+        min-height: 80px;
+        max-height: 400px;
     }
 }

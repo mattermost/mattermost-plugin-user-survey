@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import classNames from 'classnames';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import './style.scss';
 
@@ -15,9 +15,10 @@ export type Props = {
     className?: string;
     collapsible?: boolean;
     toggleFromHeader?: boolean;
+    bannerComponent?: React.ReactNode;
 }
 
-export default function Panel({title, subTitle, children, className, collapsible, toggleFromHeader}: Props) {
+export default function Panel({title, subTitle, children, className, collapsible, toggleFromHeader, bannerComponent}: Props) {
     const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
     const [height, setHeight] = useState<number>();
 
@@ -51,18 +52,30 @@ export default function Panel({title, subTitle, children, className, collapsible
         setIsCollapsed((collapsed) => !collapsed);
     }, [collapsible, toggleFromHeader]);
 
+    const banner = useMemo(() => {
+        if (bannerComponent) {
+            return bannerComponent;
+        }
+
+        return (
+            <React.Fragment>
+                <h5>{title}</h5>
+                {
+                    subTitle &&
+                    <span>{subTitle}</span>
+                }
+            </React.Fragment>
+        );
+    }, [bannerComponent, subTitle, title]);
+
     return (
         <div className={classNames('Panel', className)}>
             <div
                 className={classNames('panelHeader', 'horizontal', {pointer: collapsible && toggleFromHeader !== false})}
                 onClick={handleToggleFromHeader}
             >
-                <div className='left verical'>
-                    <h5>{title}</h5>
-                    {
-                        subTitle &&
-                        <p>{subTitle}</p>
-                    }
+                <div className='left vertical'>
+                    {banner}
                 </div>
                 {
                     collapsible &&
@@ -73,7 +86,7 @@ export default function Panel({title, subTitle, children, className, collapsible
                             className={classNames('toggleCollapseButton', {pointer: toggleFromHeader === false})}
                             onClick={handleToggleFromButton}
                         >
-                            <Icon icon={isCollapsed ? 'chevron-up' : 'chevron-down'}/>
+                            <Icon icon={isCollapsed ? 'chevron-down' : 'chevron-up'}/>
                         </div>
                     </div>
                 }

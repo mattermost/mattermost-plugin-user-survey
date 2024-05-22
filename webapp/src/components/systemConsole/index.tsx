@@ -8,6 +8,7 @@ import Expiry from 'components/systemConsole/expiry/expiry';
 import Questions from 'components/systemConsole/questions/questions';
 import SurveyDateTime from 'components/systemConsole/surveyDateTime/surveyDateTime';
 import SurveyResults from 'components/systemConsole/surveyResults/surveyResults';
+import SurveyScheduleBanner from 'components/systemConsole/surveyScheduleBanner/surveyScheduleBanner';
 import TeamFilter from 'components/systemConsole/teamFilter/teamFilter';
 
 import type {CustomComponentProps} from 'types/mattermost-webapp';
@@ -105,12 +106,27 @@ function SystemConsoleSetting(props: CustomComponentProps) {
         });
     }, [modifiedProps, settings]);
 
+    const bannerComponent = useMemo(() => {
+        if (!config.SurveyDateTime?.date || !config.SurveyDateTime?.time || !config.SurveyExpiry?.days) {
+            return null;
+        }
+
+        return (
+            <SurveyScheduleBanner
+                dateTimeConfig={config.SurveyDateTime}
+                expiryConfig={config.SurveyExpiry}
+                surveyQuestionsConfig={config.SurveyQuestions}
+            />
+        );
+    }, [config.SurveyDateTime, config.SurveyExpiry, config.SurveyQuestions]);
+
     return (
         <div className='SystemConsoleSetting vertical'>
             <Panel
                 title='Survey setup'
                 subTitle='Select the date, time, and details for the next survey.'
                 collapsible={true}
+                bannerComponent={bannerComponent}
             >
                 {body}
             </Panel>
