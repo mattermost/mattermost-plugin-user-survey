@@ -47,7 +47,7 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
         if (!surveyExpired) {
             client.refreshSurveyPost(post.id);
         }
-    }, [post.id, surveyExpired]);
+    }, []);
 
     const validateResponses = useCallback((): boolean => {
         const errors: {[key: string]: string} = {};
@@ -237,7 +237,7 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
 
                         {
 
-                            /*This is for the rare case of somehow the survey completely missing from system, so we might not its expiry*/
+                            /*This is for the rare case of somehow the survey completely missing from system, so we might not know its expiry*/
                             !surveyExpireAtDate &&
                             ('This survey has expired')
                         }

@@ -353,6 +353,10 @@ func (a *UserSurveyApp) HandleRefreshSurveyPost(userID, postID string) error {
 		return errors.Wrapf(errors.New(appErr.Error()), "HandleRefreshSurveyPost: failed to get channel by ID, channelID: %s", post.ChannelId)
 	}
 
+	if channel.Type != mmModel.ChannelTypeDirect {
+		return fmt.Errorf("HandleRefreshSurveyPost: channel is not a DM")
+	}
+
 	if !strings.Contains(channel.Name, userID) {
 		return fmt.Errorf("HandleRefreshSurveyPost: post does not belong to the user, postID: %s, userID: %s", postID, userID)
 	}
