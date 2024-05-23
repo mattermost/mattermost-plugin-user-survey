@@ -27,4 +27,5 @@ type Store interface {
 	UpdateRatingGroupCount(surveyID string, promoterFactor, neutralFactor, detractorFactor int) error
 	ResetData() error
 	GetAllResponses(surveyID, lastResponseID string, perPage uint64) ([]*model.SurveyResponse, error)
+	GetLatestEndedSurvey() (*model.Survey, error)
 }

@@ -43,12 +43,19 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 }
 
 func (p *Plugin) OnActivate() error {
+	buildMode := "Production"
+	if DebugBuild == "true" {
+		buildMode = "DEBUG"
+	}
+	p.API.LogInfo("Starting up User Survey Plugin, build mode: " + buildMode)
+
 	sqlStore, err := p.initStore()
 	if err != nil {
 		return err
 	}
 
-	app, err := p.initApp(sqlStore)
+	debugBuild := DebugBuild == "true"
+	app, err := p.initApp(sqlStore, debugBuild)
 	if err != nil {
 		return err
 	}
@@ -109,6 +116,7 @@ func (p *Plugin) createStoreParams() (*store.Params, error) {
 		SkipMigrations:   false,
 		PluginAPI:        p.API,
 		DB:               db,
+		Driver:           p.Driver,
 	}, nil
 }
 
@@ -123,11 +131,11 @@ func (p *Plugin) getMasterDB() (*sql.DB, error) {
 	return db, nil
 }
 
-func (p *Plugin) initApp(store store.Store) (*app.UserSurveyApp, error) {
+func (p *Plugin) initApp(store store.Store, debugBuild bool) (*app.UserSurveyApp, error) {
 	getConfigFunc := func() *model.Config {
 		return p.getConfiguration()
 	}
-	return app.New(p.API, store, getConfigFunc, p.Driver)
+	return app.New(p.API, store, getConfigFunc, p.Driver, debugBuild)
 }
 
 func (p *Plugin) initAPI(app *app.UserSurveyApp) *api.Handlers {

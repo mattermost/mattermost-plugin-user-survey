@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"slices"
 
+	mmModal "github.com/mattermost/mattermost/server/public/model"
+
 	sq "github.com/mattermost/squirrel"
 	"github.com/pkg/errors"
 
@@ -107,6 +109,7 @@ func (s *SQLStore) UpdateSurveyStatus(surveyID, status string) error {
 	_, err := s.getQueryBuilder().
 		Update(s.tablePrefix+"survey").
 		Set("status", status).
+		Set("updated_at", mmModal.GetMillis()).
 		Where(sq.Eq{"id": surveyID}).Exec()
 
 	if err != nil {
@@ -210,6 +213,41 @@ func (s *SQLStore) GetSurveysByID(surveyID string) (*model.Survey, error) {
 		s.pluginAPI.LogError("GetSurveysByID: more than one survey found with the given ID", "surveyID", surveyID)
 		return nil, errors.New("GetSurveysByID: more than one survey found with the given ID, surveyID: " + surveyID)
 	} else if len(surveys) == 0 {
+		return nil, nil
+	}
+
+	return surveys[0], nil
+}
+
+func (s *SQLStore) GetLatestEndedSurvey() (*model.Survey, error) {
+	// using master DB query builder here because this function is generally used
+	// after a survey was ended in database. Reading from a read replica immediately after
+	// updating the survey status in database can cause incorrect data to be read
+	// due to read replica delay
+
+	masterQueryBuilder, err := s.getMasterQueryBuilder()
+	if err != nil {
+		return nil, errors.Wrap(err, "GetLatestEndedSurvey: Failed to get master query builder")
+	}
+
+	rows, err := masterQueryBuilder.
+		Select(s.surveyColumns()...).
+		From(s.tablePrefix + "survey").
+		Where(sq.Eq{"status": model.SurveyStatusEnded}).
+		OrderBy("updated_at DESC").
+		Limit(1).
+		Query()
+
+	if err != nil {
+		return nil, errors.Wrap(err, "GetLatestEndedSurvey failed to fetch latest ended survey")
+	}
+
+	surveys, err := s.SurveysFromRows(rows)
+	if err != nil {
+		return nil, errors.Wrap(err, "GetLatestEndedSurvey: failed to map survey rows to surveys")
+	}
+
+	if len(surveys) == 0 {
 		return nil, nil
 	}
 

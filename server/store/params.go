@@ -14,6 +14,7 @@ type Params struct {
 	DB               *sql.DB
 	PluginAPI        plugin.API
 	SkipMigrations   bool
+	Driver           plugin.Driver
 }
 
 func (p Params) IsValid() error {
