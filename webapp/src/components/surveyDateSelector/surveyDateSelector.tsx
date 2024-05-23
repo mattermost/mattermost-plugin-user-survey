@@ -55,7 +55,8 @@ const SurveyDateSelector = ({value, onChange}: Props) => {
         <DatePicker
             onSelect={handleOnChange}
             value={value}
-            disableBefore={tomorrow.current}
+            /* eslint-disable-next-line no-process-env */
+            disableBefore={process.env.mode === 'production' ? tomorrow.current : undefined}
         >
             <div className='SurveyDateSelector form-control'>
                 <Icon icon='calendar-outline'/>

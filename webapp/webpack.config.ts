@@ -2,6 +2,8 @@ import {exec} from 'child_process';
 
 import path from 'path';
 
+const webpack = require('webpack');
+
 import plugin from '../plugin.json';
 
 const PLUGIN_ID = plugin.id;
@@ -35,6 +37,12 @@ if (NPM_TARGET === 'build:watch' || NPM_TARGET === 'debug:watch') {
         },
     });
 }
+
+plugins.push(new webpack.DefinePlugin({
+    'process.env': JSON.stringify({
+        mode,
+    }),
+}));
 
 module.exports = {
     entry: [
