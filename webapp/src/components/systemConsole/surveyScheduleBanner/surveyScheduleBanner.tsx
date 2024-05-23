@@ -45,7 +45,7 @@ export default function SurveyScheduleBanner({dateTimeConfig, expiryConfig, surv
     }
 
     return (
-        <div className='SurveyScheduleBanner'>
+        <div className='SurveyScheduleBanner vertical'>
             <div className='horizontal title'>
                 <h5>{'Survey setup'}</h5>
                 <Badge
