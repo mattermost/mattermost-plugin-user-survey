@@ -6,6 +6,7 @@ import React, {useCallback, useMemo, useState} from 'react';
 import {Modal} from 'react-bootstrap';
 
 import './style.scss';
+import Icon from 'components/common/icon/icon';
 
 type Props = {
     className?: string;
@@ -235,7 +236,7 @@ function GenericModal({
                     {
                         errorText && (
                             <div className='genericModalError'>
-                                <i className='icon icon-alert-outline'/>
+                                <Icon icon='alert-outline'/>
                                 <span>{errorText}</span>
                             </div>
                         )

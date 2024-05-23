@@ -4,6 +4,7 @@
 import {format} from 'date-fns';
 import React from 'react';
 
+import Badge from 'components/common/badge/badge';
 import SurveyRowActionButton from 'components/systemConsole/surveyResults/surveyRowActionButton';
 
 import type {SurveyResult} from 'types/plugin';
@@ -21,7 +22,13 @@ export default function ResultRow({result, onStopSurvey}: Props) {
         >
             <div className='startDate'>
                 <span>{format(result.startDate, 'do MMM yyyy')}</span>
-                {result.status === 'in_progress' && <div className='badge inProgress'>{'Active'}</div>}
+                {
+                    result.status === 'in_progress' &&
+                    <Badge
+                        text='Active'
+                        className='inProgress'
+                    />
+                }
             </div>
             <div className='endDate'><span>{format(result.endDate, 'do MMM yyyy')}</span></div>
             <div className='npsScore'><span>{result.npsScore || '-'}</span></div>

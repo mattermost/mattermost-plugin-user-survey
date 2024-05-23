@@ -4,14 +4,18 @@
     }
 
     .settingLabel {
+        display: flex;
         max-width: 32%;
+        height: 38px;
         flex: 4;
+        flex-direction: column;
+        justify-content: center;
         padding-right: 0;
         font-weight: 600;
         text-align: left;
     }
 
-    .customSettingComponent {
+    .questionBody, .customSettingComponent {
         flex: 8;
     }
 }

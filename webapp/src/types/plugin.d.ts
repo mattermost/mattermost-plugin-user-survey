@@ -6,7 +6,7 @@ import type {Post} from '@mattermost/types/lib/posts';
 import type {QuestionType} from 'components/systemConsole/questions/questions';
 
 export type DateTimeConfig = {
-    date: string;
+    date?: string;
     time: string;
 }
 
@@ -23,14 +23,11 @@ export type SurveyQuestionsConfig = {
     questions: Question[];
 };
 
-export type SurveyEnabledConfig = boolean;
-
 export type CombinedConfig = {
     SurveyDateTime: DateTimeConfig;
     SurveyExpiry: ExpiryConfig;
     TeamFilter: TeamFilterConfig;
     SurveyQuestions: SurveyQuestionsConfig;
-    EnableSurvey: SurveyEnabledConfig;
 };
 
 export type CustomConfigTypes =
@@ -38,7 +35,6 @@ export type CustomConfigTypes =
     | ExpiryConfig
     | TeamFilterConfig
     | SurveyQuestionsConfig
-    | SurveyEnabledConfig
     | CombinedConfig;
 
 export type SurveyStatus = 'in_progress' | 'ended';
@@ -238,6 +234,7 @@ export type Question = {
     type: QuestionType;
     system: boolean;
     mandatory: boolean;
+    helpText?: string;
 };
 
 export type UserSurvey = Survey & {

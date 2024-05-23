@@ -12,18 +12,30 @@ import type {DateTimeConfig} from 'types/plugin';
 
 import './style.scss';
 
-const DEFAULT_SURVEY_TIME = '09:00';
+const DEFAULT_SURVEY_TIME = '00:00';
 
 function SurveyDateTime({id, setSaveNeeded, onChange, config, setInitialSetting}: CustomSettingChildComponentProp) {
-    // This default setting it here instead of outside the component like other defaults
-    // is because we want the default to be the time admin opens the plugin config page.
-    // If this was outside, the value would be when the admin first opened mattermost, which can
-    // create quite a difference. And also because this need memomization as new Date() is a new
-    // useMemo as new Date() is different in every render cycle
-    const defaultSurveyDate = useMemo(() => new Date(), []);
-
     const [surveyTime, setSurveyTime] = useState<string>(DEFAULT_SURVEY_TIME);
-    const [surveyDate, setSurveyDate] = useState<Date>(defaultSurveyDate);
+    const [surveyDate, setSurveyDate] = useState<Date>();
+
+    const [surveyDateTime, setSurveyDateTime] = useState<Date>();
+
+    useEffect(() => {// Extract date components from the UTC Date object
+        if (!surveyDate) {
+            return;
+        }
+
+        const year = surveyDate.getFullYear();
+        const month = surveyDate.getMonth(); // getUTCMonth() returns month index (0-11)
+        const day = surveyDate.getDate();
+
+        // Parse time components from timeString
+        const [hours, minutes] = surveyTime.split(':').map(Number);
+
+        // Construct a new Date object in UTC with the combined date and time
+        // Convert the UTC Date object to the user's local time zone
+        setSurveyDateTime(new Date(Date.UTC(year, month, day, hours, minutes)));
+    }, [surveyDate, surveyTime]);
 
     // sets the date picker and time picker to the values saved in config on load
     useEffect(() => {
@@ -31,7 +43,6 @@ function SurveyDateTime({id, setSaveNeeded, onChange, config, setInitialSetting}
 
         const initialConfig: DateTimeConfig = {
             time: DEFAULT_SURVEY_TIME,
-            date: format(defaultSurveyDate, 'dd/MM/yyyy'),
         };
 
         if (dateTimeConfig?.time) {
@@ -42,15 +53,10 @@ function SurveyDateTime({id, setSaveNeeded, onChange, config, setInitialSetting}
         if (dateTimeConfig?.date) {
             setSurveyDate(parse(dateTimeConfig.date, 'dd/MM/yyyy', new Date()));
             initialConfig.date = dateTimeConfig.date;
-        } else {
-            const monthFromNow = new Date();
-            monthFromNow.setDate(monthFromNow.getDate() + 30);
-            setSurveyDate(monthFromNow);
-            initialConfig.date = format(monthFromNow, 'dd/MM/yyyy');
         }
 
         setInitialSetting(id, initialConfig);
-    }, [config.PluginSettings?.Plugins, defaultSurveyDate, id, setInitialSetting]);
+    }, [config.PluginSettings?.Plugins, id, setInitialSetting]);
 
     const saveSettings = useCallback((setting: DateTimeConfig) => {
         setSaveNeeded();
@@ -59,31 +65,38 @@ function SurveyDateTime({id, setSaveNeeded, onChange, config, setInitialSetting}
 
     const surveyTimeChangeHandler = useCallback((value: string) => {
         setSurveyTime(value);
-        saveSettings({date: format(surveyDate, 'dd/MM/yyyy'), time: value});
+        saveSettings({date: surveyDate ? format(surveyDate, 'dd/MM/yyyy') : undefined, time: value});
     }, [saveSettings, surveyDate]);
 
-    const surveyDateChangeHandler = useCallback((value: Date) => {
+    const surveyDateChangeHandler = useCallback((value?: Date) => {
         setSurveyDate(value);
-        saveSettings({date: format(value, 'dd/MM/yyyy'), time: surveyTime});
+        saveSettings({date: value ? format(value, 'dd/MM/yyyy') : undefined, time: surveyTime});
     }, [saveSettings, surveyTime]);
+
+    const helpText = useMemo(() => {
+        let line1 = '';
+        if (surveyDateTime && surveyDate) {
+            line1 = `(Equivalent to local time ${format(surveyDateTime, 'H:mm MMMM d, y O')})\n\n`;
+        }
+
+        return line1 + 'A bot message containing the survey will start being sent to all users at the selected date and time. Delivery will occur gradually, so the exact time may vary.';
+    }, [surveyDate, surveyDateTime]);
 
     return (
         <div className='SurveyDateTime'>
             <div className='horizontal'>
-                <SurveyTimeSelector
-                    onChange={surveyTimeChangeHandler}
-                    value={surveyTime}
-                />
                 <SurveyDateSelector
                     value={surveyDate}
                     onChange={surveyDateChangeHandler}
                 />
+                <SurveyTimeSelector
+                    onChange={surveyTimeChangeHandler}
+                    value={surveyTime}
+                />
             </div>
 
             <div className='horizontal'>
-                <p>
-                    {`A bot message with the survey will be sent to all users at ${surveyTime} UTC on ${format(surveyDate, 'do MMM yyyy')}.`}
-                </p>
+                <p className='multiline'>{helpText}</p>
             </div>
         </div>
     );

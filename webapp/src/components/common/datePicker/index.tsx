@@ -11,7 +11,8 @@ import {
     useFloating,
     useInteractions,
 } from '@floating-ui/react';
-import React, {useCallback, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import type {Matcher} from 'react-day-picker';
 import {DayPicker} from 'react-day-picker';
 
 import './style.scss';
@@ -21,11 +22,20 @@ export type Props = {
     children: React.ReactNode;
     onSelect: (date: Date) => void;
     closeOnSelect?: boolean;
+    disableBefore?: Date;
 };
 
-const DatePicker = ({value, children, onSelect, closeOnSelect = true}: Props) => {
+const DatePicker = ({value, children, onSelect, closeOnSelect = true, disableBefore}: Props) => {
     const [isPopupOpen, setPopupOpen] = useState<boolean>(false);
-    const currentDate = useRef<Date>(new Date());
+    const [matcher, setMatcher] = useState<Matcher>();
+
+    useEffect(() => {
+        if (disableBefore) {
+            setMatcher({
+                before: disableBefore,
+            });
+        }
+    }, [disableBefore]);
 
     const onSelectHandler = useCallback((day: Date) => {
         onSelect(day);
@@ -38,7 +48,7 @@ const DatePicker = ({value, children, onSelect, closeOnSelect = true}: Props) =>
     const {context} = useFloating({
         open: isPopupOpen,
         onOpenChange: (open) => setPopupOpen(open),
-        placement: 'bottom-end',
+        placement: 'bottom-start',
         whileElementsMounted: autoUpdate,
         middleware: [
             offset(5),
@@ -81,9 +91,7 @@ const DatePicker = ({value, children, onSelect, closeOnSelect = true}: Props) =>
                                 selected={value}
                                 defaultMonth={value}
                                 className='DatePicker-day-picker'
-                                disabled={{
-                                    before: currentDate.current,
-                                }}
+                                disabled={matcher}
                                 onDayClick={onSelectHandler}
                             />
                         </div>

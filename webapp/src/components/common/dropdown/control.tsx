@@ -6,13 +6,14 @@ import type {ControlProps} from 'react-select';
 import {components} from 'react-select';
 
 import type {DropdownOption} from 'components/common/dropdown/dropdown';
+import Icon from 'components/common/icon/icon';
 
 const Control = ({children, ...rest}: ControlProps<DropdownOption>) => {
     return (
         <components.Control
             {...rest}
         >
-            <i className='icon-clock-outline'/>
+            <Icon icon='clock-outline'/>
             {children}
         </components.Control>
     );

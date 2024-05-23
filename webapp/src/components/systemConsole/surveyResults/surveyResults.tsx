@@ -4,6 +4,8 @@
 import client from 'client/client';
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
+import Icon from 'components/common/icon/icon';
+import Panel from 'components/common/panel/panel';
 import ResultRow from 'components/systemConsole/surveyResults/resultRow';
 
 import type {SurveyResult} from 'types/plugin';
@@ -75,15 +77,15 @@ function SurveyResults() {
     }, [handleStopSurvey, surveyResults]);
 
     return (
-        <div className='SurveyResults'>
-            <div className='panelHeader'>
-                <h5>{'Previous surveys'}</h5>
-                <p>{'Surveys sent out in the past'}</p>
-            </div>
-
-            <div className='panelBody vertical'>
+        <React.Fragment>
+            <Panel
+                className='SurveyResults'
+                title='Active and past surveys'
+                subTitle='Track and download responses for active and previously conducted surveys'
+                collapsible={false}
+            >
                 <div className='horizontal resultHeader'>
-                    <div className='startDate'>{'Start date (UTC)'}</div>
+                    <div className='startDate'>{'Start date (UTC)'} <Icon icon='arrow-down'/></div>
                     <div className='endDate'>{'End date (UTC)'}</div>
                     <div className='npsScore'>{'NPS Score'}</div>
                     <div className='receiptsCount'>{'Sent to'}</div>
@@ -93,9 +95,8 @@ function SurveyResults() {
                 <div className='resultBody'>
                     {renderedRows}
                 </div>
-            </div>
-
-        </div>
+            </Panel>
+        </React.Fragment>
     );
 }
 

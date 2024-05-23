@@ -28,23 +28,26 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting
         return [
             {
                 id: utils.uuid(),
-                text: 'How likely are you to recommend Mattermost?',
+                text: 'How likely are you to suggest this app to someone else?',
                 type: 'linear_scale',
                 system: true,
                 mandatory: true,
+                helpText: 'This is a mandatory question that helps calculate the NPS score.',
             },
             {
                 id: utils.uuid(),
-                text: 'How can we make your experience better?',
+                text: 'How can we make this app better for you?',
                 type: 'text',
                 system: true,
                 mandatory: true,
+                helpText: 'This is a mandatory question that helps gather general user feedback.',
             },
             {
                 id: utils.uuid(),
                 type: 'text',
                 system: false,
                 mandatory: false,
+                helpText: 'This is an optional customisable question that can be used to gather specific feedback or ask follow up questions.',
             },
         ];
     };
@@ -103,38 +106,41 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting
             return (
                 <div
                     key={question.id}
-                    className='vertical question'
+                    className='horizontal question'
                 >
-                    <span className='questionTitle'>
+                    <span className='questionTitle settingLabel'>
                         {`${questionTypeDisplayName.get(question.type)} ${question.mandatory ? '' : '(Optional)'}`}
                     </span>
 
-                    <input
-                        maxLength={1000}
-                        className={`form-control questionInput ${question.system && 'disabled'}`}
-                        defaultValue={question.text}
-                        onChange={(e) => questionOnChangeHandler(e, question.id)}
-                        disabled={question.system}
-                        placeholder='Question'
-                    />
+                    <div className='vertical questionBody'>
+                        <div className='customSettingComponent'>
+                            <input
+                                maxLength={1000}
+                                className={`form-control questionInput ${question.system && 'disabled'}`}
+                                defaultValue={question.text}
+                                onChange={(e) => questionOnChangeHandler(e, question.id)}
+                                disabled={question.system}
+                                placeholder='Question'
+                            />
+                        </div>
+
+                        <span className='questionHelpText'>
+                            {question.helpText}
+                        </span>
+                    </div>
                 </div>
             );
         });
     }, [questionOnChangeHandler, questions]);
 
     return (
-        <div className='SurveyQuestions'>
-            <div className='header'>
-                <h5>{'Survey Questions'}</h5>
-                <p>{'View and customise the contents of the next survey'}</p>
-            </div>
+        <div className='SurveyQuestions vertical'>
+            <div className='horizontal question'>
+                <span className='questionTitle settingLabel'>
+                    {'Survey message text'}
+                </span>
 
-            <div className='body'>
-                <div className='vertical question'>
-                    <span className='questionTitle'>
-                        {'Survey message text'}
-                    </span>
-
+                <div className='vertical questionBody'>
                     <input
                         maxLength={1000}
                         className='form-control questionInput'
@@ -145,13 +151,12 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting
                     />
 
                     <span className='questionHelpText'>
-                        {'This text will be sent in the bot message preceding the survey.'}
+                        {'This text will be visible in the bot message presenting the survey.'}
                     </span>
                 </div>
-
-                {renderedQuestions}
             </div>
 
+            {renderedQuestions}
         </div>
     );
 }

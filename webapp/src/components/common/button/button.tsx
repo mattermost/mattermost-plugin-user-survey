@@ -2,7 +2,9 @@
 // See LICENSE.txt for license information.
 
 import classNames from 'classnames';
-import React, {useMemo} from 'react';
+import React from 'react';
+
+import Icon from 'components/common/icon/icon';
 
 import './style.scss';
 
@@ -30,25 +32,16 @@ function Button({
         'btn-danger': danger,
     });
 
-    const iconComponent = useMemo(() => {
-        return (
-            <span
-                aria-hidden='true'
-                className={`icon ${iconClass}`}
-            />
-        );
-    }, [iconClass]);
-
     return (
         <button
             className={buttonClassName}
             {...rest}
         >
-            {iconClass && iconPlacement === 'left' && iconComponent}
+            {iconClass && iconPlacement === 'left' && <Icon icon={iconClass}/>}
 
             {text}
 
-            {iconClass && iconPlacement === 'right' && iconComponent}
+            {iconClass && iconPlacement === 'right' && <Icon icon={iconClass}/>}
         </button>
     );
 }

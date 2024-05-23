@@ -16,7 +16,7 @@ export type Props = {
 }
 
 function TextQuestion({question, responseChangeHandler, disabled, value}: Props) {
-    const changeHandler = useDebouncedCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const changeHandler = useDebouncedCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
         responseChangeHandler(question.id, e.target.value);
     }, 200);
 
@@ -29,7 +29,7 @@ function TextQuestion({question, responseChangeHandler, disabled, value}: Props)
                 {question.text}
             </label>
             <div>
-                <input
+                <textarea
                     id={`surveyQuestion_${question.id}`}
                     maxLength={5000}
                     className='form-control questionInput'

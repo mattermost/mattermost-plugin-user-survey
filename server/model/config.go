@@ -50,6 +50,10 @@ type TeamFilter struct {
 }
 
 func (c *Config) ShouldSurveyStart() (bool, error) {
+	if c.SurveyDateTime.Date == "" {
+		return false, nil
+	}
+
 	// survey should start if the UTC date and UTC time have passed
 	utcDateTime := time.Now().UTC()
 	parsedTime, err := c.ParsedTime()
