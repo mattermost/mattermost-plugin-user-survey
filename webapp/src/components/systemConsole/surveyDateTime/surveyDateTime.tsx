@@ -76,7 +76,7 @@ function SurveyDateTime({id, setSaveNeeded, onChange, config, setInitialSetting}
     const helpText = useMemo(() => {
         let line1 = '';
         if (surveyDateTime && surveyDate) {
-            line1 = `(Equivalent to ${format(surveyDateTime, 'H:mm MMMM d, y O')})\n\n`;
+            line1 = `(Equivalent to local time ${format(surveyDateTime, 'H:mm MMMM d, y O')})\n\n`;
         }
 
         return line1 + 'A bot message containing the survey will start being sent to all users at the selected date and time. Delivery will occur gradually, so the exact time may vary.';
@@ -85,13 +85,13 @@ function SurveyDateTime({id, setSaveNeeded, onChange, config, setInitialSetting}
     return (
         <div className='SurveyDateTime'>
             <div className='horizontal'>
-                <SurveyTimeSelector
-                    onChange={surveyTimeChangeHandler}
-                    value={surveyTime}
-                />
                 <SurveyDateSelector
                     value={surveyDate}
                     onChange={surveyDateChangeHandler}
+                />
+                <SurveyTimeSelector
+                    onChange={surveyTimeChangeHandler}
+                    value={surveyTime}
                 />
             </div>
 
