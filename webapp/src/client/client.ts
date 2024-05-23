@@ -10,6 +10,8 @@ import manifest from '../manifest';
 
 export const ID_PATH_PATTERN = /[a-z0-9]{26}/;
 
+export const POST_ID_PATTERN = /[a-zA-Z0-9]{26}/;
+
 class SurveyClient extends HttpClient {
     url = '';
 
@@ -76,6 +78,14 @@ class SurveyClient extends HttpClient {
         // construct the expected filename in case of an error in the header
         const formattedDate = format(new Date(), 'yyyy-MMM-dd_hh-mm');
         return `${formattedDate}_${originalFileName}`;
+    };
+
+    refreshSurveyPost = (postID: string) => {
+        if (!postID || !POST_ID_PATTERN.test(postID)) {
+            return Promise.reject(new Error('invalid post ID encountered. Post ID should be a 26 character alphanumeric string'));
+        }
+
+        return this.doPost(`${this.url}/survey_post/${postID}/refresh`);
     };
 }
 
