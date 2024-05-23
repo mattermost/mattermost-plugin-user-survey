@@ -32,6 +32,7 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting
                 type: 'linear_scale',
                 system: true,
                 mandatory: true,
+                helpText: 'This is a mandatory question that helps calculate the NPS score.',
             },
             {
                 id: utils.uuid(),
@@ -39,12 +40,14 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting
                 type: 'text',
                 system: true,
                 mandatory: true,
+                helpText: 'This is a mandatory question that helps gather general user feedback.',
             },
             {
                 id: utils.uuid(),
                 type: 'text',
                 system: false,
                 mandatory: false,
+                helpText: 'This is an optional customisable question that can be used to gather specific feedback or ask follow up questions.',
             },
         ];
     };
@@ -109,15 +112,21 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting
                         {`${questionTypeDisplayName.get(question.type)} ${question.mandatory ? '' : '(Optional)'}`}
                     </span>
 
-                    <div className='customSettingComponent'>
-                        <input
-                            maxLength={1000}
-                            className={`form-control questionInput ${question.system && 'disabled'}`}
-                            defaultValue={question.text}
-                            onChange={(e) => questionOnChangeHandler(e, question.id)}
-                            disabled={question.system}
-                            placeholder='Question'
-                        />
+                    <div className='vertical questionBody'>
+                        <div className='customSettingComponent'>
+                            <input
+                                maxLength={1000}
+                                className={`form-control questionInput ${question.system && 'disabled'}`}
+                                defaultValue={question.text}
+                                onChange={(e) => questionOnChangeHandler(e, question.id)}
+                                disabled={question.system}
+                                placeholder='Question'
+                            />
+                        </div>
+
+                        <span className='questionHelpText'>
+                            {question.helpText}
+                        </span>
                     </div>
                 </div>
             );
@@ -131,7 +140,7 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting
                     {'Survey message text'}
                 </span>
 
-                <div className='vertical customSettingComponent'>
+                <div className='vertical questionBody'>
                     <input
                         maxLength={1000}
                         className='form-control questionInput'

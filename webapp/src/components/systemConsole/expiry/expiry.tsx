@@ -39,7 +39,10 @@ const Expiry = ({id, setSaveNeeded, onChange, config, setInitialSetting}: Custom
     }, [id, onChange, setSaveNeeded]);
 
     const expiryDaysChangeHandler = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-        setExpiryDays(e.target.value);
+        // this is to strip out decimal parts of a number when someone pasts it.
+        // The onKeyDown handler takes care of when someone tries ty type a decimal number
+        const integerValue = Number.parseInt(e.target.value, 10);
+        setExpiryDays(integerValue.toString());
         setSaveNeeded();
 
         const numberValue = Number.parseInt(e.target.value, 10);
@@ -51,6 +54,12 @@ const Expiry = ({id, setSaveNeeded, onChange, config, setInitialSetting}: Custom
         }
     }, [saveSettings, setSaveNeeded]);
 
+    const expiryDaysHandleOnKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === '.') {
+            e.preventDefault();
+        }
+    }, []);
+
     return (
         <div className='Expiry'>
             <div className='horizontal'>
@@ -60,6 +69,7 @@ const Expiry = ({id, setSaveNeeded, onChange, config, setInitialSetting}: Custom
                     name='surveyExpiry'
                     value={expiryDays}
                     onChange={expiryDaysChangeHandler}
+                    onKeyDown={expiryDaysHandleOnKeyDown}
                 />
             </div>
 

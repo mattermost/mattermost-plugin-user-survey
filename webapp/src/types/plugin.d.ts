@@ -234,6 +234,7 @@ export type Question = {
     type: QuestionType;
     system: boolean;
     mandatory: boolean;
+    helpText?: string;
 };
 
 export type UserSurvey = Survey & {
