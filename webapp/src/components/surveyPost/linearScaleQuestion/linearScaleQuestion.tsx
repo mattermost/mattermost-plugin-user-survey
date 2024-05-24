@@ -54,7 +54,7 @@ function LinearScaleQuestion({
 
     return (
         <div className='LinearScaleQuestion vertical'>
-            <div className='questionTitle'>{question.text}</div>
+            <label className='questionTitle'>{question.text}</label>
             <div className='scale vertical'>
                 <div className='scaleLabels horizontal'>
                     <div className='scaleLabel'>{'Not Likely'}</div>
