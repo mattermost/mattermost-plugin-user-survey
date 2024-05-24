@@ -146,7 +146,6 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting
                         className='form-control questionInput'
                         defaultValue={surveyMessageText}
                         placeholder='Survey message text'
-                        required={true}
                         onChange={surveyMessageTextChangeHandler}
                     />
 
