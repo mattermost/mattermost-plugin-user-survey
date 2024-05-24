@@ -231,15 +231,7 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
                     disabled && surveyExpired &&
                     <div className='surveyMessage submitted'>
                         {
-                            surveyExpireAtDate &&
-                            (`Survey expired on ${surveyExpireAtDate?.toLocaleDateString()}.`)
-                        }
-
-                        {
-
-                            /*This is for the rare case of somehow the survey completely missing from system, so we might not know its expiry*/
-                            !surveyExpireAtDate &&
-                            ('This survey has expired')
+                            surveyExpireAtDate ? (`Survey expired on ${surveyExpireAtDate?.toLocaleDateString()}.`) : ('This survey has expired')
                         }
                     </div>
                 }
