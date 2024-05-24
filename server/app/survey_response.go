@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/mattermost/mattermost-plugin-user-survey/server/utils"
 
@@ -222,13 +223,23 @@ func (a *UserSurveyApp) UpdatePostForExpiredSurvey(userID, surveyID string) erro
 		return errors.Wrap(errors.New(appErr.Error()), "UpdatePostForExpiredSurvey: failed to get post from ID")
 	}
 
-	post.AddProp(postPropKeySurveyStatus, postPropValueSurveyStatusExpired)
-	post.AddProp(postPropSurveyExpiryDate, expiredSurvey.GetEndTime().Format("02 January 2006"))
+	if err := a.setExpiredPropsInPost(post, expiredSurvey); err != nil {
+		return errors.Wrapf(err, "UpdatePostForExpiredSurvey: failed to update post for rxpired survey, userID: %s", userID)
+	}
 
-	_, appErr = a.api.UpdatePost(post)
-	if appErr != nil {
-		a.api.LogError("UpdatePostForExpiredSurvey: failed to update post after updating it for expired survey", "userID", userID, "surveyID", surveyID, "error", appErr.Error())
-		return errors.Wrap(errors.New(appErr.Error()), fmt.Sprintf("UpdatePostForExpiredSurvey: failed to update post after updating it for expired survey, userID: %s, surveyID: %s", userID, surveyID))
+	return nil
+}
+
+func (a *UserSurveyApp) setExpiredPropsInPost(post *mmModel.Post, expiredSurvey *model.Survey) error {
+	post.AddProp(postPropKeySurveyStatus, postPropValueSurveyStatusExpired)
+
+	if expiredSurvey != nil {
+		post.AddProp(postPropSurveyExpiryDate, expiredSurvey.GetEndTime().UnixMilli())
+	}
+
+	if _, appErr := a.api.UpdatePost(post); appErr != nil {
+		a.api.LogError("UpdatePostForExpiredSurvey: failed to update post after updating it for expired survey", "error", appErr.Error())
+		return errors.Wrap(errors.New(appErr.Error()), "UpdatePostForExpiredSurvey: failed to update post after updating it for expired survey")
 	}
 
 	return nil
@@ -322,4 +333,61 @@ func (a *UserSurveyApp) hasRatingGroupChanged(oldRating, newRating int) bool {
 	default:
 		return true
 	}
+}
+
+func (a *UserSurveyApp) HandleRefreshSurveyPost(userID, postID string) error {
+	post, appErr := a.api.GetPost(postID)
+	if appErr != nil {
+		a.api.LogError("HandleRefreshSurveyPost: failed to get post by ID", "postID", postID, "error", appErr.Error())
+		return errors.Wrapf(errors.New(appErr.Error()), "HandleRefreshSurveyPost: failed to get post by ID, postID: %s", postID)
+	}
+
+	if post.Type != surveyPostType {
+		return errors.New("Post is not a survey post")
+	}
+
+	// verify post belongs to the user's DM
+	channel, appErr := a.api.GetChannel(post.ChannelId)
+	if appErr != nil {
+		a.api.LogError("HandleRefreshSurveyPost: failed to channel by ID", "channelID", post.ChannelId, "error", appErr.Error())
+		return errors.Wrapf(errors.New(appErr.Error()), "HandleRefreshSurveyPost: failed to get channel by ID, channelID: %s", post.ChannelId)
+	}
+
+	if channel.Type != mmModel.ChannelTypeDirect {
+		return fmt.Errorf("HandleRefreshSurveyPost: channel is not a DM")
+	}
+
+	if !strings.Contains(channel.Name, userID) {
+		return fmt.Errorf("HandleRefreshSurveyPost: post does not belong to the user, postID: %s, userID: %s", postID, userID)
+	}
+
+	surveyIDRaw := post.GetProp(postPropSurveyID)
+	if surveyIDRaw == nil {
+		a.api.LogError("HandleRefreshSurveyPost: failed to find survey ID in post props", "postID", postID)
+		return fmt.Errorf("HandleRefreshSurveyPost: failed to find survey ID in post props, postID: %s", postID)
+	}
+
+	surveyID, ok := surveyIDRaw.(string)
+	if !ok {
+		a.api.LogError("HandleRefreshSurveyPost: survey ID extracted from post props is not a string", "postID", postID)
+		return fmt.Errorf("HandleRefreshSurveyPost: survey ID extracted from post props is not a string, postID: %s", postID)
+	}
+
+	survey, err := a.store.GetSurveysByID(surveyID)
+	if err != nil {
+		return errors.Wrapf(err, "HandleRefreshSurveyPost: failed to get survey by ID, surveyID: %s", surveyID)
+	}
+
+	if survey != nil && survey.Status == model.SurveyStatusInProgress {
+		// nothing to update in post if survey is still running
+		return nil
+	}
+
+	// from here on, we know the post's survey is expired,
+	// so we need to update the post.
+	if err := a.setExpiredPropsInPost(post, survey); err != nil {
+		return errors.Wrapf(err, "HandleRefreshSurveyPost: failed to update posyt for expired survey, userID: %s, postID: %s", userID, postID)
+	}
+
+	return nil
 }

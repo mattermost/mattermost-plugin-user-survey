@@ -48,7 +48,7 @@ func (api *Handlers) handleSubmitSurveyResponse(w http.ResponseWriter, r *http.R
 	}
 
 	// the response should belong to the currently active survey
-	if survey.ID != surveyID {
+	if survey == nil || survey.ID != surveyID {
 		err = api.app.UpdatePostForExpiredSurvey(userID, response.SurveyID)
 		if err != nil {
 			http.Error(w, "failed to update post for expired survey", http.StatusInternalServerError)
@@ -61,6 +61,33 @@ func (api *Handlers) handleSubmitSurveyResponse(w http.ResponseWriter, r *http.R
 	if err := api.app.SaveSurveyResponse(response); err != nil {
 		api.pluginAPI.LogError("handleSubmitSurveyResponse: failed to save survey response", "error", err.Error())
 		http.Error(w, "failed to save response", http.StatusInternalServerError)
+		return
+	}
+
+	ReturnStatusOK(w)
+}
+
+func (api *Handlers) handleRefreshPost(w http.ResponseWriter, r *http.Request) {
+	if err := api.RequireAuthentication(w, r); err != nil {
+		return
+	}
+
+	if err := api.DisallowGuestUsers(w, r); err != nil {
+		return
+	}
+
+	userID := r.Header.Get(headerMattermostUserID)
+
+	vars := mux.Vars(r)
+	postID, ok := vars["postID"]
+	if !ok {
+		http.Error(w, "missing post ID in request", http.StatusBadRequest)
+		return
+	}
+
+	err := api.app.HandleRefreshSurveyPost(userID, postID)
+	if err != nil {
+		http.Error(w, "failed to check post for expired survey", http.StatusInternalServerError)
 		return
 	}
 

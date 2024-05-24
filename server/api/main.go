@@ -48,6 +48,7 @@ func (api *Handlers) initRoutes() {
 	root.HandleFunc("/survey/{surveyID:[a-z0-9]{26}}/end", api.handleStopSurvey).Methods(http.MethodPost)
 	root.HandleFunc("/survey/{surveyID:[a-z0-9]{26}}/report", api.handleGenerateSurveyReport).Methods(http.MethodGet)
 	root.HandleFunc("/survey_stats", api.handleGetSurveyStats).Methods(http.MethodGet)
+	root.HandleFunc("/survey_post/{postID:[A-Za-z0-9]{26}}/refresh", api.handleRefreshPost).Methods(http.MethodPost)
 }
 
 func (api *Handlers) handlePing(w http.ResponseWriter, r *http.Request) {

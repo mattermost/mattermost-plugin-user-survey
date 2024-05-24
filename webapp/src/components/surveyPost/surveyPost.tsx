@@ -43,6 +43,12 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
         }
     }, [responses]);
 
+    useEffect(() => {
+        if (!surveyExpired) {
+            client.refreshSurveyPost(post.id);
+        }
+    }, []);
+
     const validateResponses = useCallback((): boolean => {
         const errors: {[key: string]: string} = {};
         let errorMessage: string = '';
@@ -224,7 +230,9 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
                 {
                     disabled && surveyExpired &&
                     <div className='surveyMessage submitted'>
-                        {`Survey expired on ${surveyExpireAtDate?.toLocaleDateString()}.`}
+                        {
+                            surveyExpireAtDate ? (`Survey expired on ${surveyExpireAtDate?.toLocaleDateString()}.`) : ('This survey has expired')
+                        }
                     </div>
                 }
             </div>
