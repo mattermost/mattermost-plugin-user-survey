@@ -234,7 +234,7 @@ func (a *UserSurveyApp) setExpiredPropsInPost(post *mmModel.Post, expiredSurvey 
 	post.AddProp(postPropKeySurveyStatus, postPropValueSurveyStatusExpired)
 
 	if expiredSurvey != nil {
-		post.AddProp(postPropSurveyExpiryDate, expiredSurvey.GetEndTime().UnixMilli())
+		post.AddProp(postPropSurveyExpiryDate, expiredSurvey.UpdateAt)
 	}
 
 	if _, appErr := a.api.UpdatePost(post); appErr != nil {
