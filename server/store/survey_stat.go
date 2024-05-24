@@ -20,6 +20,7 @@ func (s *SQLStore) GetSurveyStatList() ([]*model.SurveyStat, error) {
 		Select(s.surveyStatColumns()...).
 		From(s.tablePrefix + "survey").
 		OrderBy("start_time DESC, status DESC").
+		Limit(500). // this is a temporary limit to avoid UI from crashing in case of very large number of surveys. We'll add pagination next.
 		Query()
 
 	if err != nil {
