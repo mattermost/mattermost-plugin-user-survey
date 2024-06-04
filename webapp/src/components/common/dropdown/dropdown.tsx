@@ -28,9 +28,17 @@ const Dropdown = ({options, value, defaultValue, onChange}: Props) => {
         onChange(newValue as DropdownOption);
     }, [onChange]);
 
+    // the value needs to be picked picked out of the options array
+    // to make React Select scroll the selected value into view when
+    // opening the dropdown menu.
+    const selectedValue = useMemo(() => {
+        const targetValue = value || defaultValue;
+        return options.find((option) => option.value === targetValue?.value);
+    }, [options, value, defaultValue]);
+
     return (
         <Select
-            value={value || defaultValue}
+            value={selectedValue}
             options={options}
             components={customComponents}
             onChange={onChangeHandler}
