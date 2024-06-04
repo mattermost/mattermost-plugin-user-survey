@@ -102,7 +102,7 @@ func (a *UserSurveyApp) ShouldSendSurvey(userID string, survey *model.Survey) (b
 		return false, errors.New("ShouldSendSurvey: a survey can only be sent against an in progress survey")
 	}
 
-	postID, err := a.getSurveySentToUser(userID, survey.ID)
+	postID, err := a.GetSurveyPostIDSentToUser(userID, survey.ID)
 	if err != nil {
 		return false, errors.Wrap(err, "ShouldSendSurvey: failed to check if survey is already sent to the user")
 	}
@@ -119,7 +119,7 @@ func (a *UserSurveyApp) ShouldSendSurvey(userID string, survey *model.Survey) (b
 	return !inExcludedTeam, nil
 }
 
-func (a *UserSurveyApp) getSurveySentToUser(userID, surveyID string) (string, error) {
+func (a *UserSurveyApp) GetSurveyPostIDSentToUser(userID, surveyID string) (string, error) {
 	postID, appErr := a.api.KVGet(utils.KeyUserSurveySentStatus(userID, surveyID))
 	if appErr != nil {
 		a.api.LogError("GetSurveySentToUser: Failed to get user survey sent status key from KV store", "userID", userID, "surveyID", surveyID, "error", appErr.Error())

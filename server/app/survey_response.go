@@ -42,6 +42,15 @@ func (a *UserSurveyApp) SaveSurveyResponse(response *model.SurveyResponse) error
 		return errors.New("the survey you're responding to is no longer active")
 	}
 
+	postID, err := a.GetSurveyPostIDSentToUser(response.UserID, response.SurveyID)
+	if err != nil {
+		return errors.Wrap(err, "SaveSurveyResponse: failed to fetch KV store entry for user survey")
+	}
+
+	if postID == "" {
+		return errors.New("the survey was not sent to the user")
+	}
+
 	err = a.matchSurveyAndResponse(inProgressSurvey, response)
 	if err != nil {
 		a.api.LogError("SaveSurveyResponse: failed to match survey and response", "error", err.Error())
@@ -80,11 +89,6 @@ func (a *UserSurveyApp) SaveSurveyResponse(response *model.SurveyResponse) error
 		} else if existingResponse.ResponseType == model.ResponseTypeComplete {
 			return nil
 		}
-	}
-
-	postID, err := a.getSurveySentToUser(response.UserID, response.SurveyID)
-	if err != nil {
-		return errors.Wrap(err, "SaveSurveyResponse: failed to fetch KV store entry for user survey")
 	}
 
 	if err := a.addResponseInPost(response, postID); err != nil {
@@ -206,7 +210,7 @@ func (a *UserSurveyApp) matchSurveyAndResponse(survey *model.Survey, response *m
 }
 
 func (a *UserSurveyApp) UpdatePostForExpiredSurvey(userID, surveyID string) error {
-	postID, err := a.getSurveySentToUser(userID, surveyID)
+	postID, err := a.GetSurveyPostIDSentToUser(userID, surveyID)
 	if err != nil || postID == "" {
 		a.api.LogError("UpdatePostForExpiredSurvey: failed to fetch KV store entry for user survey", "userID", userID, "surveyID", surveyID, "error", err.Error())
 		return errors.Wrap(err, fmt.Sprintf("UpdatePostForExpiredSurvey: failed to fetch KV store entry for user survey, userID: %s, surveyID: %s", userID, surveyID))

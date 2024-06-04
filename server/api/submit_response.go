@@ -21,7 +21,6 @@ func (api *Handlers) handleSubmitSurveyResponse(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	userID := r.Header.Get(headerMattermostUserID)
 	vars := mux.Vars(r)
 	surveyID, ok := vars["surveyID"]
 	if !ok {
@@ -29,6 +28,11 @@ func (api *Handlers) handleSubmitSurveyResponse(w http.ResponseWriter, r *http.R
 		return
 	}
 
+	if err := api.RequireSurveySentToUser(w, r, surveyID); err != nil {
+		return
+	}
+
+	userID := r.Header.Get(headerMattermostUserID)
 	body := http.MaxBytesReader(w, r.Body, maxPayloadSizeBytes)
 	var response *model.SurveyResponse
 	if err := json.NewDecoder(body).Decode(&response); err != nil {
