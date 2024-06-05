@@ -11,17 +11,24 @@ import type {CustomSettingChildComponentProp} from 'components/systemConsole/ind
 import type {DateTimeConfig} from 'types/plugin';
 
 import './style.scss';
+import {useSelector} from 'react-redux';
 
-const DEFAULT_SURVEY_TIME = '00:00';
+import {getCurrentUser} from 'mattermost-redux/selectors/entities/users';
+import {getMyPreferences} from 'mattermost-redux/selectors/entities/preferences';
+
+// const DEFAULT_SURVEY_TIME = '00:00';
 
 function SurveyDateTime({id, setSaveNeeded, onChange, config, setInitialSetting}: CustomSettingChildComponentProp) {
-    const [surveyTime, setSurveyTime] = useState<string>(DEFAULT_SURVEY_TIME);
+    const currentUser = useSelector(getCurrentUser);
+    const preferences = useSelector(getMyPreferences);
+
+    const [surveyTime, setSurveyTime] = useState<string>();
     const [surveyDate, setSurveyDate] = useState<Date>();
 
     const [surveyDateTime, setSurveyDateTime] = useState<Date>();
 
     useEffect(() => {// Extract date components from the UTC Date object
-        if (!surveyDate) {
+        if (!surveyDate || !surveyTime) {
             return;
         }
 
@@ -41,9 +48,7 @@ function SurveyDateTime({id, setSaveNeeded, onChange, config, setInitialSetting}
     useEffect(() => {
         const dateTimeConfig = config.PluginSettings?.Plugins?.['com.mattermost.user-survey']?.systemconsolesetting.SurveyDateTime;
 
-        const initialConfig: DateTimeConfig = {
-            time: DEFAULT_SURVEY_TIME,
-        };
+        const initialConfig: DateTimeConfig = {};
 
         if (dateTimeConfig?.time) {
             setSurveyTime(dateTimeConfig.time);

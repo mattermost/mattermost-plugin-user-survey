@@ -7,7 +7,7 @@ import type {QuestionType} from 'components/systemConsole/questions/questions';
 
 export type DateTimeConfig = {
     date?: string;
-    time: string;
+    time?: string;
 }
 
 export type ExpiryConfig = {
