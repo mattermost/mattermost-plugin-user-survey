@@ -18,19 +18,33 @@ export type Props = {
     value?: DropdownOption;
     defaultValue?: DropdownOption;
     onChange: (newValue: DropdownOption) => void;
+    scrollSelectedInView?: boolean;
 }
-const Dropdown = ({options, value, defaultValue, onChange}: Props) => {
+const Dropdown = ({options, value, defaultValue, onChange, scrollSelectedInView = true}: Props) => {
     const customComponents = useMemo(() => ({Control}), []);
 
     // This handler only serves the purpose of satisfying typescript.
-    // Otherwise it complains abut incorrect type's callback passed to Select's onChange prop.
+    // Otherwise, it complains abut incorrect type's callback passed to Select's onChange prop.
     const onChangeHandler = useCallback((newValue: SingleValue<DropdownOption> | MultiValue<DropdownOption>) => {
         onChange(newValue as DropdownOption);
     }, [onChange]);
 
+    // the value needs to be picked out of the options array
+    // to make React Select scroll the selected value into view when
+    // opening the dropdown menu.
+    const selectedValue = useMemo(() => {
+        const targetValue = value || defaultValue;
+
+        if (!scrollSelectedInView) {
+            return targetValue;
+        }
+
+        return options.find((option) => option.value === targetValue?.value);
+    }, [options, value, defaultValue, scrollSelectedInView]);
+
     return (
         <Select
-            value={value || defaultValue}
+            value={selectedValue}
             options={options}
             components={customComponents}
             onChange={onChangeHandler}
