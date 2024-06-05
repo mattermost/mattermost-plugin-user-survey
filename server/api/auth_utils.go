@@ -50,3 +50,20 @@ func (api *Handlers) RequireSystemAdmin(w http.ResponseWriter, r *http.Request) 
 
 	return nil
 }
+
+func (api *Handlers) RequireSurveySentToUser(w http.ResponseWriter, r *http.Request, surveyID string) error {
+	userID := r.Header.Get(headerMattermostUserID)
+	postID, err := api.app.GetSurveyPostIDSentToUser(userID, surveyID)
+	if err != nil {
+		api.pluginAPI.LogError("RequreSurveySentToUser: failed to get survey post", "error", err.Error(), "surveyID", surveyID)
+		http.Error(w, "failed to get survey post", http.StatusInternalServerError)
+		return err
+	}
+
+	if postID == "" {
+		http.Error(w, "Unauthorized", http.StatusForbidden)
+		return errors.New("User was not requested for survey post")
+	}
+
+	return nil
+}
