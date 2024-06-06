@@ -22,10 +22,14 @@ export default function SurveyScheduleBanner({dateTimeConfig, expiryConfig, surv
             return '';
         }
 
+        console.log(dateTimeConfig);
+
         const messages: string[] = [];
 
+        // June 3, 2024 at 11:30 PM UTC
+
         const startDate = parse(dateTimeConfig.date, 'dd/MM/yyyy', new Date());
-        messages.push(`Next survey scheduled for ${dateTimeConfig.time} UTC on ${format(startDate, 'MMMM d, y')}`);
+        messages.push(`Next survey scheduled for ${format(startDate, 'MMMM d, y')} at ${dateTimeConfig.time} UTC`);
 
         const endDate = new Date(startDate);
         endDate.setDate(endDate.getDate() + expiryConfig.days);

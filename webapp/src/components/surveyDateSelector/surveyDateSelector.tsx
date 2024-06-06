@@ -36,7 +36,7 @@ const SurveyDateSelector = ({value, onChange}: Props) => {
             const month = date.getMonth();
             const day = date.getDate();
 
-            dateToUse = new Date(Date.UTC(year, month, day));
+            dateToUse = new Date(year, month, day);
         } else {
             dateToUse = undefined;
         }
