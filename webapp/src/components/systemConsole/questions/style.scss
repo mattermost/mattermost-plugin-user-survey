@@ -25,12 +25,10 @@
         gap: 24px;
 
         .question {
-            .questionTitle {
-                margin: 0;
-                color: #3D3C40;
-                font-size: 12px;
-                font-weight: 600;
-                line-height: 16px;
+            div {
+                .questionTitle {
+                    margin-bottom: 0;
+                }
             }
 
             .questionHelpText {

@@ -3,36 +3,31 @@
         gap: 8px;
     }
 
-    .questionTitle {
-        color: #3D3C40;
-        font-size: 14px;
-        font-weight: 600;
-        line-height: 16px;
-    }
-
     .scale {
         width: min-content;
+        max-width: 100%;
         gap: 4px;
 
-
         .scaleLabels {
-            color: rgba(61, 60, 64, 0.72);
+            color: rgb(var(--center-channel-color-rgb));
             font-size: 12px;
             font-style: normal;
             font-weight: 600;
             line-height: 20px;
+            opacity: 0.75;
         }
 
         .indents {
             display: flex;
             width: min-content;
+            max-width: 100%;
             flex-direction: row;
             border-radius: 16px;
-            background: rgba(var(--button-bg-rgb), 0.08);
+            background: rgba(var(--button-bg-rgb), 0.12);
             gap: 8px;
 
             &.disabled {
-                background: var(--center-channel-color-8, rgba(63, 67, 80, 0.08));
+                background: var(--center-channel-color-08);
                 pointer-events: none;
 
                 .indent.selected {
