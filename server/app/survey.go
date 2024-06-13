@@ -215,7 +215,7 @@ func (a *UserSurveyApp) ensureSurveyBot() error {
 
 func (a *UserSurveyApp) userInExcludedTeams(userID string, survey *model.Survey) (bool, error) {
 	// no need to check for memberships if
-	//no teams were excluded from the survey
+	// no teams were excluded from the survey
 	if len(survey.ExcludedTeamIDs) == 0 {
 		return false, nil
 	}
