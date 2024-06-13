@@ -18,7 +18,7 @@ const questionTypeDisplayName = new Map<QuestionType, string>([
     ['text', 'Textual question'],
 ]);
 
-const DEFAULT_SURVEY_MESSAGE_TEXT = 'Please take a few moments to help us improve your experience with Mattermost.';
+const DEFAULT_SURVEY_MESSAGE_TEXT = 'Please take a few moments to help us improve your experience.';
 
 function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting}: CustomSettingChildComponentProp) {
     const [questions, setQuestions] = useState<Question[]>([]);

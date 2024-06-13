@@ -3,6 +3,9 @@
 
 import client from 'client/client';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useSelector} from 'react-redux';
+
+import {getCurrentUser} from 'mattermost-redux/selectors/entities/users';
 
 import Button from 'components/common/button/button';
 import {useUserSurvey} from 'components/hooks/survey';
@@ -20,6 +23,8 @@ const QUESTION_COMPONENTS = {
 };
 
 function SurveyPost({post}: CustomPostTypeComponentProps) {
+    const currentUser = useSelector(getCurrentUser);
+
     const [errorMessage, setErrorMessage] = useState<string>();
     const draftResponse = useRef<SurveyResponse>();
     const [questionErrorMessages, setQuestionErrorMessages] = useState<{[key: string]: string}>({});
@@ -143,11 +148,13 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
     );
 
     const renderedMessage = useMemo(() => {
+        const message = `:wave: Hey @${currentUser.username}! ${questions?.surveyMessageText}`;
+
         // @ts-expect-error window is definitely MattermostWindow in plugins
         const mmWindow = window as MattermostWindow;
-        const htmlString = mmWindow.PostUtils.formatText(post.message, {markdown: true, mentionHighlight: true, atMentions: true});
+        const htmlString = mmWindow.PostUtils.formatText(message, {markdown: true, mentionHighlight: true, atMentions: true});
         return mmWindow.PostUtils.messageHtmlToComponent(htmlString);
-    }, [post.message]);
+    }, [currentUser.username, questions?.surveyMessageText]);
 
     const renderQuestions = useMemo(() => {
         if (!questions) {

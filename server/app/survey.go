@@ -23,6 +23,8 @@ const (
 	surveySentValue = "survey_sent"
 
 	cacheValidityUserTeamFilter = 7200 // 2 hours in seconds
+
+	surveyPostMessage = "Help us improve your experience. Use Mattermost in a web browser or the desktop app to take the survey."
 )
 
 func (a *UserSurveyApp) SaveSurvey(survey *model.Survey) error {
@@ -158,10 +160,9 @@ func (a *UserSurveyApp) SendSurvey(userID string, survey *model.Survey) error {
 		return errors.Wrap(errors.New(appErr.Error()), errMsg)
 	}
 
-	postMessage := fmt.Sprintf(":wave: Hey @%s! %s", user.Username, survey.SurveyQuestions.SurveyMessageText)
 	post := &mmModal.Post{
 		UserId:    a.botID,
-		Message:   postMessage,
+		Message:   surveyPostMessage,
 		ChannelId: botUserDM.Id,
 		Type:      surveyPostType,
 	}
@@ -198,8 +199,8 @@ func (a *UserSurveyApp) ensureSurveyBot() error {
 	}
 
 	bot := &mmModal.Bot{
-		Username:    "feedbackbot",
-		DisplayName: "Feedbackbot",
+		Username:    "user_feedback",
+		DisplayName: "User Feedback",
 		Description: "Created by User Survey plugin",
 	}
 
