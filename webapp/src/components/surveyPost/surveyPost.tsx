@@ -44,10 +44,10 @@ function SurveyPost({post}: CustomPostTypeComponentProps) {
     }, [responses]);
 
     useEffect(() => {
-        if (!surveyExpired) {
+        if (!surveyExpired && !surveySubmitted) {
             client.refreshSurveyPost(post.id);
         }
-    }, []);
+    }, [post.id, surveyExpired, surveySubmitted]);
 
     const validateResponses = useCallback((): boolean => {
         const errors: {[key: string]: string} = {};

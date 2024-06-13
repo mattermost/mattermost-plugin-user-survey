@@ -43,7 +43,7 @@ function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: Cu
                 });
             setAllTeamsOptions(options);
 
-            const savedSetting = config.PluginSettings.Plugins['com.mattermost.user-survey']?.systemconsolesetting.TeamFilter;
+            const savedSetting = config.PluginSettings.Plugins['com.mattermost.user-survey']?.systemconsolesetting?.TeamFilter;
             let initialOptions: DropdownOption[] = [];
             if (savedSetting?.filteredTeamIDs) {
                 initialOptions = savedSetting.filteredTeamIDs.map((teamId) => {
