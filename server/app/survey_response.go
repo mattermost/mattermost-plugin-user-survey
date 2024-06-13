@@ -155,7 +155,6 @@ func (a *UserSurveyApp) sendAcknowledgementPost(userID, surveyPostID string) err
 		UserId:    a.botID,
 		Message:   ":tada: Thank you for helping us make Mattermost better!",
 		ChannelId: botUserDM.Id,
-		RootId:    surveyPostID,
 	}
 
 	if _, appErr := a.api.CreatePost(post); appErr != nil {
