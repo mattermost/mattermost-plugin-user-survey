@@ -6,13 +6,13 @@ Upon startup, the plugin initiates a scheduled job that runs on a single node wi
 
 Here is the flowchart for the job:
 
-<img src="docs/architecture/cron-job.png?raw=true" alt="Cron Job Flow Chart"/>
+<img src="cron-job.png?raw=true" alt="Cron Job Flow Chart"/>
 
 ## Receiving the Survey
 
 The web application component of the plugin makes an API call to the `/connected` endpoint, triggering checks to determine whether to send the survey. Below is the flowchart for the `/connected` API:
 
-<img src="docs/architecture/connected-api.png?raw=true" alt="Connected API Flow Chart"/>
+<img src="connected-api.png?raw=true" alt="Connected API Flow Chart"/>
 
 ## Saving Responses
 

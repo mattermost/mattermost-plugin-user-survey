@@ -19,6 +19,10 @@ for a survey to review the feedback received and analyze trends in NPS scores.
 
 ## Development
 
+### Technical Architecture
+
+The tech docs are located [here](/docs/architecture/architecture.md).
+
 ### Setup
 
 Make sure you have the following components installed:
