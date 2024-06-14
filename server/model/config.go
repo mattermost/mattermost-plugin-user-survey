@@ -4,6 +4,7 @@
 package model
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/pkg/errors"
@@ -77,4 +78,21 @@ func (c *Config) ParsedTime() (time.Time, error) {
 	}
 
 	return parsedTime, nil
+}
+
+func (c *Config) ToMap() (map[string]interface{}, error) {
+	var out map[string]interface{}
+	data, err := json.Marshal(c)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(data, &out)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]interface{}{
+		"systemconsolesetting": out,
+	}, nil
 }

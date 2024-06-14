@@ -111,6 +111,17 @@ func (a *UserSurveyApp) startNewSurveyIfNeeded() error {
 			return errors.Wrap(err, "JobManageSurveyStatus: failed to save survey in database")
 		}
 
+		config.SurveyDateTime.Date = ""
+		configMap, err := config.ToMap()
+		if err != nil {
+			a.api.LogError("JobManageSurveyStatus: failed to convert config to map", "error", err.Error())
+			// no need to break here as this error isn't critical to the job flow.
+		} else {
+			if appErr := a.api.SavePluginConfig(configMap); appErr != nil {
+				a.api.LogError("JobManageSurveyStatus: failed to save plugin config", "error", appErr.Error())
+			}
+		}
+
 		a.api.LogDebug("JobManageSurveyStatus: saved new survey")
 	} else {
 		a.api.LogDebug("JobManageSurveyStatus: determined that the new survey should NOT start")

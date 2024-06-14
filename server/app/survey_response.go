@@ -153,7 +153,7 @@ func (a *UserSurveyApp) sendAcknowledgementPost(userID, surveyPostID string) err
 
 	post := &mmModel.Post{
 		UserId:    a.botID,
-		Message:   ":tada: Thank you for helping us make Mattermost better!",
+		Message:   ":tada: Thank you for sharing your feedback!",
 		ChannelId: botUserDM.Id,
 	}
 
