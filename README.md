@@ -61,7 +61,8 @@ Set the following environment variables to true before running `make dist`-
 1. MM_SERVICESETTINGS_ENABLEDEVELOPER
 2. MM_DEBUG
 
-This will generate a development built.
+This will generate a development built for your OS and architecture.
+If you want to generate dev builds for other architectures, use the command `make dist-debug` after setting up the above mentioned env variables.
 
 ### Deploying with Local Mode
 
