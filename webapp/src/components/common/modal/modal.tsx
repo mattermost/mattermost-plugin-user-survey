@@ -146,7 +146,7 @@ function GenericModal({
             <button
                 autoFocus={autoFocusConfirmButton}
                 type='submit'
-                className={classNames('GenericModal__button btn btn-primary', isConfirmOrDeleteClassName, confirmButtonClassName, {
+                className={classNames('common_GenericModal__button btn btn-primary', isConfirmOrDeleteClassName, confirmButtonClassName, {
                     disabled: isConfirmDisabled,
                 })}
                 onClick={handleConfirmClick}
@@ -178,7 +178,7 @@ function GenericModal({
         return (
             <button
                 type='button'
-                className={classNames('GenericModal__button btn btn-tertiary', cancelButtonClassName)}
+                className={classNames('common_GenericModal__button btn btn-tertiary', cancelButtonClassName)}
                 onClick={handleCancelClick}
             >
                 {buttonText}
@@ -192,9 +192,9 @@ function GenericModal({
         }
 
         return (
-            <div className='GenericModal__header'>
+            <div className='common_GenericModal__header'>
                 <h1
-                    id='genericModalLabel'
+                    id='common_genericModalLabel'
                     className='modal-title'
                 >
                     {modalHeaderText}
@@ -210,7 +210,7 @@ function GenericModal({
             role='dialog'
             aria-label={ariaLabel}
             aria-labelledby={ariaLabel ? undefined : 'genericModalLabel'}
-            dialogClassName={classNames('a11y__modal GenericModal', 'GenericModal__compassDesign', className)}
+            dialogClassName={classNames('common_GenericModal', 'common_GenericModal__compassDesign', className)}
             show={showModal}
             restoreFocus={true}
             enforceFocus={enforceFocus}
@@ -224,7 +224,7 @@ function GenericModal({
             <div
                 onKeyDown={onEnterKeyDown}
                 tabIndex={tabIndex || 0}
-                className='GenericModal__wrapper-enter-key-press-catcher'
+                className='common_GenericModal__wrapper-enter-key-press-catcher'
             >
                 <Modal.Header closeButton={true}>
                     <div>
@@ -235,13 +235,13 @@ function GenericModal({
                 <Modal.Body className={classNames({divider: bodyDivider})}>
                     {
                         errorText && (
-                            <div className='genericModalError'>
+                            <div className='common_genericModalError'>
                                 <Icon icon='alert-outline'/>
                                 <span>{errorText}</span>
                             </div>
                         )
                     }
-                    <div className={classNames('GenericModal__body', {padding: bodyPadding})}>{children}</div>
+                    <div className={classNames('common_GenericModal__body', {padding: bodyPadding})}>{children}</div>
                 </Modal.Body>
                 {(cancelButton || confirmButton || footerContent) && (
                     <Modal.Footer className={classNames({divider: footerDivider})}>
