@@ -7,9 +7,10 @@ import type {DropdownOption} from 'components/common/dropdown/dropdown';
 import Dropdown from 'components/common/dropdown/dropdown';
 
 import './style.scss';
+import {format} from 'date-fns';
 
 export type Props = {
-    value?: string;
+    value?: Date;
     onChange: (value: string) => void;
 };
 
@@ -26,14 +27,22 @@ const SurveyTimeSelector = ({value, onChange}: Props) => {
                 const minuteString = String(minutes).padStart(2, '0');
                 const timeString = `${hourString}:${minuteString}`;
 
-                timeStrings.push({value: timeString, label: `${timeString} UTC`});
+                timeStrings.push({value: timeString, label: `${timeString}`});
             }
         }
 
         return timeStrings;
     }, []);
 
-    const dropdownValue = useMemo(() => (value ? {value, label: `${value} UTC`} : options[18]), [options, value]);
+    // const dropdownValue = useMemo(() => (value ? {value, label: `${value}`} : options[0]), [options, value]);
+
+    const dropdownValue = useMemo(() => {
+        if (value) {
+            const time = format(value, 'HH:mm');
+            return {value: time, label: time};
+        }
+        return options[0];
+    }, [options, value]);
 
     const onChangeHandler = useCallback((newValue: DropdownOption) => {
         onChange(newValue.value);

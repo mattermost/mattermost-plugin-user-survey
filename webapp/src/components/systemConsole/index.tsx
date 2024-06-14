@@ -107,17 +107,19 @@ function SystemConsoleSetting(props: CustomComponentProps) {
     }, [modifiedProps, settings]);
 
     const bannerComponent = useMemo(() => {
-        if (!config.SurveyDateTime?.date || !config.SurveyDateTime?.time || !config.SurveyExpiry?.days) {
-            return null;
-        }
+        return null;
 
-        return (
-            <SurveyScheduleBanner
-                dateTimeConfig={config.SurveyDateTime}
-                expiryConfig={config.SurveyExpiry}
-                surveyQuestionsConfig={config.SurveyQuestions}
-            />
-        );
+        // if (!config.SurveyDateTime?.date || !config.SurveyDateTime?.time || !config.SurveyExpiry?.days) {
+        //     return null;
+        // }
+        //
+        // return (
+        //     <SurveyScheduleBanner
+        //         dateTimeConfig={config.SurveyDateTime}
+        //         expiryConfig={config.SurveyExpiry}
+        //         surveyQuestionsConfig={config.SurveyQuestions}
+        //     />
+        // );
     }, [config.SurveyDateTime, config.SurveyExpiry, config.SurveyQuestions]);
 
     return (

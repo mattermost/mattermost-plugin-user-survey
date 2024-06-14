@@ -17,32 +17,32 @@ type Props = {
 }
 
 export default function SurveyScheduleBanner({dateTimeConfig, expiryConfig, surveyQuestionsConfig}: Props) {
-    const subTitleText = useMemo(() => {
-        if (!dateTimeConfig.date) {
-            return '';
-        }
-
-        const messages: string[] = [];
-
-        const startDate = parse(dateTimeConfig.date, 'dd/MM/yyyy', new Date());
-        messages.push(`Next survey scheduled for ${dateTimeConfig.time} UTC on ${format(startDate, 'MMMM d, y')}`);
-
-        const endDate = new Date(startDate);
-        endDate.setDate(endDate.getDate() + expiryConfig.days);
-
-        // this is to handle the case of end date going out of bounds
-        if (!isNaN(endDate.getTime())) {
-            messages.push(`Expires on ${format(endDate, 'MMMM d, y')}`);
-        }
-
-        messages.push(`${surveyQuestionsConfig.questions.filter((question) => question.text !== '').length} questions`);
-
-        return (messages.join(' • '));
-    }, [dateTimeConfig.date, dateTimeConfig.time, expiryConfig.days, surveyQuestionsConfig.questions]);
-
-    if (!dateTimeConfig.date) {
-        return null;
-    }
+    // const subTitleText = useMemo(() => {
+    //     if (!dateTimeConfig.date) {
+    //         return '';
+    //     }
+    //
+    //     const messages: string[] = [];
+    //
+    //     const startDate = parse(dateTimeConfig.date, 'dd/MM/yyyy', new Date());
+    //     messages.push(`Next survey scheduled for ${dateTimeConfig.time} UTC on ${format(startDate, 'MMMM d, y')}`);
+    //
+    //     const endDate = new Date(startDate);
+    //     endDate.setDate(endDate.getDate() + expiryConfig.days);
+    //
+    //     // this is to handle the case of end date going out of bounds
+    //     if (!isNaN(endDate.getTime())) {
+    //         messages.push(`Expires on ${format(endDate, 'MMMM d, y')}`);
+    //     }
+    //
+    //     messages.push(`${surveyQuestionsConfig.questions.filter((question) => question.text !== '').length} questions`);
+    //
+    //     return (messages.join(' • '));
+    // }, [dateTimeConfig.date, dateTimeConfig.time, expiryConfig.days, surveyQuestionsConfig.questions]);
+    //
+    // if (!dateTimeConfig.date) {
+    //     return null;
+    // }
 
     return (
         <div className='SurveyScheduleBanner vertical'>
@@ -54,7 +54,7 @@ export default function SurveyScheduleBanner({dateTimeConfig, expiryConfig, surv
                 />
             </div>
 
-            <span>{subTitleText}</span>
+            {/*<span>{subTitleText}</span>*/}
         </div>
     );
 }

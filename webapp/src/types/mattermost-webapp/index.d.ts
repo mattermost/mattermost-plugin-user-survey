@@ -20,7 +20,7 @@ export type Config = AdminConfig & {
     PluginSettings?: {
         Plugins?: {
             'com.mattermost.user-survey'?: {
-                systemconsolesetting: CombinedConfig;
+                systemconsolesetting?: CombinedConfig;
             };
         };
     };
