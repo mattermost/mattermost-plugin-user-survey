@@ -54,6 +54,15 @@ make dist
 After a successful build, a `.tar.gz` file in the `/dist` folder will be created which can be uploaded to Mattermost. To
 avoid having to manually install your plugin, deploy your plugin using one of the following options.
 
+##### Building in Dev Mode
+
+Set the following environment variables to true before running `make dist`-
+
+1. MM_SERVICESETTINGS_ENABLEDEVELOPER
+2. MM_DEBUG
+
+This will generate a development built.
+
 ### Deploying with Local Mode
 
 If your Mattermost server is running locally, you can

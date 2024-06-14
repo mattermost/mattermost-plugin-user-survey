@@ -42,3 +42,6 @@ In the development build, certain features work differently to facilitate testin
 
 1. The scheduled job that manages surveys runs every 15 seconds, compared to every 15 minutes in the production build.
 2. The date picker in the system console settings page allows selecting any date, including past dates or today’s date, whereas the production build limits selection to future dates only.
+3. A slash command by the name `/resetdata` is registered. Executing this command erases the following contents-
+   * all plugin KV store entries for the User Survey plugin
+   * all data for tables with `user_survey_` prefix. These contain the list of surveys and survey responses.
