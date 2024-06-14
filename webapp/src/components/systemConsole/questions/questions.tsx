@@ -54,7 +54,7 @@ function SurveyQuestions({id, setSaveNeeded, onChange, config, setInitialSetting
 
     useEffect(() => {
         // Set initial value from saved config
-        const questionConfig = config.PluginSettings.Plugins?.['com.mattermost.user-survey']?.systemconsolesetting.SurveyQuestions;
+        const questionConfig = config.PluginSettings.Plugins?.['com.mattermost.user-survey']?.systemconsolesetting?.SurveyQuestions;
         const initialSavedQuestions = questionConfig?.questions;
         const initialSurveyMessageText = questionConfig?.surveyMessageText;
 

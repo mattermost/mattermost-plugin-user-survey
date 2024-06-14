@@ -39,7 +39,7 @@ function SurveyDateTime({id, setSaveNeeded, onChange, config, setInitialSetting}
 
     // sets the date picker and time picker to the values saved in config on load
     useEffect(() => {
-        const dateTimeConfig = config.PluginSettings?.Plugins?.['com.mattermost.user-survey']?.systemconsolesetting.SurveyDateTime;
+        const dateTimeConfig = config.PluginSettings?.Plugins?.['com.mattermost.user-survey']?.systemconsolesetting?.SurveyDateTime;
 
         const initialConfig: DateTimeConfig = {
             time: DEFAULT_SURVEY_TIME,
