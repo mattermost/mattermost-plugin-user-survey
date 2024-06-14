@@ -1,5 +1,5 @@
-.console__body .modal .GenericModal,
-.app__body .modal .GenericModal {
+.console__body .modal .common_GenericModal,
+.app__body .modal .common_GenericModal {
     &.modal-dialog {
         margin-top: calc(50vh - 240px);
     }
@@ -72,7 +72,7 @@
         padding: 24px 32px;
     }
 
-    &.GenericModal__compassDesign {
+    &.common_GenericModal__compassDesign {
         .modal-content {
             .modal-body {
                 .GenericModal__body {
@@ -84,7 +84,7 @@
                 }
             }
 
-            .genericModalError {
+            .common_genericModalError {
                 display: flex;
                 box-sizing: border-box;
                 flex: 1;
