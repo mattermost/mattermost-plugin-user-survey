@@ -32,6 +32,8 @@ function SystemConsoleSetting(props: CustomComponentProps) {
             [settingId]: settings,
         };
 
+        console.log(newConfig);
+
         setConfig(newConfig);
         onChange(id, newConfig);
         setSaveNeeded();
@@ -107,18 +109,20 @@ function SystemConsoleSetting(props: CustomComponentProps) {
     }, [modifiedProps, settings]);
 
     const bannerComponent = useMemo(() => {
-        if (!config.SurveyDateTime?.date || !config.SurveyDateTime?.time || !config.SurveyExpiry?.days) {
-            return null;
-        }
+        // if (!config.SurveyDateTime?.date || !config.SurveyDateTime?.time || !config.SurveyExpiry?.days) {
+        //     return null;
+        // }
+        //
+        // return (
+        //     <SurveyScheduleBanner
+        //         dateTimeConfig={config.SurveyDateTime}
+        //         expiryConfig={config.SurveyExpiry}
+        //         surveyQuestionsConfig={config.SurveyQuestions}
+        //     />
+        // );
 
-        return (
-            <SurveyScheduleBanner
-                dateTimeConfig={config.SurveyDateTime}
-                expiryConfig={config.SurveyExpiry}
-                surveyQuestionsConfig={config.SurveyQuestions}
-            />
-        );
-    }, [config.SurveyDateTime, config.SurveyExpiry, config.SurveyQuestions]);
+        return `TODO banner, timestamp: ${config.SurveyDateTime?.timestamp}`;
+    }, [config.SurveyDateTime]);
 
     return (
         <div className='SystemConsoleSetting vertical'>
