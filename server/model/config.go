@@ -4,9 +4,8 @@
 package model
 
 import (
+	mmModel "github.com/mattermost/mattermost/server/public/model"
 	"time"
-
-	"github.com/pkg/errors"
 )
 
 type Config struct {
@@ -18,8 +17,7 @@ type Config struct {
 }
 
 type SurveyDateTime struct {
-	Date string `json:"date"`
-	Time string `json:"time"`
+	Timestamp int64 `json:"timestamp"`
 }
 
 type SurveyExpiry struct {
@@ -50,31 +48,35 @@ type TeamFilter struct {
 }
 
 func (c *Config) ShouldSurveyStart() (bool, error) {
-	if c.SurveyDateTime.Date == "" {
+	if c.SurveyDateTime.Timestamp == 0 {
 		return false, nil
 	}
 
 	// survey should start if the UTC date and UTC time have passed
 	utcDateTime := time.Now().UTC()
-	parsedTime, err := c.ParsedTime()
-	if err != nil {
-		return false, err
-	}
+	//parsedTime, err := c.ParsedTime()
+	//if err != nil {
+	//	return false, err
+	//}
+
+	parsedTime := c.ParsedTime()
 
 	return utcDateTime.After(parsedTime) || utcDateTime.Equal(parsedTime), nil
 }
 
-func (c *Config) ParsedTime() (time.Time, error) {
-	layout := "02/01/2006 15:04"
-	location, err := time.LoadLocation("UTC")
-	if err != nil {
-		return time.Time{}, errors.Wrap(err, "failed to load UTC time zone")
-	}
+func (c *Config) ParsedTime() time.Time {
+	//layout := "02/01/2006 15:04"
+	//location, err := time.LoadLocation("UTC")
+	//if err != nil {
+	//	return time.Time{}, errors.Wrap(err, "failed to load UTC time zone")
+	//}
+	//
+	//parsedTime, err := time.ParseInLocation(layout, c.SurveyDateTime.Date+" "+c.SurveyDateTime.Time, location)
+	//if err != nil {
+	//	return time.Time{}, errors.Wrap(err, "failed to parse survey date time from saved config")
+	//}
+	//
+	//return parsedTime, nil
 
-	parsedTime, err := time.ParseInLocation(layout, c.SurveyDateTime.Date+" "+c.SurveyDateTime.Time, location)
-	if err != nil {
-		return time.Time{}, errors.Wrap(err, "failed to parse survey date time from saved config")
-	}
-
-	return parsedTime, nil
+	return mmModel.GetTimeForMillis(c.SurveyDateTime.Timestamp)
 }

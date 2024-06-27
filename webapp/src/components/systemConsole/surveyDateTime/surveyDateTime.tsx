@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
 import SurveyDateSelector from 'components/surveyDateSelector/surveyDateSelector';
 import SurveyTimeSelector from 'components/surveyTimeSelector/surveyTimeSelector';
@@ -11,6 +11,8 @@ import './style.scss';
 import type {DateTimeConfig} from 'types/plugin';
 
 import utils from 'utils/utils';
+import {format} from 'date-fns';
+import {formatInTimeZone} from 'date-fns-tz';
 
 const DEFAULT_SURVEY_TIME = '00:00';
 
@@ -103,14 +105,31 @@ function SurveyDateTime({id, setSaveNeeded, onChange, config, setInitialSetting}
 
     const [surveyDate, setSurveyDate] = useState<Date>();
 
-    // effect for populating the initial value of date picker
+    // sets the date picker and time picker to the values saved in config on load
     useEffect(() => {
         const dateTimeConfig = config.PluginSettings.Plugins['com.mattermost.user-survey']?.systemconsolesetting?.SurveyDateTime;
 
         if (dateTimeConfig?.timestamp) {
             setSurveyDate(utils.unixTimestampToDate(dateTimeConfig.timestamp));
         }
-    }, [config.PluginSettings.Plugins]);
+
+        setInitialSetting(id, {timestamp: dateTimeConfig?.timestamp});
+    }, [config.PluginSettings.Plugins, id, setInitialSetting]);
+
+    const helpText = useMemo(() => {
+        let line1 = '';
+
+        if (surveyDate) {
+            const localDateString = format(surveyDate, "MMMM d, yyy 'at' HH:mm O");
+            const utcDateString = formatInTimeZone(surveyDate, 'UTC', "MMMM d, yyy 'at' HH:mm 'UTC'");
+
+            line1 = `Scheduled for ${localDateString} (${utcDateString})\n\n`;
+        }
+
+        const line2 = 'A bot message containing the survey will start being sent to all users at the selected date and time. Delivery will occur gradually, so the exact time may vary.';
+
+        return line1 + line2;
+    }, [surveyDate]);
 
     const saveSettings = useCallback((setting: DateTimeConfig) => {
         setSaveNeeded();
@@ -140,9 +159,9 @@ function SurveyDateTime({id, setSaveNeeded, onChange, config, setInitialSetting}
                 />
             </div>
 
-            {/*<div className='horizontal'>*/}
-            {/*    <p className='multiline'>{helpText}</p>*/}
-            {/*</div>*/}
+            <div className='horizontal'>
+                <p className='multiline'>{helpText}</p>
+            </div>
         </div>
     );
 }

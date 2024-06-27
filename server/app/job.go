@@ -78,10 +78,12 @@ func (a *UserSurveyApp) startNewSurveyIfNeeded() error {
 
 		a.api.LogDebug("JobManageSurveyStatus: determined that the new survey should start")
 		now := mmModal.GetMillis()
-		startTime, err := config.ParsedTime()
-		if err != nil {
-			return errors.Wrap(err, "JobManageSurveyStatus: failed to read survey parsed time")
-		}
+		//startTime, err := config.ParsedTime()
+		//if err != nil {
+		//	return errors.Wrap(err, "JobManageSurveyStatus: failed to read survey parsed time")
+		//}
+
+		startTime := config.ParsedTime()
 
 		surveyFromConfig := &model.Survey{
 			ID:              utils.NewID(),
