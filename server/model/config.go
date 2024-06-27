@@ -56,11 +56,6 @@ func (c *Config) ShouldSurveyStart() (bool, error) {
 
 	// survey should start if the UTC date and UTC time have passed
 	utcDateTime := time.Now().UTC()
-	// parsedTime, err := c.ParsedTime()
-	//if err != nil {
-	//	return false, err
-	//}
-
 	parsedTime := c.ParsedTime()
 
 	return utcDateTime.After(parsedTime) || utcDateTime.Equal(parsedTime), nil
