@@ -8,9 +8,11 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	mmModel "github.com/mattermost/mattermost/server/public/model"
 	"os"
 	"path"
+
+	mmModel "github.com/mattermost/mattermost/server/public/model"
+	"gopkg.in/yaml.v2"
 
 	"github.com/pkg/errors"
 
@@ -43,6 +45,11 @@ func (a *UserSurveyApp) generateSurveyReport(surveyID string) (string, error) {
 		return "", errors.Wrapf(err, "generateSurveyReport: failed to get survey by ID, surveyID: %s", surveyID)
 	}
 
+	surveyStat, err := a.store.GetSurveyStat(survey.ID)
+	if err != nil {
+		return "", errors.Wrapf(err, "generateSurveyReport: failed to get survey stat for survey, surveyID: %s", survey.ID)
+	}
+
 	key := utils.NewID()
 
 	rawResponseCSVFilePath, err := a.generateRawResponseCSV(survey, key)
@@ -50,16 +57,18 @@ func (a *UserSurveyApp) generateSurveyReport(surveyID string) (string, error) {
 		return "", err
 	}
 
-	surveyMetadataFilePath, err := a.generateSurveyMetadataFile(survey, key)
+	surveyMetadataFilePath, err := a.generateSurveyMetadataFile(survey, surveyStat, key)
 	if err != nil {
 		return "", err
 	}
 
-	a.generateServerMetadata()
-
+	serverMetadataFilePath, err := a.generateServerMetadataFile(survey, surveyStat, key)
+	if err != nil {
+		return "", err
+	}
 
 	zipPath := path.Join(os.TempDir(), "survey_report", key, "survey_report.zip")
-	files := []string{rawResponseCSVFilePath, surveyMetadataFilePath}
+	files := []string{rawResponseCSVFilePath, surveyMetadataFilePath, serverMetadataFilePath}
 	err = utils.CreateZip(zipPath, files)
 	if err != nil {
 		a.api.LogError("generateSurveyReport: failed to generate report zip file", "surveyID", surveyID, "error", err.Error())
@@ -199,12 +208,7 @@ func (a *UserSurveyApp) mergeParts(key string, headerRow []string, totalParts in
 	return compiledCSVFilePath, nil
 }
 
-func (a *UserSurveyApp) generateSurveyMetadataFile(survey *model.Survey, key string) (string, error) {
-	surveyStat, err := a.store.GetSurveyStat(survey.ID)
-	if err != nil {
-		return "", errors.Wrapf(err, "generateSurveyMetadataFile: failed to get survey stat for survey, surveyID: %s", survey.ID)
-	}
-
+func (a *UserSurveyApp) generateSurveyMetadataFile(survey *model.Survey, surveyStat *model.SurveyStat, key string) (string, error) {
 	metadata := surveyStat.ToMetadata()
 	jsonData, err := json.MarshalIndent(metadata, "", "\t")
 	if err != nil {
@@ -229,20 +233,48 @@ func (a *UserSurveyApp) generateSurveyMetadataFile(survey *model.Survey, key str
 	return filePath, nil
 }
 
-func (a *UserSurveyApp) generateServerMetadata() (string, error) {
+func (a *UserSurveyApp) generateServerMetadataFile(survey *model.Survey, surveyStat *model.SurveyStat, key string) (string, error) {
+	metadata, err := a.generateServerMetadata()
+	if err != nil {
+		return "", errors.Wrap(err, "generateServerMetadataFile: failed to generate server metadata")
+	}
+
+	// add servey metadata
+	if metadata.Extras == nil {
+		metadata.Extras = map[string]any{}
+	}
+
+	metadata.Extras["nps_score"] = utils.CalculateNPS(surveyStat.PromoterCount, surveyStat.DetractorCount, surveyStat.PassiveCount)
+
+	filePath := path.Join(os.TempDir(), "survey_report", key, "server_metadata.yaml")
+	file, err := os.Create(filePath)
+	if err != nil {
+		a.api.LogError("generateServerMetadataFile: failed to create server metadata YAML file", "surveyID", survey.ID, "key", key, "filePath", filePath, "error", err.Error())
+		return "", errors.Wrapf(err, "generateServerMetadataFile: failed to create server metadata YAML file, surveyID: %s, key: %s, filePath: %s", survey.ID, key, filePath)
+	}
+
+	defer file.Close()
+
+	yamlEncoder := yaml.NewEncoder(file)
+	err = yamlEncoder.Encode(metadata)
+	if err != nil {
+		a.api.LogError("generateServerMetadataFile: failed to encode server metadata via YAML encoder", "surveyID", survey.ID, "key", key, "filePath", filePath, "error", err.Error())
+		return "", errors.Wrapf(err, "generateServerMetadataFile: failed to encode server metadata via YAML encoder, surveyID: %s, key: %s, filePath: %s", survey.ID, key, filePath)
+	}
+
+	return filePath, nil
+}
+
+func (a *UserSurveyApp) generateServerMetadata() (*mmModel.Metadata, error) {
 	manifest := a.manifest
 	license := a.api.GetLicense()
 	serverID := a.api.GetTelemetryId()
 
 	metadata, err := mmModel.GeneratePluginMetadata(manifest, license, serverID, nil)
 	if err != nil {
-		a.api.LogError("generateServerMetadata: failed to generate server metadata", "error", err.Error())
-		return "", errors.Wrap(err, "generateServerMetadata: failed to generate server metadata")
+		a.api.LogError("generateServerMetadataFile: failed to generate server metadata", "error", err.Error())
+		return nil, errors.Wrap(err, "generateServerMetadataFile: failed to generate server metadata")
 	}
 
-	b, _ := json.Marshal(metadata)
-
-	a.api.LogInfo(string(b))
-
-	return "", nil
+	return metadata, nil
 }

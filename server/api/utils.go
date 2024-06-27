@@ -37,7 +37,7 @@ var MediaContentTypes = [...]string{
 
 // WriteFileResponse is copied from Mattermost server https://github.com/mattermost/mattermost/blob/f0121d4f23e065a05e63fd452486570271c6a28f/server/platform/shared/web/files.go#L38
 func WriteFileResponse(filename string, contentType string, contentSize int64, lastModification time.Time, webserverMode string, fileReader io.ReadSeeker, forceDownload bool, w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Cache-Control", "private, max-age=86400")
+	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 
 	if contentSize > 0 {
