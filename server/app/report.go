@@ -8,6 +8,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	mmModel "github.com/mattermost/mattermost/server/public/model"
 	"os"
 	"path"
 
@@ -53,6 +54,9 @@ func (a *UserSurveyApp) generateSurveyReport(surveyID string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
+	a.generateServerMetadata()
+
 
 	zipPath := path.Join(os.TempDir(), "survey_report", key, "survey_report.zip")
 	files := []string{rawResponseCSVFilePath, surveyMetadataFilePath}
@@ -223,4 +227,22 @@ func (a *UserSurveyApp) generateSurveyMetadataFile(survey *model.Survey, key str
 	}
 
 	return filePath, nil
+}
+
+func (a *UserSurveyApp) generateServerMetadata() (string, error) {
+	manifest := a.manifest
+	license := a.api.GetLicense()
+	serverID := a.api.GetTelemetryId()
+
+	metadata, err := mmModel.GeneratePluginMetadata(manifest, license, serverID, nil)
+	if err != nil {
+		a.api.LogError("generateServerMetadata: failed to generate server metadata", "error", err.Error())
+		return "", errors.Wrap(err, "generateServerMetadata: failed to generate server metadata")
+	}
+
+	b, _ := json.Marshal(metadata)
+
+	a.api.LogInfo(string(b))
+
+	return "", nil
 }
