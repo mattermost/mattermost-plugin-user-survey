@@ -45,11 +45,6 @@ func (a *UserSurveyApp) generateSurveyReport(surveyID string) (string, error) {
 		return "", errors.Wrapf(err, "generateSurveyReport: failed to get survey by ID, surveyID: %s", surveyID)
 	}
 
-	surveyStat, err := a.store.GetSurveyStat(survey.ID)
-	if err != nil {
-		return "", errors.Wrapf(err, "generateSurveyReport: failed to get survey stat for survey, surveyID: %s", survey.ID)
-	}
-
 	key := utils.NewID()
 
 	rawResponseCSVFilePath, err := a.generateRawResponseCSV(survey, key)
@@ -57,12 +52,12 @@ func (a *UserSurveyApp) generateSurveyReport(surveyID string) (string, error) {
 		return "", err
 	}
 
-	surveyMetadataFilePath, err := a.generateSurveyMetadataFile(survey, surveyStat, key)
+	surveyMetadataFilePath, err := a.generateSurveyMetadataFile(survey, key)
 	if err != nil {
 		return "", err
 	}
 
-	serverMetadataFilePath, err := a.generateServerMetadataFile(survey, surveyStat, key)
+	serverMetadataFilePath, err := a.generateServerMetadataFile(survey, key)
 	if err != nil {
 		return "", err
 	}
@@ -208,7 +203,11 @@ func (a *UserSurveyApp) mergeParts(key string, headerRow []string, totalParts in
 	return compiledCSVFilePath, nil
 }
 
-func (a *UserSurveyApp) generateSurveyMetadataFile(survey *model.Survey, surveyStat *model.SurveyStat, key string) (string, error) {
+func (a *UserSurveyApp) generateSurveyMetadataFile(survey *model.Survey, key string) (string, error) {
+	surveyStat, err := a.store.GetSurveyStat(survey.ID)
+	if err != nil {
+		return "", errors.Wrapf(err, "generateSurveyMetadataFile: failed to get survey stat for survey, surveyID: %s", survey.ID)
+	}
 	metadata := surveyStat.ToMetadata()
 	jsonData, err := json.MarshalIndent(metadata, "", "\t")
 	if err != nil {
@@ -233,18 +232,11 @@ func (a *UserSurveyApp) generateSurveyMetadataFile(survey *model.Survey, surveyS
 	return filePath, nil
 }
 
-func (a *UserSurveyApp) generateServerMetadataFile(survey *model.Survey, surveyStat *model.SurveyStat, key string) (string, error) {
+func (a *UserSurveyApp) generateServerMetadataFile(survey *model.Survey, key string) (string, error) {
 	metadata, err := a.generateServerMetadata()
 	if err != nil {
 		return "", errors.Wrap(err, "generateServerMetadataFile: failed to generate server metadata")
 	}
-
-	// add servey metadata
-	if metadata.Extras == nil {
-		metadata.Extras = map[string]any{}
-	}
-
-	metadata.Extras["nps_score"] = utils.CalculateNPS(surveyStat.PromoterCount, surveyStat.DetractorCount, surveyStat.PassiveCount)
 
 	filePath := path.Join(os.TempDir(), "survey_report", key, "server_metadata.yaml")
 	file, err := os.Create(filePath)
