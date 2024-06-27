@@ -4,8 +4,10 @@
 package model
 
 import (
-	mmModel "github.com/mattermost/mattermost/server/public/model"
+	"encoding/json"
 	"time"
+
+	mmModel "github.com/mattermost/mattermost/server/public/model"
 )
 
 type Config struct {
@@ -79,4 +81,21 @@ func (c *Config) ParsedTime() time.Time {
 	//return parsedTime, nil
 
 	return mmModel.GetTimeForMillis(c.SurveyDateTime.Timestamp)
+}
+
+func (c *Config) ToMap() (map[string]interface{}, error) {
+	var out map[string]interface{}
+	data, err := json.Marshal(c)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(data, &out)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]interface{}{
+		"systemconsolesetting": out,
+	}, nil
 }

@@ -122,6 +122,8 @@ func TestJobManageSurveyStatus(t *testing.T) {
 			}
 		}
 
+		th.MockedPluginAPI.On("SavePluginConfig", mock.Anything).Return(nil)
+
 		err := th.App.JobManageSurveyStatus()
 		require.NoError(t, err)
 
