@@ -23,7 +23,7 @@ func TestJobManageSurveyStatus(t *testing.T) {
 		th.App.getConfig = func() *model.Config {
 			return &model.Config{
 				SurveyDateTime: model.SurveyDateTime{
-					Timestamp: 32503680244,
+					Timestamp: 32503680244, // 02/01/3000 15:04
 				},
 			}
 		}
@@ -70,7 +70,7 @@ func TestJobManageSurveyStatus(t *testing.T) {
 		th.App.getConfig = func() *model.Config {
 			return &model.Config{
 				SurveyDateTime: model.SurveyDateTime{
-					Timestamp: 32503680244,
+					Timestamp: 32503680244, // 02/01/3000 15:04
 				},
 			}
 		}
@@ -103,7 +103,7 @@ func TestJobManageSurveyStatus(t *testing.T) {
 					Days: 10,
 				},
 				SurveyDateTime: model.SurveyDateTime{
-					Timestamp: 1138792800,
+					Timestamp: 1138792800, // 02/01/2006 15:04
 				},
 				SurveyQuestions: model.SurveyQuestions{
 					Questions: []model.Question{

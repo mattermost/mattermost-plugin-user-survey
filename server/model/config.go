@@ -62,7 +62,7 @@ func (c *Config) ShouldSurveyStart() (bool, error) {
 }
 
 func (c *Config) ParsedTime() time.Time {
-	return mmModel.GetTimeForMillis(c.SurveyDateTime.Timestamp * 1000)
+	return mmModel.GetTimeForMillis(c.SurveyDateTime.Timestamp)
 }
 
 func (c *Config) ToMap() (map[string]interface{}, error) {

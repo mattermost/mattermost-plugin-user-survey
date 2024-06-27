@@ -12,11 +12,11 @@ function uuid() {
 }
 
 function dateToUnixTimestamp(date: Date): number {
-    return Math.floor(date.getTime() / 1000);
+    return Math.floor(date.getTime());
 }
 
 function unixTimestampToDate(unixTimestamp: number): Date {
-    return new Date(unixTimestamp * 1000);
+    return new Date(unixTimestamp);
 }
 
 export default {
