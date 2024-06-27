@@ -11,14 +11,14 @@ import Badge from 'components/common/badge/badge';
 import type {DateTimeConfig, ExpiryConfig, SurveyQuestionsConfig} from 'types/plugin';
 
 type Props = {
-    dateTimeConfig?: DateTimeConfig;
-    expiryConfig?: ExpiryConfig;
-    surveyQuestionsConfig?: SurveyQuestionsConfig;
+    dateTimeConfig: DateTimeConfig;
+    expiryConfig: ExpiryConfig;
+    surveyQuestionsConfig: SurveyQuestionsConfig;
 }
 
 export default function SurveyScheduleBanner({dateTimeConfig, expiryConfig, surveyQuestionsConfig}: Props) {
     const subTitleText = useMemo(() => {
-        if (!dateTimeConfig?.timestamp || !expiryConfig?.days || !surveyQuestionsConfig?.questions) {
+        if (!dateTimeConfig.timestamp || !expiryConfig.days || !surveyQuestionsConfig.questions) {
             return '';
         }
 
@@ -39,9 +39,9 @@ export default function SurveyScheduleBanner({dateTimeConfig, expiryConfig, surv
         messages.push(`${surveyQuestionsConfig.questions.filter((question) => question.text !== '').length} questions`);
 
         return (messages.join(' • '));
-    }, [dateTimeConfig?.timestamp, expiryConfig?.days, surveyQuestionsConfig?.questions]);
+    }, [dateTimeConfig.timestamp, expiryConfig.days, surveyQuestionsConfig.questions]);
 
-    if (!dateTimeConfig?.timestamp) {
+    if (!dateTimeConfig.timestamp) {
         return null;
     }
 

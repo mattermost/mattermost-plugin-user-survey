@@ -32,8 +32,6 @@ function SystemConsoleSetting(props: CustomComponentProps) {
             [settingId]: settings,
         };
 
-        console.log(newConfig);
-
         setConfig(newConfig);
         onChange(id, newConfig);
         setSaveNeeded();
@@ -109,6 +107,10 @@ function SystemConsoleSetting(props: CustomComponentProps) {
     }, [modifiedProps, settings]);
 
     const bannerComponent = useMemo(() => {
+        if (!config.SurveyDateTime?.timestamp || !config.SurveyExpiry?.days || !config.SurveyQuestions) {
+            return null;
+        }
+
         return (
             <SurveyScheduleBanner
                 dateTimeConfig={config.SurveyDateTime}

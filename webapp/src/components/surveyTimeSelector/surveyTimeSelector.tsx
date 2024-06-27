@@ -1,13 +1,13 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {format, parse} from 'date-fns';
 import React, {useCallback, useMemo} from 'react';
 
 import type {DropdownOption} from 'components/common/dropdown/dropdown';
 import Dropdown from 'components/common/dropdown/dropdown';
 
 import './style.scss';
-import {format, parse} from 'date-fns';
 
 export type Props = {
     value?: Date;
@@ -41,9 +41,6 @@ const SurveyTimeSelector = ({value, onChange}: Props) => {
 
     const onChangeHandler = useCallback((newValue: DropdownOption) => {
         const dateTime = parse(newValue.value, 'HH:mm', value || new Date());
-
-        console.log(`Time picker, dateTime: ${dateTime}`);
-
         onChange(dateTime);
     }, [onChange, value]);
 

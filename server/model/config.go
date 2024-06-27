@@ -56,7 +56,7 @@ func (c *Config) ShouldSurveyStart() (bool, error) {
 
 	// survey should start if the UTC date and UTC time have passed
 	utcDateTime := time.Now().UTC()
-	//parsedTime, err := c.ParsedTime()
+	// parsedTime, err := c.ParsedTime()
 	//if err != nil {
 	//	return false, err
 	//}
@@ -67,20 +67,7 @@ func (c *Config) ShouldSurveyStart() (bool, error) {
 }
 
 func (c *Config) ParsedTime() time.Time {
-	//layout := "02/01/2006 15:04"
-	//location, err := time.LoadLocation("UTC")
-	//if err != nil {
-	//	return time.Time{}, errors.Wrap(err, "failed to load UTC time zone")
-	//}
-	//
-	//parsedTime, err := time.ParseInLocation(layout, c.SurveyDateTime.Date+" "+c.SurveyDateTime.Time, location)
-	//if err != nil {
-	//	return time.Time{}, errors.Wrap(err, "failed to parse survey date time from saved config")
-	//}
-	//
-	//return parsedTime, nil
-
-	return mmModel.GetTimeForMillis(c.SurveyDateTime.Timestamp)
+	return mmModel.GetTimeForMillis(c.SurveyDateTime.Timestamp * 1000)
 }
 
 func (c *Config) ToMap() (map[string]interface{}, error) {
