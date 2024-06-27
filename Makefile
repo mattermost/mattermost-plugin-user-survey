@@ -66,6 +66,14 @@ define check_pending_pulls
 		exit 1; \
 	fi
 endef
+# Prompt for approval
+define prompt_approval
+	@read -p "About to bump $(APP_NAME) to version $(1), approve? (y/n) " userinput; \
+	if [ "$$userinput" != "y" ]; then \
+		echo "Bump aborted."; \
+		exit 1; \
+	fi
+endef
 # ====================================================================================
 
 .PHONY: patch minor major patch-rc minor-rc major-rc
@@ -74,6 +82,7 @@ patch: ## to bump patch version (semver)
 	$(call check_protected_branch)
 	$(call check_pending_pulls)
 	@$(eval PATCH := $(shell echo $$(($(PATCH)+1))))
+	$(call prompt_approval,$(MAJOR).$(MINOR).$(PATCH))
 	@echo Bumping $(APP_NAME) to Patch version $(MAJOR).$(MINOR).$(PATCH)
 	git tag -s -a v$(MAJOR).$(MINOR).$(PATCH) -m "Bumping $(APP_NAME) to Patch version $(MAJOR).$(MINOR).$(PATCH)"
 	git push origin v$(MAJOR).$(MINOR).$(PATCH)
@@ -84,6 +93,7 @@ minor: ## to bump minor version (semver)
 	$(call check_pending_pulls)
 	@$(eval MINOR := $(shell echo $$(($(MINOR)+1))))
 	@$(eval PATCH := 0)
+	$(call prompt_approval,$(MAJOR).$(MINOR).$(PATCH))
 	@echo Bumping $(APP_NAME) to Minor version $(MAJOR).$(MINOR).$(PATCH)
 	git tag -s -a v$(MAJOR).$(MINOR).$(PATCH) -m "Bumping $(APP_NAME) to Minor version $(MAJOR).$(MINOR).$(PATCH)"
 	git push origin v$(MAJOR).$(MINOR).$(PATCH)
@@ -95,6 +105,7 @@ major: ## to bump major version (semver)
 	$(eval MAJOR := $(shell echo $$(($(MAJOR)+1))))
 	$(eval MINOR := 0)
 	$(eval PATCH := 0)
+	$(call prompt_approval,$(MAJOR).$(MINOR).$(PATCH))
 	@echo Bumping $(APP_NAME) to Major version $(MAJOR).$(MINOR).$(PATCH)
 	git tag -s -a v$(MAJOR).$(MINOR).$(PATCH) -m "Bumping $(APP_NAME) to Major version $(MAJOR).$(MINOR).$(PATCH)"
 	git push origin v$(MAJOR).$(MINOR).$(PATCH)
@@ -104,6 +115,7 @@ patch-rc: ## to bump patch release candidate version (semver)
 	$(call check_protected_branch)
 	$(call check_pending_pulls)
 	@$(eval RC := $(shell echo $$(($(RC)+1))))
+	$(call prompt_approval,$(MAJOR).$(MINOR).$(PATCH)-rc$(RC))
 	@echo Bumping $(APP_NAME) to Patch RC version $(MAJOR).$(MINOR).$(PATCH)-rc$(RC)
 	git tag -s -a v$(MAJOR).$(MINOR).$(PATCH)-rc$(RC) -m "Bumping $(APP_NAME) to Patch RC version $(MAJOR).$(MINOR).$(PATCH)-rc$(RC)"
 	git push origin v$(MAJOR).$(MINOR).$(PATCH)-rc$(RC)
@@ -115,6 +127,7 @@ minor-rc: ## to bump minor release candidate version (semver)
 	@$(eval MINOR := $(shell echo $$(($(MINOR)+1))))
 	@$(eval PATCH := 0)
 	@$(eval RC := 1)
+	$(call prompt_approval,$(MAJOR).$(MINOR).$(PATCH)-rc$(RC))
 	@echo Bumping $(APP_NAME) to Minor RC version $(MAJOR).$(MINOR).$(PATCH)-rc$(RC)
 	git tag -s -a v$(MAJOR).$(MINOR).$(PATCH)-rc$(RC) -m "Bumping $(APP_NAME) to Minor RC version $(MAJOR).$(MINOR).$(PATCH)-rc$(RC)"
 	git push origin v$(MAJOR).$(MINOR).$(PATCH)-rc$(RC)
@@ -127,6 +140,7 @@ major-rc: ## to bump major release candidate version (semver)
 	@$(eval MINOR := 0)
 	@$(eval PATCH := 0)
 	@$(eval RC := 1)
+	$(call prompt_approval,$(MAJOR).$(MINOR).$(PATCH)-rc$(RC))
 	@echo Bumping $(APP_NAME) to Major RC version $(MAJOR).$(MINOR).$(PATCH)-rc$(RC)
 	git tag -s -a v$(MAJOR).$(MINOR).$(PATCH)-rc$(RC) -m "Bumping $(APP_NAME) to Major RC version $(MAJOR).$(MINOR).$(PATCH)-rc$(RC)"
 	git push origin v$(MAJOR).$(MINOR).$(PATCH)-rc$(RC)
@@ -205,6 +219,28 @@ else
 endif
 endif
 
+server-debug:
+ifneq ($(HAS_SERVER),)
+ifneq ($(MM_DEBUG),)
+	$(info DEBUG mode is on; to disable, unset MM_DEBUG)
+endif
+	mkdir -p server/dist;
+ifneq ($(MM_SERVICESETTINGS_ENABLEDEVELOPER),)
+	@echo Building plugin only for $(DEFAULT_GOOS)-$(DEFAULT_GOARCH) because MM_SERVICESETTINGS_ENABLEDEVELOPER is enabled
+	cd server && env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GO) build -ldflags '-X main.DebugBuild=true'$(GO_BUILD_FLAGS) $(GO_BUILD_GCFLAGS) -trimpath -o dist/plugin-linux-amd64;
+	cd server && env CGO_ENABLED=0 GOOS=linux GOARCH=arm64 $(GO) build -ldflags '-X main.DebugBuild=true'$(GO_BUILD_FLAGS) $(GO_BUILD_GCFLAGS) -trimpath -o dist/plugin-linux-arm64;
+	cd server && env CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 $(GO) build -ldflags '-X main.DebugBuild=true'$(GO_BUILD_FLAGS) $(GO_BUILD_GCFLAGS) -trimpath -o dist/plugin-darwin-amd64;
+	cd server && env CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 $(GO) build -ldflags '-X main.DebugBuild=true'$(GO_BUILD_FLAGS) $(GO_BUILD_GCFLAGS) -trimpath -o dist/plugin-darwin-arm64;
+	cd server && env CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(GO) build -ldflags '-X main.DebugBuild=true'$(GO_BUILD_FLAGS) $(GO_BUILD_GCFLAGS) -trimpath -o dist/plugin-windows-amd64.exe;
+else
+	cd server && env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GO) build $(GO_BUILD_FLAGS) $(GO_BUILD_GCFLAGS) -trimpath -o dist/plugin-linux-amd64;
+	cd server && env CGO_ENABLED=0 GOOS=linux GOARCH=arm64 $(GO) build $(GO_BUILD_FLAGS) $(GO_BUILD_GCFLAGS) -trimpath -o dist/plugin-linux-arm64;
+	cd server && env CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 $(GO) build $(GO_BUILD_FLAGS) $(GO_BUILD_GCFLAGS) -trimpath -o dist/plugin-darwin-amd64;
+	cd server && env CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 $(GO) build $(GO_BUILD_FLAGS) $(GO_BUILD_GCFLAGS) -trimpath -o dist/plugin-darwin-arm64;
+	cd server && env CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(GO) build $(GO_BUILD_FLAGS) $(GO_BUILD_GCFLAGS) -trimpath -o dist/plugin-windows-amd64.exe;
+endif
+endif
+
 ## Ensures NPM dependencies are installed without having to run this all the time.
 webapp/node_modules: $(wildcard webapp/package.json)
 ifneq ($(HAS_WEBAPP),)
@@ -250,6 +286,8 @@ endif
 ## Builds and bundles the plugin.
 .PHONY: dist
 dist: apply server webapp bundle
+
+dist-debug: apply server-debug webapp bundle
 
 ## Builds and installs the plugin to a server.
 .PHONY: deploy

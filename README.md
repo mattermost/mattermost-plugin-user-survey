@@ -19,6 +19,10 @@ for a survey to review the feedback received and analyze trends in NPS scores.
 
 ## Development
 
+### Technical Architecture
+
+The tech docs are located [here](/docs/architecture/architecture.md).
+
 ### Setup
 
 Make sure you have the following components installed:
@@ -49,6 +53,16 @@ make dist
 
 After a successful build, a `.tar.gz` file in the `/dist` folder will be created which can be uploaded to Mattermost. To
 avoid having to manually install your plugin, deploy your plugin using one of the following options.
+
+##### Building in Dev Mode
+
+Set the following environment variables to true before running `make dist`-
+
+1. MM_SERVICESETTINGS_ENABLEDEVELOPER
+2. MM_DEBUG
+
+This will generate a development built for your OS and architecture.
+If you want to generate dev builds for other architectures, use the command `make dist-debug` after setting up the above mentioned env variables.
 
 ### Deploying with Local Mode
 
