@@ -20,6 +20,7 @@ const SurveyTimeSelector = ({value, onChange}: Props) => {
         // to 23:30 (11:30 PM) in 30 minute increment
 
         const timeStrings: DropdownOption[] = [];
+        const timeZone = format(new Date(), 'O');
 
         for (let hours = 0; hours < 24; hours++) {
             for (let minutes = 0; minutes <= 30; minutes += 30) {
@@ -27,7 +28,7 @@ const SurveyTimeSelector = ({value, onChange}: Props) => {
                 const minuteString = String(minutes).padStart(2, '0');
                 const timeString = `${hourString}:${minuteString}`;
 
-                timeStrings.push({value: timeString, label: timeString});
+                timeStrings.push({value: timeString, label: `${timeString} ${timeZone}`});
             }
         }
 
@@ -36,7 +37,7 @@ const SurveyTimeSelector = ({value, onChange}: Props) => {
 
     const dropdownValue = useMemo(() => (value ? {
         value: format(value, 'HH:mm'),
-        label: format(value, 'HH:mm'),
+        label: format(value, 'HH:mm O'),
     } : undefined), [value]);
 
     const onChangeHandler = useCallback((newValue: DropdownOption) => {
