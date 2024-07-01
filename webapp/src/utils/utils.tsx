@@ -11,6 +11,16 @@ function uuid() {
     return uuid.substring(uuid.lastIndexOf('/') + 1);
 }
 
+function dateToUnixTimestamp(date: Date): number {
+    return date.getTime();
+}
+
+function unixTimestampToDate(unixTimestamp: number): Date {
+    return new Date(unixTimestamp);
+}
+
 export default {
     uuid,
+    dateToUnixTimestamp,
+    unixTimestampToDate,
 };
