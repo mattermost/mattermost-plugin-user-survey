@@ -12,7 +12,7 @@ function uuid() {
 }
 
 function dateToUnixTimestamp(date: Date): number {
-    return Math.floor(date.getTime());
+    return date.getTime();
 }
 
 function unixTimestampToDate(unixTimestamp: number): Date {

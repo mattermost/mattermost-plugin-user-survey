@@ -28,18 +28,23 @@ function SurveyDateTime({id, setSaveNeeded, onChange, config, setInitialSetting}
     }, [config.PluginSettings.Plugins, id, setInitialSetting]);
 
     const helpText = useMemo(() => {
-        let line1 = '';
+        let line1;
 
         if (surveyDate) {
             const localDateString = format(surveyDate, "MMMM d, yyy 'at' HH:mm O");
             const utcDateString = formatInTimeZone(surveyDate, 'UTC', "MMMM d, yyy 'at' HH:mm 'UTC'");
 
-            line1 = `Scheduled for ${localDateString} (${utcDateString})\n\n`;
+            line1 = (<p>{`Scheduled for ${localDateString} (${utcDateString})\n\n`}</p>);
         }
 
-        const line2 = 'A bot message containing the survey will start being sent to all users at the selected date and time. Delivery will occur gradually, so the exact time may vary.';
+        const line2 = (<p>{'A bot message containing the survey will start being sent to all users at the selected date and time. Delivery will occur gradually, so the exact time may vary.'}</p>);
 
-        return line1 + line2;
+        return (
+            <React.Fragment>
+                {line1}
+                {line2}
+            </React.Fragment>
+        );
     }, [surveyDate]);
 
     const saveSettings = useCallback((setting: DateTimeConfig) => {
