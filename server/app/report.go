@@ -54,8 +54,13 @@ func (a *UserSurveyApp) generateSurveyReport(surveyID string) (string, error) {
 		return "", err
 	}
 
+	serverMetadataFilePath, err := a.generateServerMetadataFile(key)
+	if err != nil {
+		return "", err
+	}
+
 	zipPath := path.Join(os.TempDir(), "survey_report", key, "survey_report.zip")
-	files := []string{rawResponseCSVFilePath, surveyMetadataFilePath}
+	files := []string{rawResponseCSVFilePath, surveyMetadataFilePath, serverMetadataFilePath}
 	err = utils.CreateZip(zipPath, files)
 	if err != nil {
 		a.api.LogError("generateSurveyReport: failed to generate report zip file", "surveyID", surveyID, "error", err.Error())
@@ -200,7 +205,6 @@ func (a *UserSurveyApp) generateSurveyMetadataFile(survey *model.Survey, key str
 	if err != nil {
 		return "", errors.Wrapf(err, "generateSurveyMetadataFile: failed to get survey stat for survey, surveyID: %s", survey.ID)
 	}
-
 	metadata := surveyStat.ToMetadata()
 	jsonData, err := json.MarshalIndent(metadata, "", "\t")
 	if err != nil {
@@ -220,6 +224,18 @@ func (a *UserSurveyApp) generateSurveyMetadataFile(survey *model.Survey, key str
 	if _, err := file.Write(jsonData); err != nil {
 		a.api.LogError("generateSurveyMetadataFile: failed to write data to survey metadata file", "surveyID", survey.ID, "key", key, "filePath", filePath, "error", err.Error())
 		return "", errors.Wrapf(err, "generateSurveyMetadataFile: failed to write data to survey metadata file, surveyID: %s, key: %s, filePath: %s", survey.ID, key, filePath)
+	}
+
+	return filePath, nil
+}
+
+func (a *UserSurveyApp) generateServerMetadataFile(key string) (string, error) {
+	fileDir := path.Join(os.TempDir(), "survey_report", key)
+
+	filePath, err := a.apiClient.System.GeneratePacketMetadata(fileDir, nil)
+	if err != nil {
+		a.api.LogError("generateServerMetadataFile: failed to generate packet metadata", "error", err.Error())
+		return "", errors.Wrap(err, "generateServerMetadataFile: failed to generate packet metadata")
 	}
 
 	return filePath, nil
