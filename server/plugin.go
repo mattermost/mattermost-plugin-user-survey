@@ -136,7 +136,7 @@ func (p *Plugin) initApp(store store.Store, debugBuild bool) (*app.UserSurveyApp
 		return p.getConfiguration()
 	}
 
-	return app.New(p.API, store, getConfigFunc, p.Driver, debugBuild, manifest)
+	return app.New(p.API, store, getConfigFunc, p.Driver, debugBuild)
 }
 
 func (p *Plugin) initAPI(app *app.UserSurveyApp) *api.Handlers {

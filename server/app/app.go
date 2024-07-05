@@ -1,7 +1,6 @@
 package app
 
 import (
-	mmModel "github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/plugin"
 	"github.com/mattermost/mattermost/server/public/pluginapi"
 
@@ -16,7 +15,6 @@ type UserSurveyApp struct {
 	apiClient  *pluginapi.Client
 	botID      string
 	debugBuild bool
-	manifest   *mmModel.Manifest
 }
 
 func New(
@@ -25,7 +23,6 @@ func New(
 	getConfigFunc func() *model.Config,
 	driver plugin.Driver,
 	debugBuild bool,
-	manifest *mmModel.Manifest,
 ) (*UserSurveyApp, error) {
 	app := &UserSurveyApp{
 		api:        api,
@@ -33,7 +30,6 @@ func New(
 		getConfig:  getConfigFunc,
 		apiClient:  pluginapi.NewClient(api, driver),
 		debugBuild: debugBuild,
-		manifest:   manifest,
 	}
 
 	err := app.ensureSurveyBot()

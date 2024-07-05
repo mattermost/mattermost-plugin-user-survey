@@ -6,8 +6,6 @@ package app
 import (
 	"testing"
 
-	mmModel "github.com/mattermost/mattermost/server/public/model"
-
 	"github.com/mattermost/mattermost/server/public/plugin/plugintest"
 	"github.com/stretchr/testify/require"
 
@@ -34,9 +32,7 @@ func SetupAppTest(t *testing.T) *AppTestHelper {
 		return &model.Config{}
 	}
 
-	manifest := &mmModel.Manifest{}
-
-	app, err := New(mockedAPI, &mockedStore, getConfig, &mockedDriver, true, manifest)
+	app, err := New(mockedAPI, &mockedStore, getConfig, &mockedDriver, true)
 	require.NoError(t, err)
 
 	return &AppTestHelper{
