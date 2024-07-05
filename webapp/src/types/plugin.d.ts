@@ -6,8 +6,7 @@ import type {Post} from '@mattermost/types/lib/posts';
 import type {QuestionType} from 'components/systemConsole/questions/questions';
 
 export type DateTimeConfig = {
-    date?: string;
-    time: string;
+    timestamp?: number;
 }
 
 export type ExpiryConfig = {

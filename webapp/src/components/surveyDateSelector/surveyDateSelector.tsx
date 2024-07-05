@@ -29,21 +29,18 @@ const SurveyDateSelector = ({value, onChange}: Props) => {
     );
 
     const handleOnChange = useCallback((date?: Date) => {
-        let dateToUse: Date | undefined;
+        if (date && value) {
+            // the date picker sends date object with time set to 00:00,
+            // so we replace it with time from props.value
 
-        if (date) {
-            const year = date.getFullYear();
-            const month = date.getMonth();
-            const day = date.getDate();
-
-            dateToUse = new Date(Date.UTC(year, month, day));
-        } else {
-            dateToUse = undefined;
+            date.setHours(value.getHours());
+            date.setMinutes(value.getMinutes());
+            date.setSeconds(value.getSeconds());
+            date.setMilliseconds(value.getMilliseconds());
         }
 
-        onChange(dateToUse);
-        onChange(dateToUse);
-    }, [onChange]);
+        onChange(date);
+    }, [value, onChange]);
 
     const handleClearDate = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();

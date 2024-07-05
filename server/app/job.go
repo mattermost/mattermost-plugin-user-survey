@@ -78,10 +78,7 @@ func (a *UserSurveyApp) startNewSurveyIfNeeded() error {
 
 		a.api.LogDebug("JobManageSurveyStatus: determined that the new survey should start")
 		now := mmModal.GetMillis()
-		startTime, err := config.ParsedTime()
-		if err != nil {
-			return errors.Wrap(err, "JobManageSurveyStatus: failed to read survey parsed time")
-		}
+		startTime := config.ParsedTime()
 
 		surveyFromConfig := &model.Survey{
 			ID:              utils.NewID(),
@@ -111,7 +108,7 @@ func (a *UserSurveyApp) startNewSurveyIfNeeded() error {
 			return errors.Wrap(err, "JobManageSurveyStatus: failed to save survey in database")
 		}
 
-		config.SurveyDateTime.Date = ""
+		config.SurveyDateTime.Timestamp = 0
 		configMap, err := config.ToMap()
 		if err != nil {
 			a.api.LogError("JobManageSurveyStatus: failed to convert config to map", "error", err.Error())

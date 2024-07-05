@@ -107,7 +107,7 @@ function SystemConsoleSetting(props: CustomComponentProps) {
     }, [modifiedProps, settings]);
 
     const bannerComponent = useMemo(() => {
-        if (!config.SurveyDateTime?.date || !config.SurveyDateTime?.time || !config.SurveyExpiry?.days) {
+        if (!config.SurveyDateTime?.timestamp || !config.SurveyExpiry?.days || !config.SurveyQuestions) {
             return null;
         }
 
