@@ -17,7 +17,13 @@ type UserSurveyApp struct {
 	debugBuild bool
 }
 
-func New(api plugin.API, store store.Store, getConfigFunc func() *model.Config, driver plugin.Driver, debugBuild bool) (*UserSurveyApp, error) {
+func New(
+	api plugin.API,
+	store store.Store,
+	getConfigFunc func() *model.Config,
+	driver plugin.Driver,
+	debugBuild bool,
+) (*UserSurveyApp, error) {
 	app := &UserSurveyApp{
 		api:        api,
 		store:      store,

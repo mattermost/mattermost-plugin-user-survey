@@ -135,6 +135,7 @@ func (p *Plugin) initApp(store store.Store, debugBuild bool) (*app.UserSurveyApp
 	getConfigFunc := func() *model.Config {
 		return p.getConfiguration()
 	}
+
 	return app.New(p.API, store, getConfigFunc, p.Driver, debugBuild)
 }
 
