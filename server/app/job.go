@@ -82,7 +82,8 @@ func (a *UserSurveyApp) startNewSurveyIfNeeded() error {
 
 		surveyFromConfig := &model.Survey{
 			ID:              utils.NewID(),
-			ExcludedTeamIDs: config.TeamFilter.FilteredTeamIDs,
+			FilterTeamIDs:   config.TeamFilter.FilteredTeamIDs,
+			TeamFilterType:  config.TeamFilter.FilterType,
 			CreateAt:        now,
 			UpdateAt:        now,
 			StartTime:       startTime.UnixMilli(),

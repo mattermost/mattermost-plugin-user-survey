@@ -221,7 +221,7 @@ func (a *UserSurveyApp) ensureSurveyBot() error {
 func (a *UserSurveyApp) userInExcludedTeams(userID string, survey *model.Survey) (bool, error) {
 	// no need to check for memberships if
 	// no teams were excluded from the survey
-	if len(survey.ExcludedTeamIDs) == 0 {
+	if len(survey.FilterTeamIDs) == 0 {
 		return false, nil
 	}
 
@@ -244,7 +244,7 @@ func (a *UserSurveyApp) userInExcludedTeams(userID string, survey *model.Survey)
 	}
 
 	filteredTeamMap := map[string]bool{}
-	for _, teamID := range survey.ExcludedTeamIDs {
+	for _, teamID := range survey.FilterTeamIDs {
 		filteredTeamMap[teamID] = true
 	}
 

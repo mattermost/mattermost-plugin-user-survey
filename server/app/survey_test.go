@@ -117,9 +117,9 @@ func TestShouldSendSurvey(t *testing.T) {
 		th.MockedPluginAPI.On("KVSetWithExpiry", "user_team_filter_cache_user_id_survey_id", mock.Anything, int64(7200)).Return(nil)
 
 		survey := &model.Survey{
-			ID:              "survey_id",
-			Status:          "in_progress",
-			ExcludedTeamIDs: []string{},
+			ID:            "survey_id",
+			Status:        "in_progress",
+			FilterTeamIDs: []string{},
 		}
 		should, err := th.App.ShouldSendSurvey("user_id", survey)
 		require.NoError(t, err)
@@ -133,9 +133,9 @@ func TestShouldSendSurvey(t *testing.T) {
 		th.MockedPluginAPI.On("KVDelete", "user_lock_user_id").Return(nil)
 
 		survey := &model.Survey{
-			ID:              "survey_id",
-			Status:          "ended",
-			ExcludedTeamIDs: []string{},
+			ID:            "survey_id",
+			Status:        "ended",
+			FilterTeamIDs: []string{},
 		}
 		should, err := th.App.ShouldSendSurvey("user_id", survey)
 		require.Error(t, err)
@@ -157,9 +157,9 @@ func TestShouldSendSurvey(t *testing.T) {
 		th.MockedPluginAPI.On("KVSetWithExpiry", "user_team_filter_cache_user_id_survey_id", mock.Anything, int64(7200)).Return(nil)
 
 		survey := &model.Survey{
-			ID:              "survey_id",
-			Status:          "in_progress",
-			ExcludedTeamIDs: []string{"team_id_1"},
+			ID:            "survey_id",
+			Status:        "in_progress",
+			FilterTeamIDs: []string{"team_id_1"},
 		}
 		should, err := th.App.ShouldSendSurvey("user_id", survey)
 		require.NoError(t, err)
@@ -175,9 +175,9 @@ func TestShouldSendSurvey(t *testing.T) {
 		th.MockedPluginAPI.On("KVDelete", "user_lock_user_id").Return(nil)
 
 		survey := &model.Survey{
-			ID:              "survey_id",
-			Status:          "in_progress",
-			ExcludedTeamIDs: []string{"team_id_1"},
+			ID:            "survey_id",
+			Status:        "in_progress",
+			FilterTeamIDs: []string{"team_id_1"},
 		}
 		should, err := th.App.ShouldSendSurvey("user_id", survey)
 		require.NoError(t, err)
@@ -193,9 +193,9 @@ func TestShouldSendSurvey(t *testing.T) {
 		th.MockedPluginAPI.On("KVDelete", "user_lock_user_id").Return(nil)
 
 		survey := &model.Survey{
-			ID:              "survey_id",
-			Status:          "in_progress",
-			ExcludedTeamIDs: []string{"team_id_1"},
+			ID:            "survey_id",
+			Status:        "in_progress",
+			FilterTeamIDs: []string{"team_id_1"},
 		}
 		should, err := th.App.ShouldSendSurvey("user_id", survey)
 		require.NoError(t, err)

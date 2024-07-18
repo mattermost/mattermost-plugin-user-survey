@@ -57,12 +57,13 @@ func (s *SQLStore) SurveysFromRows(rows *sql.Rows) ([]*model.Survey, error) {
 			&survey.Duration,
 			&questionsJSON,
 			&survey.Status,
+			&survey.TeamFilterType,
 		)
 		if err != nil {
 			return nil, errors.Wrap(err, "SurveysFromRows failed to scan survey row")
 		}
 
-		err = json.Unmarshal([]byte(excludedTeamIDsJSON), &survey.ExcludedTeamIDs)
+		err = json.Unmarshal([]byte(excludedTeamIDsJSON), &survey.FilterTeamIDs)
 		if err != nil {
 			return nil, errors.Wrap(err, "SurveysFromRows: failed to unmarshal excluded team IDs string to survey")
 		}
@@ -96,6 +97,7 @@ func (s *SQLStore) SaveSurvey(survey *model.Survey) error {
 			survey.Duration,
 			surveyQuestions,
 			survey.Status,
+			survey.TeamFilterType,
 		).Exec()
 
 	if err != nil {
@@ -120,7 +122,7 @@ func (s *SQLStore) UpdateSurveyStatus(surveyID, status string) error {
 }
 
 func (s *SQLStore) surveyExtractJSONFields(survey *model.Survey) (excludedTeamIDs, surveyQuestions []byte, err error) {
-	excludedTeamIDs, err = s.MarshalJSONB(survey.ExcludedTeamIDs)
+	excludedTeamIDs, err = s.MarshalJSONB(survey.FilterTeamIDs)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "surveyExtractJSONFields: failed to marshal excluded team IDs")
 	}
@@ -136,13 +138,14 @@ func (s *SQLStore) surveyExtractJSONFields(survey *model.Survey) (excludedTeamID
 func (s *SQLStore) surveyColumns() []string {
 	return []string{
 		"id",
-		"excluded_team_ids",
+		"filter_team_ids",
 		"create_at",
 		"updated_at",
 		"start_time",
 		"duration",
 		"questions",
 		"status",
+		"team_filter_type",
 	}
 }
 
