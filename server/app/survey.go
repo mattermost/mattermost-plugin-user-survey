@@ -121,6 +121,10 @@ func (a *UserSurveyApp) ShouldSendSurvey(userID string, survey *model.Survey) (b
 	return !inExcludedTeam, nil
 }
 
+//func (a *UserSurveyApp) userPassesSurveyTeamFilter(userID string, survey *model.Survey) (bool, error) {
+//	if survey.team
+//}
+
 func (a *UserSurveyApp) GetSurveyPostIDSentToUser(userID, surveyID string) (string, error) {
 	postID, appErr := a.api.KVGet(utils.KeyUserSurveySentStatus(userID, surveyID))
 	if appErr != nil {
