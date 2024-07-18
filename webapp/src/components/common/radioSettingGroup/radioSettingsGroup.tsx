@@ -8,25 +8,16 @@ export type RadioSetting = { text: string; value: string };
 
 interface Props {
     id: string;
-
-    // label: React.ReactNode;
     values: RadioSetting[];
     value: string;
-
-    // setByEnv: boolean;
     disabled?: boolean;
-
-    // helpText?: React.ReactNode;
     onChange(id: string, value: string): void;
-
     orientation?: 'horizontal' | 'vertical';
 }
 export default function RadioSettingsGroup({
     id,
     values,
     value,
-
-    // setByEnv,
     disabled = false,
     onChange,
     orientation = 'vertical',
@@ -47,8 +38,6 @@ export default function RadioSettingsGroup({
                     name={id}
                     checked={optionValue === value}
                     onChange={handleChange}
-
-                    // disabled={disabled || setByEnv}
                     disabled={disabled}
                 />
                 {text}
