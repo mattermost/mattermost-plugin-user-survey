@@ -19,6 +19,10 @@ const (
 
 	QuestionTypeLinearScale = "linear_scale"
 	QuestionType            = "text"
+
+	TeamFilterSendToAll = "everyone"
+	TeamFilterIncludeSelected = "include_selected"
+	TeamFilterExcludeSelected = "exclude_selected"
 )
 
 var (

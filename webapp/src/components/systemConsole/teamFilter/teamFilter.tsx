@@ -27,7 +27,7 @@ export type TeamFilterType = 'everyone' | 'include_selected' | 'exclude_selected
 const TEAM_FILTER_FILTER_TYPE_OPTIONS: RadioSetting[] = [
     {text: 'Send to everyone', value: 'everyone'},
     {text: 'Send to selected teams', value: 'include_selected'},
-    {text: 'Do not send to selected teams', value: 'excluded_selected'},
+    {text: 'Do not send to selected teams', value: 'exclude_selected'},
 ];
 
 function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: CustomSettingChildComponentProp) {
