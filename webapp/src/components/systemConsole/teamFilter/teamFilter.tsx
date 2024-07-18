@@ -10,6 +10,8 @@ import {Client4} from 'mattermost-redux/client';
 import type {DropdownOption} from 'components/common/dropdown/dropdown';
 import type {CustomComponentsDefinition} from 'components/common/multiSelect/multiselect';
 import Multiselect from 'components/common/multiSelect/multiselect';
+import type {RadioSetting} from 'components/common/radioSettingGroup/radioSettingsGroup';
+import RadioSettingsGroup from 'components/common/radioSettingGroup/radioSettingsGroup';
 import type {CustomSettingChildComponentProp} from 'components/systemConsole/index';
 import {
     CustomMultiValueContainer,
@@ -20,9 +22,18 @@ import type {TeamFilterConfig} from 'types/plugin';
 
 import './style.scss';
 
+export type TeamFilterType = 'everyone' | 'include_selected' | 'exclude_selected';
+
+const TEAM_FILTER_FILTER_TYPE_OPTIONS: RadioSetting[] = [
+    {text: 'Send to everyone', value: 'everyone'},
+    {text: 'Send to selected teams', value: 'include_selected'},
+    {text: 'Do not send to selected teams', value: 'excluded_selected'},
+];
+
 function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: CustomSettingChildComponentProp) {
     const [selectedTeams, setSelectedTeams] = useState<DropdownOption[]>([]);
     const [allTeamsOptions, setAllTeamsOptions] = useState<DropdownOption[]>([]);
+    const [teamFilterType, setTeamFilterType] = useState<TeamFilterType>('everyone');
 
     useEffect(() => {
         const task = async () => {
@@ -57,7 +68,15 @@ function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: Cu
             }
 
             setSelectedTeams(initialOptions);
-            setInitialSetting(id, optionsToConfig(initialOptions));
+
+            const initialFilterTypeValue = savedSetting?.filterType || 'everyone';
+            setTeamFilterType(initialFilterTypeValue);
+
+            const initialConfig: TeamFilterConfig = {
+                filteredTeamIDs: optionsToTeamIDs(initialOptions),
+                filterType: initialFilterTypeValue,
+            };
+            setInitialSetting(id, initialConfig);
         };
 
         task();
@@ -68,26 +87,47 @@ function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: Cu
         MultiValueContainer: CustomMultiValueContainer,
     }), []);
 
-    const saveSettings = useCallback((teams: DropdownOption[]) => {
+    const saveSettings = useCallback((teams: DropdownOption[], filterType: TeamFilterType) => {
         setSaveNeeded();
-        onChange(id, optionsToConfig(teams));
+        const config: TeamFilterConfig = {
+            filteredTeamIDs: optionsToTeamIDs(teams),
+            filterType,
+        };
+        onChange(id, config);
     }, [id, onChange, setSaveNeeded]);
 
     const teamFilterOnChangeHandler = useCallback((selectedTeams: DropdownOption[]) => {
         setSelectedTeams(selectedTeams);
-        saveSettings(selectedTeams);
-    }, [saveSettings]);
+        saveSettings(selectedTeams, teamFilterType);
+    }, [saveSettings, teamFilterType]);
+
+    const teamFilterTypeChangeHandler = useCallback((id: string, value: string) => {
+        setTeamFilterType(value as TeamFilterType);
+        saveSettings(selectedTeams, value as TeamFilterType);
+    }, [saveSettings, selectedTeams]);
 
     return (
         <div className='TeamFilter'>
-            <Multiselect
-                options={allTeamsOptions}
-                customComponents={customComponents}
-                values={selectedTeams}
-                onChange={teamFilterOnChangeHandler}
+            <RadioSettingsGroup
+                id='teamFilterType'
+                values={TEAM_FILTER_FILTER_TYPE_OPTIONS}
+                value={teamFilterType}
+                onChange={teamFilterTypeChangeHandler}
             />
+
+            {
+                teamFilterType !== 'everyone' &&
+                <Multiselect
+                    options={allTeamsOptions}
+                    customComponents={customComponents}
+                    values={selectedTeams}
+                    onChange={teamFilterOnChangeHandler}
+                />
+            }
+
             <div className='horizontal'>
                 <p>
+                    {/* TODO update hep tesxt absed on the selected filtertype*/}
                     {'Select the teams that the next survey should NOT be sent to. The survey will be sent to all teams if this field is left blank.'}
                 </p>
             </div>
@@ -95,8 +135,6 @@ function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: Cu
     );
 }
 
-const optionsToConfig = (teams: DropdownOption[]): TeamFilterConfig => ({
-    filteredTeamIDs: teams.map((option) => option.value),
-});
+const optionsToTeamIDs = (teams: DropdownOption[]): string[] => teams.map((option) => option.value);
 
 export default TeamFilter;
