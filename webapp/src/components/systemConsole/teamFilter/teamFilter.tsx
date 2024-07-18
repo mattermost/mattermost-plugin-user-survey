@@ -127,8 +127,23 @@ function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: Cu
 
             <div className='horizontal'>
                 <p>
-                    {/* TODO update hep tesxt absed on the selected filtertype*/}
-                    {'Select the teams that the next survey should NOT be sent to. The survey will be sent to all teams if this field is left blank.'}
+                    {
+                        teamFilterType === 'everyone' &&
+                        'The survey will be sent to all users.'
+                    }
+
+                    {
+                        teamFilterType === 'include_selected' &&
+                        'The survey will be sent to users who are a part of the selected teams.'
+                    }
+
+                    {
+                        teamFilterType === 'exclude_selected' &&
+                        <div>
+                            {'The survey'} <b>{'WILL NOT'}</b> {' be sent to users who are a part of the selected teams.'}
+                        </div>
+                    }
+
                 </p>
             </div>
         </div>

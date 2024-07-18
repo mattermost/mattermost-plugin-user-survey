@@ -113,11 +113,6 @@ func (a *UserSurveyApp) ShouldSendSurvey(userID string, survey *model.Survey) (b
 		return false, nil
 	}
 
-	//inExcludedTeam, err := a.userMemberOfFilteredTeams(userID, survey)
-	//if err != nil {
-	//	return false, errors.Wrap(err, "ShouldSendSurvey: failed to check is in filtered teams or not")
-	//}
-
 	userPassesTeamFIlter, err := a.userPassesSurveyTeamFilter(userID, survey)
 	if err != nil {
 		return false, errors.Wrap(err, "ShouldSendSurvey: failed to check if user passes team filter or not")
@@ -127,7 +122,6 @@ func (a *UserSurveyApp) ShouldSendSurvey(userID string, survey *model.Survey) (b
 }
 
 func (a *UserSurveyApp) userPassesSurveyTeamFilter(userID string, survey *model.Survey) (bool, error) {
-	a.api.LogInfo("userPassesSurveyTeamFilter.... " + survey.TeamFilterType)
 	if survey.TeamFilterType == model.TeamFilterSendToAll {
 		// nothing to check if survey isn't filtering by teams
 		return true, nil
@@ -138,18 +132,12 @@ func (a *UserSurveyApp) userPassesSurveyTeamFilter(userID string, survey *model.
 		return false, errors.Wrap(err, "userPassesSurveyTeamFilter: failed to check is in filtered teams or not")
 	}
 
-	a.api.LogInfo(fmt.Sprintf("userPassesSurveyTeamFilter.... %t", inFilteredTeams))
-
-	if survey.TeamFilterType == model.TeamFilterIncludeSelected {
-		// if survey is being sent to users in filtered teams, being present in any of those
-		// teams means the user should get the survey, so, being in filtered teams here passes the filter
+	switch {
+	case survey.TeamFilterType == model.TeamFilterIncludeSelected:
 		return inFilteredTeams, nil
-	} else if survey.TeamFilterType == model.TeamFilterExcludeSelected {
-		// if survey is being excluded from users belonging to any of the filtered teams, being present in
-		// any of those teams means the user must not receive the survey, so, being in the filtered team
-		// in this case means user DOES NOT pass the filter
+	case survey.TeamFilterType == model.TeamFilterExcludeSelected:
 		return !inFilteredTeams, nil
-	} else {
+	default:
 		filterErr := errors.New("userPassesSurveyTeamFilter: invalid filter type encountered: " + survey.TeamFilterType)
 		a.api.LogError(filterErr.Error())
 		return false, filterErr
