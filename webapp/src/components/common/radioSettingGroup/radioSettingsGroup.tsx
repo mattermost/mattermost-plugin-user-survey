@@ -28,10 +28,10 @@ export default function RadioSettingsGroup({
 
     const options = values.map(({value: optionValue, text}) => (
         <div
-            className='radio'
+            className='RadioSettingGroup_option'
             key={optionValue}
         >
-            <label>
+            <label className='RadioSettingGroup_option_label horizontal'>
                 <input
                     type='radio'
                     value={optionValue}
@@ -40,7 +40,9 @@ export default function RadioSettingsGroup({
                     onChange={handleChange}
                     disabled={disabled}
                 />
-                {text}
+                <span>
+                    {text}
+                </span>
             </label>
         </div>
     ));
