@@ -31,7 +31,7 @@ export default function ResultRow({result, onStopSurvey}: Props) {
                 }
             </div>
             <div className='endDate'><span>{format(result.endDate, 'do MMM yyyy')}</span></div>
-            <div className='npsScore'><span>{result.npsScore || '-'}</span></div>
+            <div className='npsScore'><span>{isNaN(result.npsScore) ? '-' : result.npsScore}</span></div>
             <div className='receiptsCount'><span>{result.receiptCount}</span></div>
             <div className='responseCount'><span>{result.responseCount}</span></div>
             <div className='actions'>
