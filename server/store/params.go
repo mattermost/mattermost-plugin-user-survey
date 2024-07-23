@@ -8,13 +8,14 @@ import (
 )
 
 type Params struct {
-	DBType           string
-	ConnectionString string
-	TablePrefix      string
-	DB               *sql.DB
-	PluginAPI        plugin.API
-	SkipMigrations   bool
-	Driver           plugin.Driver
+	DBType                  string
+	ConnectionString        string
+	TablePrefix             string
+	DB                      *sql.DB
+	PluginAPI               plugin.API
+	SkipMigrations          bool
+	Driver                  plugin.Driver
+	MigrationTimeoutSeconds int
 }
 
 func (p Params) IsValid() error {

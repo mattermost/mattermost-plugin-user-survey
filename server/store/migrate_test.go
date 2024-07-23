@@ -10,6 +10,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const testMigrationTimeoutSeconds = 10
+
 func TestMigrations(t *testing.T) {
 	tests := []StoreTests{
 		testMigration,
@@ -32,7 +34,7 @@ func testMigration(t *testing.T, namePrefix string, sqlStore *SQLStore, tearDown
 		require.NoError(t, err)
 
 		// now ru-run the migrations
-		err = sqlStore.Migrate()
+		err = sqlStore.Migrate(testMigrationTimeoutSeconds)
 		require.NoError(t, err)
 
 		// now lets check the row count again.

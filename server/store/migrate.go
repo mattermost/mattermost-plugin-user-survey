@@ -25,33 +25,16 @@ const (
 
 	migrationAssetsDir = "migrations"
 
-	migrationLockKey        = "user-survey-lock-key"
-	migrationTimeoutSeconds = 100000
+	migrationLockKey = "user-survey-lock-key"
 )
 
 //go:embed migrations/*.sql
 var Assets embed.FS
 
-func (s *SQLStore) Migrate() error {
+func (s *SQLStore) Migrate(migrationTimeoutSeconds int) error {
 	var driver drivers.Driver
 	var err error
 
-	// acquire lock so only one plugin instance in a cluster runs the migrations
-	clusterMutex, err := s.newMutex("user_survey_migration_db_mutex")
-	if err != nil {
-		s.pluginAPI.LogError("SQLStore.Migrate failed to create cluster mutex for running database migrations", "error", err.Error())
-		return err
-	}
-
-	s.pluginAPI.LogDebug("Acquiring cluster mutex for running database migrations")
-	clusterMutex.Lock()
-
-	defer func() {
-		s.pluginAPI.LogDebug("Releasing cluster mutex for for database migrations")
-		clusterMutex.Unlock()
-	}()
-
-	// lock acquired. Safe to run migrations now...
 	s.pluginAPI.LogDebug("Obtaining migration connection")
 	db, err := s.getMigrationConnection()
 	if err != nil {
