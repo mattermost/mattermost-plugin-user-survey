@@ -110,13 +110,14 @@ func (p *Plugin) createStoreParams() (*store.Params, error) {
 	}
 
 	return &store.Params{
-		DBType:           *mmConfig.SqlSettings.DriverName,
-		ConnectionString: *mmConfig.SqlSettings.DataSource,
-		TablePrefix:      store.TablePrefix,
-		SkipMigrations:   false,
-		PluginAPI:        p.API,
-		DB:               db,
-		Driver:           p.Driver,
+		DBType:                  *mmConfig.SqlSettings.DriverName,
+		ConnectionString:        *mmConfig.SqlSettings.DataSource,
+		TablePrefix:             store.TablePrefix,
+		SkipMigrations:          false,
+		PluginAPI:               p.API,
+		DB:                      db,
+		Driver:                  p.Driver,
+		MigrationTimeoutSeconds: *mmConfig.SqlSettings.MigrationsStatementTimeoutSeconds,
 	}, nil
 }
 

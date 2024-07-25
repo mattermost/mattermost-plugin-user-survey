@@ -312,17 +312,17 @@ func (_m *Store) IncrementSurveyResponseCount(surveyID string) error {
 	return r0
 }
 
-// Migrate provides a mock function with given fields:
-func (_m *Store) Migrate() error {
-	ret := _m.Called()
+// Migrate provides a mock function with given fields: migrationTimeoutSeconds
+func (_m *Store) Migrate(migrationTimeoutSeconds int) error {
+	ret := _m.Called(migrationTimeoutSeconds)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Migrate")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func() error); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(int) error); ok {
+		r0 = rf(migrationTimeoutSeconds)
 	} else {
 		r0 = ret.Error(0)
 	}

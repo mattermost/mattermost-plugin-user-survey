@@ -9,7 +9,7 @@ import (
 
 type Store interface {
 	Shutdown() error
-	Migrate() error
+	Migrate(migrationTimeoutSeconds int) error
 	GetTemplateHelperFuncs() template.FuncMap
 	GetSchemaName() (string, error)
 	GetSurveysByStatus(status string) ([]*model.Survey, error)

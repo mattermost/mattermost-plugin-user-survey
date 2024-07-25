@@ -10,7 +10,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/mattermost/mattermost/server/public/plugin"
-	"github.com/mattermost/mattermost/server/public/pluginapi/cluster"
 	"github.com/mattermost/squirrel"
 
 	"github.com/mattermost/mattermost-plugin-user-survey/server/model"
@@ -61,7 +60,7 @@ func New(params Params) (*SQLStore, error) {
 	}
 
 	if !store.skipMigrations {
-		if migrationErr := store.Migrate(); migrationErr != nil {
+		if migrationErr := store.Migrate(params.MigrationTimeoutSeconds); migrationErr != nil {
 			params.PluginAPI.LogError(`Table creation / migration failed`, "error", migrationErr.Error())
 			return nil, migrationErr
 		}
@@ -82,10 +81,6 @@ func (s *SQLStore) checkBinaryParams() (bool, error) {
 	}
 
 	return parsedURL.Query().Get("binary_parameters") == "yes", nil
-}
-
-func (s *SQLStore) newMutex(name string) (*cluster.Mutex, error) {
-	return cluster.NewMutex(s.pluginAPI, name)
 }
 
 func (s *SQLStore) Shutdown() error {
