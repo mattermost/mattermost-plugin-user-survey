@@ -256,3 +256,51 @@ func getIndexName(tableName string, columns string) string {
 	}
 	return sb.String()
 }
+
+func (s *SQLStore) genRenameColumnIfNeeded(tableName, oldColumnName, newColumnName, dataType string) (string, error) {
+	tableName = addPrefixIfNeeded(tableName, s.tablePrefix)
+	normTableName := s.normalizeTablename(tableName)
+
+	vars := map[string]string{
+		"schema":          s.schemaName,
+		"table_name":      tableName,
+		"norm_table_name": normTableName,
+		"old_column_name": oldColumnName,
+		"new_column_name": newColumnName,
+		"data_type":       dataType,
+	}
+
+	switch s.dbType {
+	case model.DBTypeMySQL:
+		return replaceVars(`
+			SET @stmt = (SELECT IF(
+				(
+				SELECT COUNT(column_name) FROM INFORMATION_SCHEMA.COLUMNS
+				WHERE table_name = '[[table_name]]'
+				AND table_schema = '[[schema]]'
+				AND column_name = '[[new_column_name]]'
+				) > 0,
+				'SELECT 1;',
+				'ALTER TABLE [[norm_table_name]] CHANGE [[old_column_name]] [[new_column_name]] [[data_type]];'
+			));
+			PREPARE renameColumnIfNeeded FROM @stmt;
+			EXECUTE renameColumnIfNeeded;
+			DEALLOCATE PREPARE renameColumnIfNeeded;
+		`, vars), nil
+	case model.DBTypePostgres:
+		return replaceVars(`
+			do $$
+			begin
+				if (SELECT COUNT(table_name) FROM INFORMATION_SCHEMA.COLUMNS
+							WHERE table_name = '[[table_name]]'
+							AND table_schema = '[[schema]]'
+							AND column_name = '[[new_column_name]]'
+				) = 0 then
+					ALTER TABLE [[norm_table_name]] RENAME COLUMN [[old_column_name]] TO [[new_column_name]];
+				end if;
+			end$$;
+		`, vars), nil
+	default:
+		return "", ErrUnsupportedDatabaseType
+	}
+}

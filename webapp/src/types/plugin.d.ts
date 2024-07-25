@@ -4,6 +4,7 @@
 import type {Post} from '@mattermost/types/lib/posts';
 
 import type {QuestionType} from 'components/systemConsole/questions/questions';
+import type {TeamFilterType} from 'components/systemConsole/teamFilter/teamFilter';
 
 export type DateTimeConfig = {
     timestamp?: number;
@@ -15,6 +16,7 @@ export type ExpiryConfig = {
 
 export type TeamFilterConfig = {
     filteredTeamIDs: string[];
+    filterType: TeamFilterType;
 }
 
 export type SurveyQuestionsConfig = {

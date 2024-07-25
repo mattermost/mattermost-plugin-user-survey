@@ -19,6 +19,10 @@ const (
 
 	QuestionTypeLinearScale = "linear_scale"
 	QuestionType            = "text"
+
+	TeamFilterSendToAll       = "everyone"
+	TeamFilterIncludeSelected = "include_selected"
+	TeamFilterExcludeSelected = "exclude_selected"
 )
 
 var (
@@ -27,7 +31,8 @@ var (
 
 type Survey struct {
 	ID              string          `json:"id"`
-	ExcludedTeamIDs []string        `json:"excludedTeamIDs"`
+	FilterTeamIDs   []string        `json:"excludedTeamIDs"`
+	TeamFilterType  string          `json:"teamFilterType"`
 	CreateAt        int64           `json:"createAt"`
 	UpdateAt        int64           `json:"updateAt"`
 	StartTime       int64           `json:"startTime"`
@@ -124,11 +129,15 @@ func (s *Survey) IsEqual(survey *Survey) bool {
 		return false
 	}
 
-	if !slices.Equal(s.ExcludedTeamIDs, survey.ExcludedTeamIDs) {
+	if s.SurveyQuestions.SurveyMessageText != survey.SurveyQuestions.SurveyMessageText {
 		return false
 	}
 
-	if s.SurveyQuestions.SurveyMessageText != survey.SurveyQuestions.SurveyMessageText {
+	if s.TeamFilterType != survey.TeamFilterType {
+		return false
+	}
+
+	if !slices.Equal(s.FilterTeamIDs, survey.FilterTeamIDs) {
 		return false
 	}
 

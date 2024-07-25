@@ -1,5 +1,10 @@
 .TeamFilter {
     display: flex;
     flex-direction: column;
+    padding-top: 9px;
     gap: 12px;
+
+    .RadioSettingGroup {
+        margin-bottom: 8px;
+    }
 }

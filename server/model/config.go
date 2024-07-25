@@ -47,6 +47,7 @@ func (sq *SurveyQuestions) GetMetadata() []interface{} {
 
 type TeamFilter struct {
 	FilteredTeamIDs []string `json:"filteredTeamIDs"`
+	FilterType      string   `json:"filterType"`
 }
 
 func (c *Config) ShouldSurveyStart() (bool, error) {
