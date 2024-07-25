@@ -113,12 +113,12 @@ func (a *UserSurveyApp) ShouldSendSurvey(userID string, survey *model.Survey) (b
 		return false, nil
 	}
 
-	userPassesTeamFIlter, err := a.userPassesSurveyTeamFilter(userID, survey)
+	userPassesTeamFilter, err := a.userPassesSurveyTeamFilter(userID, survey)
 	if err != nil {
 		return false, errors.Wrap(err, "ShouldSendSurvey: failed to check if user passes team filter or not")
 	}
 
-	return userPassesTeamFIlter, nil
+	return userPassesTeamFilter, nil
 }
 
 func (a *UserSurveyApp) userPassesSurveyTeamFilter(userID string, survey *model.Survey) (bool, error) {
@@ -239,7 +239,7 @@ func (a *UserSurveyApp) ensureSurveyBot() error {
 
 func (a *UserSurveyApp) userMemberOfFilteredTeams(userID string, survey *model.Survey) (bool, error) {
 	// no need to check for memberships if
-	// no teams were excluded from the survey
+	// no teams were filtered from the survey
 	if len(survey.FilterTeamIDs) == 0 {
 		return false, nil
 	}
