@@ -45,6 +45,7 @@
 
     .panelBody {
         overflow: hidden;
+        justify-content: unset;
         gap: 28px;
         transition: height 0.4s ease-in-out;
 

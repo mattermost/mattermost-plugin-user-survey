@@ -117,9 +117,10 @@ func TestShouldSendSurvey(t *testing.T) {
 		th.MockedPluginAPI.On("KVSetWithExpiry", "user_team_filter_cache_user_id_survey_id", mock.Anything, int64(7200)).Return(nil)
 
 		survey := &model.Survey{
-			ID:              "survey_id",
-			Status:          "in_progress",
-			ExcludedTeamIDs: []string{},
+			ID:             "survey_id",
+			Status:         "in_progress",
+			FilterTeamIDs:  []string{},
+			TeamFilterType: model.TeamFilterExcludeSelected,
 		}
 		should, err := th.App.ShouldSendSurvey("user_id", survey)
 		require.NoError(t, err)
@@ -133,9 +134,10 @@ func TestShouldSendSurvey(t *testing.T) {
 		th.MockedPluginAPI.On("KVDelete", "user_lock_user_id").Return(nil)
 
 		survey := &model.Survey{
-			ID:              "survey_id",
-			Status:          "ended",
-			ExcludedTeamIDs: []string{},
+			ID:             "survey_id",
+			Status:         "ended",
+			FilterTeamIDs:  []string{},
+			TeamFilterType: model.TeamFilterExcludeSelected,
 		}
 		should, err := th.App.ShouldSendSurvey("user_id", survey)
 		require.Error(t, err)
@@ -157,9 +159,104 @@ func TestShouldSendSurvey(t *testing.T) {
 		th.MockedPluginAPI.On("KVSetWithExpiry", "user_team_filter_cache_user_id_survey_id", mock.Anything, int64(7200)).Return(nil)
 
 		survey := &model.Survey{
-			ID:              "survey_id",
-			Status:          "in_progress",
-			ExcludedTeamIDs: []string{"team_id_1"},
+			ID:             "survey_id",
+			Status:         "in_progress",
+			FilterTeamIDs:  []string{"team_id_1"},
+			TeamFilterType: model.TeamFilterExcludeSelected,
+		}
+		should, err := th.App.ShouldSendSurvey("user_id", survey)
+		require.NoError(t, err)
+		require.False(t, should)
+	})
+
+	t.Run("should send as user is include team", func(t *testing.T) {
+		th := SetupAppTest(t)
+
+		th.MockedPluginAPI.On("KVGet", "user_survey_status_user_id_survey_id").Return(nil, nil)
+		th.MockedPluginAPI.On("KVGet", "user_team_filter_cache_user_id_survey_id").Return(nil, nil)
+		th.MockedPluginAPI.On("KVCompareAndSet", "user_lock_user_id", mock.Anything, mock.Anything).Return(true, nil)
+		th.MockedPluginAPI.On("KVDelete", "user_lock_user_id").Return(nil)
+
+		th.MockedPluginAPI.On("GetTeamsForUser", "user_id").Return([]*mmModel.Team{
+			{Id: "team_id_1"},
+			{Id: "team_id_2"},
+		}, nil)
+		th.MockedPluginAPI.On("KVSetWithExpiry", "user_team_filter_cache_user_id_survey_id", mock.Anything, int64(7200)).Return(nil)
+
+		survey := &model.Survey{
+			ID:             "survey_id",
+			Status:         "in_progress",
+			FilterTeamIDs:  []string{"team_id_1"},
+			TeamFilterType: model.TeamFilterIncludeSelected,
+		}
+		should, err := th.App.ShouldSendSurvey("user_id", survey)
+		require.NoError(t, err)
+		require.True(t, should)
+	})
+	t.Run("should send as no team filter is set", func(t *testing.T) {
+		th := SetupAppTest(t)
+
+		th.MockedPluginAPI.On("KVGet", "user_survey_status_user_id_survey_id").Return(nil, nil)
+		th.MockedPluginAPI.On("KVGet", "user_team_filter_cache_user_id_survey_id").Return(nil, nil)
+		th.MockedPluginAPI.On("KVCompareAndSet", "user_lock_user_id", mock.Anything, mock.Anything).Return(true, nil)
+		th.MockedPluginAPI.On("KVDelete", "user_lock_user_id").Return(nil)
+		th.MockedPluginAPI.On("KVSetWithExpiry", "user_team_filter_cache_user_id_survey_id", mock.Anything, int64(7200)).Return(nil)
+
+		survey := &model.Survey{
+			ID:             "survey_id",
+			Status:         "in_progress",
+			FilterTeamIDs:  []string{"team_id_1"},
+			TeamFilterType: model.TeamFilterSendToAll,
+		}
+		should, err := th.App.ShouldSendSurvey("user_id", survey)
+		require.NoError(t, err)
+		require.True(t, should)
+	})
+
+	t.Run("excluding selected teams but not mentioning any team should send to all", func(t *testing.T) {
+		th := SetupAppTest(t)
+
+		th.MockedPluginAPI.On("KVGet", "user_survey_status_user_id_survey_id").Return(nil, nil)
+		th.MockedPluginAPI.On("KVGet", "user_team_filter_cache_user_id_survey_id").Return(nil, nil)
+		th.MockedPluginAPI.On("KVCompareAndSet", "user_lock_user_id", mock.Anything, mock.Anything).Return(true, nil)
+		th.MockedPluginAPI.On("KVDelete", "user_lock_user_id").Return(nil)
+
+		th.MockedPluginAPI.On("GetTeamsForUser", "user_id").Return([]*mmModel.Team{
+			{Id: "team_id_1"},
+			{Id: "team_id_2"},
+		}, nil)
+		th.MockedPluginAPI.On("KVSetWithExpiry", "user_team_filter_cache_user_id_survey_id", mock.Anything, int64(7200)).Return(nil)
+
+		survey := &model.Survey{
+			ID:             "survey_id",
+			Status:         "in_progress",
+			FilterTeamIDs:  []string{},
+			TeamFilterType: model.TeamFilterExcludeSelected,
+		}
+		should, err := th.App.ShouldSendSurvey("user_id", survey)
+		require.NoError(t, err)
+		require.True(t, should)
+	})
+
+	t.Run("including selected teams but not mentioning any team should not send to anyone", func(t *testing.T) {
+		th := SetupAppTest(t)
+
+		th.MockedPluginAPI.On("KVGet", "user_survey_status_user_id_survey_id").Return(nil, nil)
+		th.MockedPluginAPI.On("KVGet", "user_team_filter_cache_user_id_survey_id").Return(nil, nil)
+		th.MockedPluginAPI.On("KVCompareAndSet", "user_lock_user_id", mock.Anything, mock.Anything).Return(true, nil)
+		th.MockedPluginAPI.On("KVDelete", "user_lock_user_id").Return(nil)
+
+		th.MockedPluginAPI.On("GetTeamsForUser", "user_id").Return([]*mmModel.Team{
+			{Id: "team_id_1"},
+			{Id: "team_id_2"},
+		}, nil)
+		th.MockedPluginAPI.On("KVSetWithExpiry", "user_team_filter_cache_user_id_survey_id", mock.Anything, int64(7200)).Return(nil)
+
+		survey := &model.Survey{
+			ID:             "survey_id",
+			Status:         "in_progress",
+			FilterTeamIDs:  []string{},
+			TeamFilterType: model.TeamFilterIncludeSelected,
 		}
 		should, err := th.App.ShouldSendSurvey("user_id", survey)
 		require.NoError(t, err)
@@ -175,9 +272,10 @@ func TestShouldSendSurvey(t *testing.T) {
 		th.MockedPluginAPI.On("KVDelete", "user_lock_user_id").Return(nil)
 
 		survey := &model.Survey{
-			ID:              "survey_id",
-			Status:          "in_progress",
-			ExcludedTeamIDs: []string{"team_id_1"},
+			ID:             "survey_id",
+			Status:         "in_progress",
+			FilterTeamIDs:  []string{"team_id_1"},
+			TeamFilterType: model.TeamFilterExcludeSelected,
 		}
 		should, err := th.App.ShouldSendSurvey("user_id", survey)
 		require.NoError(t, err)
@@ -193,9 +291,10 @@ func TestShouldSendSurvey(t *testing.T) {
 		th.MockedPluginAPI.On("KVDelete", "user_lock_user_id").Return(nil)
 
 		survey := &model.Survey{
-			ID:              "survey_id",
-			Status:          "in_progress",
-			ExcludedTeamIDs: []string{"team_id_1"},
+			ID:             "survey_id",
+			Status:         "in_progress",
+			FilterTeamIDs:  []string{"team_id_1"},
+			TeamFilterType: model.TeamFilterExcludeSelected,
 		}
 		should, err := th.App.ShouldSendSurvey("user_id", survey)
 		require.NoError(t, err)

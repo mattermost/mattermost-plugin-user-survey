@@ -113,12 +113,35 @@ func (a *UserSurveyApp) ShouldSendSurvey(userID string, survey *model.Survey) (b
 		return false, nil
 	}
 
-	inExcludedTeam, err := a.userInExcludedTeams(userID, survey)
+	userPassesTeamFilter, err := a.userPassesSurveyTeamFilter(userID, survey)
 	if err != nil {
-		return false, errors.Wrap(err, "ShouldSendSurvey: failed to check is in filtered teams or not")
+		return false, errors.Wrap(err, "ShouldSendSurvey: failed to check if user passes team filter or not")
 	}
 
-	return !inExcludedTeam, nil
+	return userPassesTeamFilter, nil
+}
+
+func (a *UserSurveyApp) userPassesSurveyTeamFilter(userID string, survey *model.Survey) (bool, error) {
+	if survey.TeamFilterType == model.TeamFilterSendToAll {
+		// nothing to check if survey isn't filtering by teams
+		return true, nil
+	}
+
+	inFilteredTeams, err := a.userMemberOfFilteredTeams(userID, survey)
+	if err != nil {
+		return false, errors.Wrap(err, "userPassesSurveyTeamFilter: failed to check is in filtered teams or not")
+	}
+
+	switch {
+	case survey.TeamFilterType == model.TeamFilterIncludeSelected:
+		return inFilteredTeams, nil
+	case survey.TeamFilterType == model.TeamFilterExcludeSelected:
+		return !inFilteredTeams, nil
+	default:
+		filterErr := errors.New("userPassesSurveyTeamFilter: invalid filter type encountered: " + survey.TeamFilterType)
+		a.api.LogError(filterErr.Error())
+		return false, filterErr
+	}
 }
 
 func (a *UserSurveyApp) GetSurveyPostIDSentToUser(userID, surveyID string) (string, error) {
@@ -214,10 +237,10 @@ func (a *UserSurveyApp) ensureSurveyBot() error {
 	return nil
 }
 
-func (a *UserSurveyApp) userInExcludedTeams(userID string, survey *model.Survey) (bool, error) {
+func (a *UserSurveyApp) userMemberOfFilteredTeams(userID string, survey *model.Survey) (bool, error) {
 	// no need to check for memberships if
-	// no teams were excluded from the survey
-	if len(survey.ExcludedTeamIDs) == 0 {
+	// no teams were filtered from the survey
+	if len(survey.FilterTeamIDs) == 0 {
 		return false, nil
 	}
 
@@ -235,12 +258,12 @@ func (a *UserSurveyApp) userInExcludedTeams(userID string, survey *model.Survey)
 	// compute data on cache miss
 	teams, appErr := a.api.GetTeamsForUser(userID)
 	if appErr != nil {
-		a.api.LogError("userInExcludedTeams: failed to get user teams", "userID", userID, "error", appErr.Error())
-		return false, errors.Wrap(errors.New(appErr.Error()), "userInExcludedTeams: failed to get user teams")
+		a.api.LogError("userMemberOfFilteredTeams: failed to get user teams", "userID", userID, "error", appErr.Error())
+		return false, errors.Wrap(errors.New(appErr.Error()), "userMemberOfFilteredTeams: failed to get user teams")
 	}
 
 	filteredTeamMap := map[string]bool{}
-	for _, teamID := range survey.ExcludedTeamIDs {
+	for _, teamID := range survey.FilterTeamIDs {
 		filteredTeamMap[teamID] = true
 	}
 

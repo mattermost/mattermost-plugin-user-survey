@@ -91,6 +91,7 @@ func (s *SQLStore) surveyStatsFromRows(rows *sql.Rows) ([]*model.SurveyStat, err
 			&surveyStat.Duration,
 			&questionsJSON,
 			&surveyStat.Status,
+			&surveyStat.TeamFilterType,
 			&surveyStat.ReceiptCount,
 			&surveyStat.ResponseCount,
 			&surveyStat.PassiveCount,
@@ -102,7 +103,7 @@ func (s *SQLStore) surveyStatsFromRows(rows *sql.Rows) ([]*model.SurveyStat, err
 			return nil, errors.Wrap(err, "surveyStatsFromRows failed to scan survey stat row")
 		}
 
-		err = json.Unmarshal([]byte(excludedTeamIDsJSON), &surveyStat.ExcludedTeamIDs)
+		err = json.Unmarshal([]byte(excludedTeamIDsJSON), &surveyStat.FilterTeamIDs)
 		if err != nil {
 			s.pluginAPI.LogError("surveyStatsFromRows: failed to unmarshal excluded team IDs string to survey", "error", err.Error())
 			return nil, errors.Wrap(err, "surveyStatsFromRows: failed to unmarshal excluded team IDs string to survey")
