@@ -212,7 +212,7 @@ func (a *UserSurveyApp) generateSurveyMetadataFile(survey *model.Survey, key str
 		return "", errors.Wrapf(err, "generateSurveyMetadataFile: failed to marshal survey stat metadata, surveyID: %s, key: %s", survey.ID, key)
 	}
 
-	filePath := path.Join(os.TempDir(), "survey_report", key, "metadata.json")
+	filePath := path.Join(os.TempDir(), "survey_report", key, "survey_metadata.json")
 	file, err := os.Create(filePath)
 	if err != nil {
 		a.api.LogError("generateSurveyMetadataFile: failed to create metadata JSON file", "surveyID", survey.ID, "key", key, "filePath", filePath, "error", err.Error())
