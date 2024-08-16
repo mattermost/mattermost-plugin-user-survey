@@ -4,8 +4,6 @@
 package model
 
 import (
-	"strconv"
-
 	"github.com/mattermost/mattermost-plugin-user-survey/server/utils"
 )
 
@@ -23,7 +21,7 @@ func (stat *SurveyStat) ToMetadata() map[string]interface{} {
 	return map[string]interface{}{
 		"id":              stat.ID,
 		"start_time":      utils.FormatUnixTimeMillis(stat.StartTime),
-		"duration":        strconv.Itoa(stat.Duration),
+		"duration":        stat.Duration,
 		"questions":       stat.SurveyQuestions.GetMetadata(),
 		"receipt_count":   stat.ReceiptCount,
 		"response_count":  stat.ResponseCount,
