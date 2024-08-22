@@ -5,7 +5,7 @@
     "description": "A plugin designed for gathering user feedback on Mattermost and related topics.",
     "homepage_url": "https://github.com/mattermost/mattermost-plugin-user-survey",
     "support_url": "https://github.com/mattermost/mattermost-plugin-user-survey/issues",
-    "icon_path": "assets/starter-template-icon.svg",
+    "icon_path": "assets/icon.svg",
     "min_server_version": "6.2.1",
     "server": {
         "executables": {
