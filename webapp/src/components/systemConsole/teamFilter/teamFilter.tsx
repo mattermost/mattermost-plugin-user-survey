@@ -109,7 +109,7 @@ function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: Cu
         };
 
         task();
-    }, [config.PluginSettings.Plugins, getTeamsByIds, id, setInitialSetting]);
+    }, [config.PluginSettings.Plugins, id, setInitialSetting]);
 
     const customComponents: CustomComponentsDefinition = useMemo(() => ({
         Option: CustomOption,
