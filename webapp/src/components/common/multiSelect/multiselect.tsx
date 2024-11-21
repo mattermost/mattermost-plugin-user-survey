@@ -3,7 +3,7 @@
 
 import React, {useCallback} from 'react';
 import type {GroupBase, MultiValue, SingleValue} from 'react-select';
-import Select from 'react-select';
+import AsyncSelect from 'react-select/async';
 import type {SelectComponentsConfig} from 'react-select/dist/declarations/src/components';
 
 import type {DropdownOption} from 'components/common/dropdown/dropdown';
@@ -14,9 +14,10 @@ export type Props = {
     values?: DropdownOption[];
     customComponents?: CustomComponentsDefinition;
     onChange: (selectedValues: DropdownOption[]) => void;
+    searchOptions: (inputValue: string) => Promise<DropdownOption[]>;
 }
 
-function Multiselect({options, values, customComponents, onChange}: Props) {
+function Multiselect({options, values, customComponents, onChange, searchOptions}: Props) {
     const onChangeHandler = useCallback((newValue: SingleValue<DropdownOption> | MultiValue<DropdownOption>) => {
         if (Array.isArray(newValue)) {
             onChange(newValue);
@@ -24,13 +25,15 @@ function Multiselect({options, values, customComponents, onChange}: Props) {
     }, [onChange]);
 
     return (
-        <Select
+        <AsyncSelect
             isMulti={true}
-            isClearable={false}
+            isClearable={true}
             value={values}
-            options={options}
             components={customComponents}
             onChange={onChangeHandler}
+            defaultOptions={options}
+            cacheOptions={true}
+            loadOptions={searchOptions}
         />
     );
 }
