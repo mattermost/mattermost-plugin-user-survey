@@ -51,25 +51,6 @@ function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: Cu
         task();
     }, []);
 
-    const getTeamsByIds = useCallback(async (teamIds: string[]): Promise<Team[]> => {
-        const teams: Team[] = [];
-        const getTeamPromises: Array<Promise<void>> = [];
-
-        const fetchTeam = async (teamId: string) => {
-            const team = await Client4.getTeam(teamId);
-            teams.push(team);
-            return Promise.resolve();
-        };
-
-        teamIds.forEach((teamId) => {
-            getTeamPromises.push(fetchTeam(teamId));
-        });
-
-        await Promise.all(getTeamPromises);
-
-        return teams;
-    }, []);
-
     // For fetching the teams which are selected so their names can be displayed
     useEffect(() => {
         const savedSetting = config.PluginSettings.Plugins['com.mattermost.user-survey']?.systemconsolesetting?.TeamFilter;
@@ -82,6 +63,25 @@ function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: Cu
             }
 
             const teamsByID: {[key: string]: Team} = {};
+
+            const getTeamsByIds = async (teamIds: string[]): Promise<Team[]> => {
+                const teams: Team[] = [];
+                const getTeamPromises: Array<Promise<void>> = [];
+
+                const fetchTeam = async (teamId: string) => {
+                    const team = await Client4.getTeam(teamId);
+                    teams.push(team);
+                    return Promise.resolve();
+                };
+
+                teamIds.forEach((teamId) => {
+                    getTeamPromises.push(fetchTeam(teamId));
+                });
+
+                await Promise.all(getTeamPromises);
+
+                return teams;
+            };
 
             // fetch selected teams
             const teams = await getTeamsByIds(savedSetting.filteredTeamIDs);
