@@ -17,7 +17,7 @@ export type Props = {
     searchOptions: (inputValue: string) => Promise<DropdownOption[]>;
 }
 
-function Multiselect({values, customComponents, onChange, searchOptions}: Props) {
+function Multiselect({options, values, customComponents, onChange, searchOptions}: Props) {
     const onChangeHandler = useCallback((newValue: SingleValue<DropdownOption> | MultiValue<DropdownOption>) => {
         if (Array.isArray(newValue)) {
             onChange(newValue);
@@ -31,6 +31,7 @@ function Multiselect({values, customComponents, onChange, searchOptions}: Props)
             value={values}
             components={customComponents}
             onChange={onChangeHandler}
+            defaultOptions={options}
             cacheOptions={true}
             loadOptions={searchOptions}
         />

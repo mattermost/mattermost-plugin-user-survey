@@ -32,66 +32,24 @@ const TEAM_FILTER_FILTER_TYPE_OPTIONS: RadioSetting[] = [
 
 function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: CustomSettingChildComponentProp) {
     const [selectedTeams, setSelectedTeams] = useState<DropdownOption[]>([]);
-    const [allTeamsOptions, setAllTeamsOptions] = useState<DropdownOption[]>([]);
+    const [initialOptions, setInitialOptions] = useState<DropdownOption[]>([]);
     const [teamFilterType, setTeamFilterType] = useState<TeamFilterType>('everyone');
 
-    const searchTeams = async (inputValue: string) => {
-        // response is always TeamsWithCount when paginating
-        const {teams} = await Client4.searchTeams(inputValue, {page: 0, per_page: 100}) as TeamsWithCount;
+    // For fetching initial few teams for displaying in the multiselect dropdown
+    useEffect(() => {
+        const task = async () => {
+            // getTeams always returns Team[] when includeTotalCount param is set to false
+            const teams = await Client4.getTeams(0, 20, false) as Team[];
+            const options = teams.map((team): DropdownOption => ({
+                value: team.id,
+                label: team.display_name,
+                raw: team,
+            }));
+            setInitialOptions(options);
+        };
 
-        return teams.map((team): DropdownOption => ({
-            value: team.id,
-            label: team.display_name,
-            raw: team,
-        }));
-    };
-
-    // useEffect(() => {
-    //     const task = async () => {
-    //         // fetch all teams to populate options
-    //         const teams: Team[] = await Client4.getTeams(0, 10000, false) as Team[];
-    //
-    //         const teamsByID: {[key: string]: Team} = {};
-    //         const options = teams.
-    //             filter((team) => team.delete_at === 0).
-    //             map((team): DropdownOption => {
-    //                 teamsByID[team.id] = team;
-    //
-    //                 return {
-    //                     value: team.id,
-    //                     label: team.display_name,
-    //                     raw: team,
-    //                 };
-    //             });
-    //         setAllTeamsOptions(options);
-    //
-    //         const savedSetting = config.PluginSettings.Plugins['com.mattermost.user-survey']?.systemconsolesetting?.TeamFilter;
-    //         let initialOptions: DropdownOption[] = [];
-    //         if (savedSetting?.filteredTeamIDs) {
-    //             initialOptions = savedSetting.filteredTeamIDs.map((teamId) => {
-    //                 const team = teamsByID[teamId];
-    //                 return {
-    //                     label: team?.display_name || `Archived Team: ${teamId}`,
-    //                     value: teamId,
-    //                     raw: team,
-    //                 };
-    //             });
-    //         }
-    //
-    //         setSelectedTeams(initialOptions);
-    //
-    //         const initialFilterTypeValue = savedSetting?.filterType || 'everyone';
-    //         setTeamFilterType(initialFilterTypeValue);
-    //
-    //         const initialConfig: TeamFilterConfig = {
-    //             filteredTeamIDs: optionsToTeamIDs(initialOptions),
-    //             filterType: initialFilterTypeValue,
-    //         };
-    //         setInitialSetting(id, initialConfig);
-    //     };
-    //
-    //     task();
-    // }, [config.PluginSettings.Plugins, id, setInitialSetting]);
+        task();
+    }, []);
 
     const getTeamsByIds = useCallback(async (teamIds: string[]): Promise<Team[]> => {
         const teams: Team[] = [];
@@ -112,20 +70,27 @@ function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: Cu
         return teams;
     }, []);
 
+    // For fetching the teams which are selected so their names can be displayed
     useEffect(() => {
+        const savedSetting = config.PluginSettings.Plugins['com.mattermost.user-survey']?.systemconsolesetting?.TeamFilter;
+        const initialFilterTypeValue = savedSetting?.filterType || 'everyone';
+        setTeamFilterType(initialFilterTypeValue);
+
         const task = async () => {
-            const savedSetting = config.PluginSettings.Plugins['com.mattermost.user-survey']?.systemconsolesetting?.TeamFilter;
             if (!savedSetting?.filteredTeamIDs) {
                 return;
             }
 
             const teamsByID: {[key: string]: Team} = {};
+
+            // fetch selected teams
             const teams = await getTeamsByIds(savedSetting.filteredTeamIDs);
             teams.forEach((team) => {
                 teamsByID[team.id] = team;
             });
 
-            const initialOptions = savedSetting.filteredTeamIDs.map((teamId) => {
+            // convert team objects to DropdownOption for displaying
+            const selectedOptions = savedSetting.filteredTeamIDs.map((teamId) => {
                 const team = teamsByID[teamId];
                 return {
                     label: team?.display_name || `Archived Team: ${teamId}`,
@@ -134,13 +99,10 @@ function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: Cu
                 };
             });
 
-            setSelectedTeams(initialOptions);
-
-            const initialFilterTypeValue = savedSetting?.filterType || 'everyone';
-            setTeamFilterType(initialFilterTypeValue);
+            setSelectedTeams(selectedOptions);
 
             const initialConfig: TeamFilterConfig = {
-                filteredTeamIDs: optionsToTeamIDs(initialOptions),
+                filteredTeamIDs: optionsToTeamIDs(selectedOptions),
                 filterType: initialFilterTypeValue,
             };
             setInitialSetting(id, initialConfig);
@@ -173,6 +135,17 @@ function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: Cu
         saveSettings(selectedTeams, value as TeamFilterType);
     }, [saveSettings, selectedTeams]);
 
+    const searchTeams = useCallback(async (inputValue: string) => {
+        // response is always TeamsWithCount when paginating
+        const {teams} = await Client4.searchTeams(inputValue, {page: 0, per_page: 100}) as TeamsWithCount;
+
+        return teams.map((team): DropdownOption => ({
+            value: team.id,
+            label: team.display_name,
+            raw: team,
+        }));
+    }, []);
+
     return (
         <div className='TeamFilter'>
             <RadioSettingsGroup
@@ -185,7 +158,7 @@ function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: Cu
             {
                 teamFilterType !== 'everyone' &&
                 <Multiselect
-                    options={allTeamsOptions}
+                    options={initialOptions}
                     customComponents={customComponents}
                     values={selectedTeams}
                     onChange={teamFilterOnChangeHandler}
