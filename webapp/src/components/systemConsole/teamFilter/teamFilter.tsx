@@ -3,7 +3,7 @@
 
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
-import type {Team} from '@mattermost/types/teams';
+import type {Team, TeamsWithCount} from '@mattermost/types/teams';
 
 import {Client4} from 'mattermost-redux/client';
 
@@ -35,37 +35,104 @@ function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: Cu
     const [allTeamsOptions, setAllTeamsOptions] = useState<DropdownOption[]>([]);
     const [teamFilterType, setTeamFilterType] = useState<TeamFilterType>('everyone');
 
+    const searchTeams = async (inputValue: string) => {
+        // response is always TeamsWithCount when paginating
+        const {teams} = await Client4.searchTeams(inputValue, {page: 0, per_page: 100}) as TeamsWithCount;
+
+        return teams.map((team): DropdownOption => ({
+            value: team.id,
+            label: team.display_name,
+            raw: team,
+        }));
+    };
+
+    // useEffect(() => {
+    //     const task = async () => {
+    //         // fetch all teams to populate options
+    //         const teams: Team[] = await Client4.getTeams(0, 10000, false) as Team[];
+    //
+    //         const teamsByID: {[key: string]: Team} = {};
+    //         const options = teams.
+    //             filter((team) => team.delete_at === 0).
+    //             map((team): DropdownOption => {
+    //                 teamsByID[team.id] = team;
+    //
+    //                 return {
+    //                     value: team.id,
+    //                     label: team.display_name,
+    //                     raw: team,
+    //                 };
+    //             });
+    //         setAllTeamsOptions(options);
+    //
+    //         const savedSetting = config.PluginSettings.Plugins['com.mattermost.user-survey']?.systemconsolesetting?.TeamFilter;
+    //         let initialOptions: DropdownOption[] = [];
+    //         if (savedSetting?.filteredTeamIDs) {
+    //             initialOptions = savedSetting.filteredTeamIDs.map((teamId) => {
+    //                 const team = teamsByID[teamId];
+    //                 return {
+    //                     label: team?.display_name || `Archived Team: ${teamId}`,
+    //                     value: teamId,
+    //                     raw: team,
+    //                 };
+    //             });
+    //         }
+    //
+    //         setSelectedTeams(initialOptions);
+    //
+    //         const initialFilterTypeValue = savedSetting?.filterType || 'everyone';
+    //         setTeamFilterType(initialFilterTypeValue);
+    //
+    //         const initialConfig: TeamFilterConfig = {
+    //             filteredTeamIDs: optionsToTeamIDs(initialOptions),
+    //             filterType: initialFilterTypeValue,
+    //         };
+    //         setInitialSetting(id, initialConfig);
+    //     };
+    //
+    //     task();
+    // }, [config.PluginSettings.Plugins, id, setInitialSetting]);
+
+    const getTeamsByIds = useCallback(async (teamIds: string[]): Promise<Team[]> => {
+        const teams: Team[] = [];
+        const getTeamPromises: Array<Promise<void>> = [];
+
+        const fetchTeam = async (teamId: string) => {
+            const team = await Client4.getTeam(teamId);
+            teams.push(team);
+            return Promise.resolve();
+        };
+
+        teamIds.forEach((teamId) => {
+            getTeamPromises.push(fetchTeam(teamId));
+        });
+
+        await Promise.all(getTeamPromises);
+
+        return teams;
+    }, []);
+
     useEffect(() => {
         const task = async () => {
-            // fetch all teams to populate options
-            const teams: Team[] = await Client4.getTeams(0, 10000, false) as Team[];
+            const savedSetting = config.PluginSettings.Plugins['com.mattermost.user-survey']?.systemconsolesetting?.TeamFilter;
+            if (!savedSetting?.filteredTeamIDs) {
+                return;
+            }
 
             const teamsByID: {[key: string]: Team} = {};
-            const options = teams.
-                filter((team) => team.delete_at === 0).
-                map((team): DropdownOption => {
-                    teamsByID[team.id] = team;
+            const teams = await getTeamsByIds(savedSetting.filteredTeamIDs);
+            teams.forEach((team) => {
+                teamsByID[team.id] = team;
+            });
 
-                    return {
-                        value: team.id,
-                        label: team.display_name,
-                        raw: team,
-                    };
-                });
-            setAllTeamsOptions(options);
-
-            const savedSetting = config.PluginSettings.Plugins['com.mattermost.user-survey']?.systemconsolesetting?.TeamFilter;
-            let initialOptions: DropdownOption[] = [];
-            if (savedSetting?.filteredTeamIDs) {
-                initialOptions = savedSetting.filteredTeamIDs.map((teamId) => {
-                    const team = teamsByID[teamId];
-                    return {
-                        label: team?.display_name || `Archived Team: ${teamId}`,
-                        value: teamId,
-                        raw: team,
-                    };
-                });
-            }
+            const initialOptions = savedSetting.filteredTeamIDs.map((teamId) => {
+                const team = teamsByID[teamId];
+                return {
+                    label: team?.display_name || `Archived Team: ${teamId}`,
+                    value: teamId,
+                    raw: team,
+                };
+            });
 
             setSelectedTeams(initialOptions);
 
@@ -80,7 +147,7 @@ function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: Cu
         };
 
         task();
-    }, [config.PluginSettings.Plugins, id, setInitialSetting]);
+    }, [config.PluginSettings.Plugins, getTeamsByIds, id, setInitialSetting]);
 
     const customComponents: CustomComponentsDefinition = useMemo(() => ({
         Option: CustomOption,
@@ -122,6 +189,7 @@ function TeamFilter({id, setSaveNeeded, onChange, config, setInitialSetting}: Cu
                     customComponents={customComponents}
                     values={selectedTeams}
                     onChange={teamFilterOnChangeHandler}
+                    searchOptions={searchTeams}
                 />
             }
 
