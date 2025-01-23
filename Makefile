@@ -160,6 +160,7 @@ install-go-tools:
 	@echo Installing go tools
 	$(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.2
 	$(GO) install gotest.tools/gotestsum@v1.11.0
+	$(GO) install github.com/mattermost/mattermost-govet/v2@3f08281c344327ac09364f196b15f9a81c7eff08
 
 ## Runs eslint and golangci-lint
 .PHONY: check-style
@@ -178,6 +179,7 @@ ifneq ($(HAS_SERVER),)
 	@echo Running golangci-lint
 	$(GO) vet ./...
 	$(GOBIN)/golangci-lint run ./...
+	$(GO) vet -vettool=$(GOBIN)/mattermost-govet -license -license.year=2024 ./...
 endif
 
 ## Runs eslint and golangci-lint auto style fixes
