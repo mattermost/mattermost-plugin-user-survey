@@ -16,3 +16,6 @@ go.work
 go.work.sum
 
 webapp/.stylelintcache
+
+# notice
+.notice-work
