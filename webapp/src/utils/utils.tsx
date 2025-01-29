@@ -1,4 +1,4 @@
-// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
+// Copyright (c) 2024-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
 // Source: https://www.robots.ox.ac.uk/~adutta/blog/standalone_uuid_generator_in_javascript.html

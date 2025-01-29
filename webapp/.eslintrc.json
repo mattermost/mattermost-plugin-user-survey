@@ -3,8 +3,26 @@
   "extends": [
     "plugin:@mattermost/react"
   ],
-  "ignorePatterns": ["src/**/*.js"],
+  "ignorePatterns": [
+    "src/**/*.js"
+  ],
+  "plugins": [
+    "header"
+  ],
   "rules": {
-    "no-console": ["error", {"allow":  ["error"]}]
+    "no-console": [
+      "error",
+      {
+        "allow": [
+          "error"
+        ]
+      }
+    ],
+    "header/header": [
+      2,
+      "line",
+      " Copyright (c) 2024-present Mattermost, Inc. All Rights Reserved.\n See LICENSE.txt for license information.",
+      2
+    ]
   }
 }
